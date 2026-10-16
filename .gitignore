@@ -225,3 +225,5 @@
 !/README.md
 !/.nojekyll
 !/.gitignore
+!/assets/portfolio-index/index-font.woff2
+!/assets/portfolio-index/title-transparent.webp
