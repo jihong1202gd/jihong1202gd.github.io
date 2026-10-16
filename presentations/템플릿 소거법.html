@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>캐릭터 템플릿 소거법 연구</title>    <link rel="stylesheet" href="shared/local-display.css">
+    <style>        
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #1a1a1a;
+            color: white;
+            overflow: hidden; 
+        }
+
+        .slide-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .slide {
+            display: none;
+            width: 90%; 
+            height: 90%; 
+            background: linear-gradient(145deg, #2a2a2a, #333333);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            padding: 40px;
+            position: relative;
+            animation: fadeIn 0.5s ease-in-out;
+            overflow-y: auto;
+        }
+
+        .slide.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .highlight {
+            color: #60a5fa;
+            font-weight: bold;
+        }
+
+        .strike-through {
+            text-decoration: line-through;
+            color: #9ca3af; 
+            opacity: 0.7;
+        }
+
+        .core-item {
+            color: #34d399; 
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .controls {
+            position: absolute;
+            bottom: 30px;
+            right: 60px;
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        button {
+            padding: 12px 24px;
+            background-color: #3b82f6;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+            transition: background-color 0.2s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        button:hover {
+            background-color: #2563eb;
+        }
+        
+        .page-indicator {
+            position: absolute;
+            top: 30px;
+            right: 40px;
+            color: #888;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        /* Fact List Styling */
+        .fact-list li {
+            margin-bottom: 4px;
+            font-size: 0.85rem;
+            color: #ccc;
+            line-height: 1.4;
+            display: flex;
+            align-items: flex-start;
+        }
+        .fact-list li::before {
+            content: "•";
+            color: #60a5fa;
+            font-weight: bold;
+            display: inline-block;
+            width: 1em;
+            margin-left: -1em;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1a1a1a; }
+        ::-webkit-scrollbar-thumb { background: #555; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #777; }
+
+    </style>
+</head>
+<body>
+
+    <div class="slide-container">
+        <!-- Slide 1: 표지 -->
+        <div class="slide active" id="slide1">
+            <div class="h-full flex flex-col justify-center items-center text-center">
+                <div class="text-blue-400 text-2xl mb-6 font-bold tracking-widest">CHARACTER STUDY</div>
+                <h1 class="text-6xl font-black mb-8 leading-tight">껍데기를 벗기고<br><span class="text-blue-500">본질</span>을 찾다</h1>
+                <h2 class="text-3xl text-gray-300 font-light">템플릿 소거법 연구</h2>
+                <div class="mt-20 text-lg text-gray-500 border-t border-gray-700 pt-8 px-12">
+                    <p class="font-bold text-2xl text-white mb-2">게임 기획 & 캐릭터 메이킹 스터디</p>
+                    <p class="text-gray-400">사례 분석 샘플</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 2: 도입 -->
+        <div class="slide" id="slide2">
+            <h2 class="text-4xl font-bold mb-10 border-b border-gray-600 pb-6">매력적인 캐릭터, '속성'인가 '템플릿'인가?</h2>
+            <div class="flex flex-row justify-around items-center h-full">
+                <div class="w-1/2 p-4 text-center">
+                    <div class="text-8xl text-gray-400 mb-6"><i class="fas fa-puzzle-piece"></i></div>
+                    <h3 class="text-3xl font-bold mb-4">속성</h3>
+                    <p class="text-xl text-gray-400 leading-relaxed">외형, 성격, 취미, 습관 등<br>캐릭터를 구성하는 모든 특징</p>
+                </div>
+                <div class="text-6xl text-gray-600 font-bold">VS</div>
+                <div class="w-1/2 p-4 text-center">
+                    <div class="text-8xl text-blue-400 mb-6"><i class="fas fa-box-open"></i></div>
+                    <h3 class="text-3xl font-bold mb-4 highlight">템플릿</h3>
+                    <p class="text-xl text-gray-400 leading-relaxed">장르적으로 정형화된 껍데기<br>(예: 츤데레, 갸루, 먼치킨)</p>
+                </div>
+            </div>
+            <div class="mt-8 bg-gray-700 p-6 rounded-lg text-center font-bold text-2xl shadow-lg border border-gray-600">
+                Question: 익숙한 템플릿을 전부 지워버리면, 그 캐릭터에게는 무엇이 남을까?
+            </div>
+        </div>
+
+        <!-- Slide 3: 방법론 -->
+        <div class="slide" id="slide3">
+            <h2 class="text-4xl font-bold mb-10 border-b border-gray-600 pb-6">분석 프로세스 : 3단계</h2>
+            <div class="flex flex-col justify-center h-full gap-8 px-20">
+                <div class="flex items-center bg-gray-800 p-8 rounded-xl border-l-8 border-gray-500 shadow-md transform hover:scale-[1.02] transition-transform">
+                    <div class="text-6xl mr-10 text-gray-400 font-black">01</div>
+                    <div>
+                        <h3 class="text-2xl font-bold mb-2">나열</h3>
+                        <p class="text-xl text-gray-400">캐릭터의 모든 요소를 낱낱이 분해하여 나열한다.</p>
+                    </div>
+                </div>
+                <div class="flex items-center bg-gray-800 p-8 rounded-xl border-l-8 border-red-500 shadow-md transform hover:scale-[1.02] transition-transform">
+                    <div class="text-6xl mr-10 text-red-500 font-black">02</div>
+                    <div>
+                        <h3 class="text-2xl font-bold text-red-400 mb-2">소거</h3>
+                        <p class="text-xl text-gray-400">템플릿(클리셰)에 해당하는 요소를 강제로 <span class="line-through decoration-4 decoration-red-500">삭제</span>한다.</p>
+                    </div>
+                </div>
+                <div class="flex items-center bg-gray-800 p-8 rounded-xl border-l-8 border-green-500 shadow-md transform hover:scale-[1.02] transition-transform">
+                    <div class="text-6xl mr-10 text-green-500 font-black">03</div>
+                    <div>
+                        <h3 class="text-2xl font-bold text-green-400 mb-2">시너지</h3>
+                        <p class="text-xl text-gray-400">남은 '알맹이'와 '템플릿'의 화학 반응을 분석한다.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: 예시 소개 -->
+        <div class="slide" id="slide4">
+            <h2 class="text-4xl font-bold mb-6 border-b border-gray-600 pb-6">사례 분석</h2>
+            <div class="flex flex-row h-full items-center px-10">
+                <div class="w-1/2 pr-12">
+                    <h3 class="text-6xl font-black mb-4 text-pink-400 leading-tight">키타가와<br>마린</h3>
+                    <p class="text-2xl text-gray-400 mb-12 font-light">(그 비스크 돌은 사랑을 한다)</p>
+                    
+                    <div class="bg-gray-800 p-8 rounded-xl mb-8 border border-gray-600">
+                        <span class="text-gray-400 block text-lg mb-2 font-bold">적용 템플릿</span>
+                        <span class="text-3xl font-bold block">오타쿠에게 친절한 <span class="text-yellow-400">마이페이스 갸루</span></span>
+                    </div>
+                    
+                    <p class="text-xl text-gray-300 leading-relaxed italic border-l-4 border-pink-500 pl-4">
+                        "단순히 예쁜 갸루라서 인기가 많았을까요?<br>
+                        그녀를 낱낱이 분해해보겠습니다."
+                    </p>
+                </div>
+                <!-- 우측 이미지 영역 -->
+                <div class="w-1/2 flex justify-center items-center bg-gray-800 h-full rounded-2xl shadow-inner border border-gray-700 overflow-hidden relative p-4">
+                    <img src="../assets/images/template_marin.jpg" 
+                         alt="키타가와 마린" 
+                         class="w-full h-full object-contain hover:scale-105 transition-transform duration-500">
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: 속성 완전 분해 -->
+        <div class="slide" id="slide5">
+            <h2 class="text-3xl font-bold mb-4 border-b border-gray-600 pb-2">Step 1. 속성 완전 분해</h2>
+            <p class="mb-4 text-gray-400 text-sm">관찰 가능한 '객관적 사실'만을 편집증적으로 나열합니다.</p>
+            
+            <div class="grid grid-cols-3 gap-4 h-full overflow-y-auto pb-4 pr-2">
+                <!-- 1. Visual (Head) -->
+                <div class="bg-gray-800 p-4 rounded-lg border border-gray-700">
+                    <h4 class="text-yellow-400 font-bold mb-3 border-b border-gray-600 pb-1 flex items-center"><i class="fas fa-user-circle mr-2"></i> 외형 (두상)</h4>
+                    <ul class="fact-list pl-4">
+                        <li><strong>헤어:</strong> 허리까지 오는 슈퍼 롱 스트레이트</li>
+                        <li><strong>염색:</strong> 뿌리부터 탈색된 플래티넘 블론드</li>
+                        <li><strong>포인트:</strong> 모발 끝 15cm 핑크색 그라데이션</li>
+                        <li><strong>앞머리:</strong> 눈썹을 덮는 시스루 뱅</li>
+                        <li><strong>눈:</strong> 붉은빛이 도는 핑크색 컬러 렌즈</li>
+                        <li><strong>화장:</strong> 볼륨 마스카라로 뭉친 속눈썹, 짙은 아이라인</li>
+                        <li><strong>특이사항:</strong> 왼쪽 눈 밑에 눈물점</li>
+                        <li><strong>장신구:</strong> 귓볼 링 귀걸이 + 연골 피어싱</li>
+                    </ul>
+                </div>
+
+                <!-- 2. Visual (Body) -->
+                <div class="bg-gray-800 p-4 rounded-lg border border-gray-700">
+                    <h4 class="text-yellow-400 font-bold mb-3 border-b border-gray-600 pb-1 flex items-center"><i class="fas fa-child mr-2"></i> 외형 (신체)</h4>
+                    <ul class="fact-list pl-4">
+                        <li><strong>신장:</strong> 164cm</li>
+                        <li><strong>체형:</strong> 슬렌더 (마른 편이나 골격 있음)</li>
+                        <li><strong>손:</strong> 손가락보다 긴 아크릴 젤 네일 (파츠 부착)</li>
+                        <li><strong>피부:</strong> 태닝 자국 없는 하얀 피부톤</li>
+                        <li><strong>자세:</strong> 앉을 때 다리를 꼬거나 책상에 걸터앉음</li>
+                    </ul>
+                </div>
+
+                <!-- 3. Fashion -->
+                <div class="bg-gray-800 p-4 rounded-lg border border-gray-700">
+                    <h4 class="text-blue-400 font-bold mb-3 border-b border-gray-600 pb-1 flex items-center"><i class="fas fa-tshirt mr-2"></i> 패션</h4>
+                    <ul class="fact-list pl-4">
+                        <li><strong>상의:</strong> 흰색 와이셔츠, 단추 2개 이상 오픈</li>
+                        <li><strong>넥타이:</strong> 파란색, 매듭을 풀어 목걸이처럼 착용</li>
+                        <li><strong>하의:</strong> 네이비 체크, 허벅지 중간 위 기장 수선</li>
+                        <li><strong>벨트:</strong> 검은색 가죽 벨트</li>
+                        <li><strong>레그웨어:</strong> 검은색 니삭스 / 루즈 삭스 혼용</li>
+                        <li><strong>신발:</strong> 굽이 있는 갈색 로퍼</li>
+                    </ul>
+                </div>
+
+                <!-- 4. Items -->
+                <div class="bg-gray-800 p-4 rounded-lg border border-gray-700">
+                    <h4 class="text-blue-400 font-bold mb-3 border-b border-gray-600 pb-1 flex items-center"><i class="fas fa-shopping-bag mr-2"></i> 소지품</h4>
+                    <ul class="fact-list pl-4">
+                        <li><strong>가방:</strong> 나일론 소재 스쿨백</li>
+                        <li><strong>장식:</strong> 애니 캐릭터 캔뱃지, 키링 다수 부착</li>
+                        <li><strong>목걸이:</strong> 검은색 가죽 초커 (사복 시)</li>
+                        <li><strong>반지:</strong> 양손 검지, 중지 등에 심플한 링</li>
+                        <li><strong>폰:</strong> 항상 손에 소지, 화려한 케이스</li>
+                    </ul>
+                </div>
+
+                <!-- 5. Behavior (Fact) -->
+                <div class="bg-gray-800 p-4 rounded-lg border border-gray-700">
+                    <h4 class="text-green-400 font-bold mb-3 border-b border-gray-600 pb-1 flex items-center"><i class="fas fa-walking mr-2"></i> 행동</h4>
+                    <ul class="fact-list pl-4">
+                        <li><strong>언어:</strong> "마지?", "야바!" 등 갸루어 사용</li>
+                        <li><strong>거리감:</strong> 상대방 퍼스널 스페이스(50cm) 침범</li>
+                        <li><strong>식사:</strong> 밥풀/소스를 입가에 묻히며 대량 섭취</li>
+                        <li><strong>이동:</strong> 남주인공 손목을 잡고 원단시장 등 주도적 리드</li>
+                    </ul>
+                </div>
+
+                <!-- 6. Interest & Status -->
+                <div class="bg-gray-800 p-4 rounded-lg border border-gray-700">
+                    <h4 class="text-pink-400 font-bold mb-3 border-b border-gray-600 pb-1 flex items-center"><i class="fas fa-heart mr-2"></i> 내면 및 상태</h4>
+                    <ul class="fact-list pl-4">
+                        <li><strong>직업:</strong> 현역 잡지 독자 모델 활동 중</li>
+                        <li><strong>취미:</strong> 성인용 미소녀 게임(R-18) 플레이</li>
+                        <li><strong>소비:</strong> 알바 수익 대부분을 굿즈/게임비 지출</li>
+                        <li><strong>기능(X):</strong> 재봉 바늘에 실을 꿰지 못함</li>
+                        <li><strong>기능(O):</strong> 자신의 얼굴 메이크업 및 헤어 세팅 능숙</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: Step 2 소거 (2단 레이아웃) -->
+        <div class="slide" id="slide6">
+            <h2 class="text-4xl font-bold mb-6 border-b border-gray-600 pb-4">Step 2. 갸루(템플릿) 껍데기 제거</h2>
+            
+            <div class="flex flex-col h-full gap-6 pb-4">
+                <!-- Top Box -->
+                <div class="bg-gray-800 p-6 rounded-xl border border-gray-600 flex flex-col justify-center flex-1">
+                    <h4 class="text-lg text-gray-400 font-bold mb-4 flex justify-between items-center">
+                        <span><i class="fas fa-trash-alt mr-2 text-gray-500"></i> 삭제된 템플릿</span>
+                        <span class="text-sm font-normal bg-gray-700 px-3 py-1 rounded-full">일반적인 '양산형 갸루' 속성</span>
+                    </h4>
+                    <div class="flex flex-wrap gap-3 justify-center items-center content-center h-full">
+                        <span class="strike-through px-4 py-2 bg-gray-700 rounded-lg text-gray-400 text-lg font-medium border border-gray-600">금발 염색</span>
+                        <span class="strike-through px-4 py-2 bg-gray-700 rounded-lg text-gray-400 text-lg font-medium border border-gray-600">핑크 투톤</span>
+                        <span class="strike-through px-4 py-2 bg-gray-700 rounded-lg text-gray-400 text-lg font-medium border border-gray-600">컬러 렌즈</span>
+                        <span class="strike-through px-4 py-2 bg-gray-700 rounded-lg text-gray-400 text-lg font-medium border border-gray-600">화려한 네일</span>
+                        <span class="strike-through px-4 py-2 bg-gray-700 rounded-lg text-gray-400 text-lg font-medium border border-gray-600">짧은 치마</span>
+                        <span class="strike-through px-4 py-2 bg-gray-700 rounded-lg text-gray-400 text-lg font-medium border border-gray-600">갸루어 사용</span>
+                    </div>
+                </div>
+                
+                <!-- Arrow -->
+                <div class="text-center -my-3 z-10 h-0 flex justify-center items-center">
+                    <i class="fas fa-arrow-circle-down text-4xl text-blue-500 bg-gray-900 rounded-full border-4 border-gray-800 animate-bounce"></i>
+                </div>
+        
+                <!-- Bottom Box -->
+                <div class="bg-gray-900 p-8 rounded-xl border-2 border-green-500/30 shadow-[0_0_20px_rgba(16,185,129,0.05)] flex flex-col justify-center flex-[1.5]">
+                    <h4 class="text-2xl text-green-400 font-bold mb-6 pb-2 border-b border-gray-800 flex items-center">
+                        <i class="fas fa-gem mr-3 text-green-500"></i> 남은 알맹이
+                    </h4>
+                    <div class="grid grid-cols-1 gap-3">
+                         <div class="flex items-center text-xl text-gray-300 p-2 hover:bg-gray-800 rounded transition">
+                            <i class="fas fa-check text-green-500 mr-4 w-6 text-center"></i> 
+                            <span>입가에 묻히고 먹는 털털함 <span class="text-sm text-gray-500 ml-2 font-mono border border-gray-700 px-2 rounded">행동</span></span>
+                         </div>
+                         <div class="flex items-center text-xl text-pink-300 font-bold bg-pink-900/20 p-3 rounded-lg border border-pink-900/50">
+                            <i class="fas fa-star mr-4 w-6 text-center"></i> 
+                            <span>하드코어 에로게 오타쿠 & 코스프레 열망 <span class="text-sm text-pink-300/70 ml-2 font-mono">취미</span></span>
+                         </div>
+                         <div class="flex items-center text-xl text-red-300 font-bold bg-red-900/20 p-3 rounded-lg border border-red-900/50">
+                            <i class="fas fa-exclamation-triangle mr-4 w-6 text-center"></i> 
+                            <span>재봉 스킬 F / 똥손 <span class="text-sm text-red-300/70 ml-2 font-mono">약점</span></span>
+                         </div>
+                         <div class="flex items-center text-xl text-blue-300 font-bold bg-blue-900/20 p-3 rounded-lg border border-blue-900/50">
+                            <i class="fas fa-brain mr-4 w-6 text-center"></i> 
+                            <span>"좋아하는 것을 존중한다"는 철학 <span class="text-sm text-blue-300/70 ml-2 font-mono">가치관</span></span>
+                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: Step 3 시너지 A -->
+        <div class="slide" id="slide7">
+            <h2 class="text-4xl font-bold mb-10 border-b border-gray-600 pb-6">Step 3-1. 알맹이와 알맹이의 만남</h2>
+            
+            <div class="flex flex-col justify-center items-center h-full space-y-10 px-20">
+                <div class="flex items-center text-3xl font-bold w-full justify-center gap-6">
+                    <div class="bg-blue-900 p-10 rounded-2xl text-center w-5/12 shadow-lg transform hover:-translate-y-1 transition-transform">
+                        <div class="text-lg text-blue-300 mb-3 font-bold uppercase tracking-wider">가치관</div>
+                        완벽주의<br>(코스프레)
+                    </div>
+                    <div class="text-5xl text-gray-500 font-black">+</div>
+                    <div class="bg-red-900 p-10 rounded-2xl text-center w-5/12 shadow-lg transform hover:-translate-y-1 transition-transform">
+                        <div class="text-lg text-red-300 mb-3 font-bold uppercase tracking-wider">약점</div>
+                        재봉 스킬 F<br>(똥손)
+                    </div>
+                </div>
+
+                <div class="text-6xl text-yellow-400 font-black animate-bounce mt-4">⬇</div>
+
+                <div class="bg-gray-800 p-10 rounded-2xl w-full text-center border-4 border-yellow-500 shadow-[0_0_30px_rgba(234,179,8,0.2)]">
+                    <h3 class="text-3xl font-bold mb-4 text-white">"필연적 좌절과 도움 요청"</h3>
+                    <p class="text-xl text-gray-300 leading-relaxed">잘하고 싶은데 능력이 없으니 괴로워함<br>👉 <span class="text-blue-400 font-bold bg-blue-900/30 px-2 rounded">남주인공(장인)이 그녀의 인생에 개입할 명분</span>이 됨</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8: Step 3 시너지 B -->
+        <div class="slide" id="slide8">
+            <h2 class="text-4xl font-bold mb-6 border-b border-gray-600 pb-4">Step 3-2. 템플릿과 알맹이의 시너지</h2>
+            <p class="mb-4 text-xl text-gray-400">템플릿은 알맹이를 감추는 것이 아니라, <span class="text-yellow-400 font-bold">증폭시키고 정당화</span>한다.</p>
+            
+            <div class="space-y-6 px-4 h-full overflow-y-auto pb-4">
+                
+                <!-- 1. Identity Synergy (Top) - Attitude First -->
+                <div class="flex items-stretch bg-gray-800 rounded-xl overflow-hidden shadow-lg min-h-[140px] border-2 border-blue-500">
+                    <div class="bg-gray-700 p-4 w-1/4 text-center font-bold text-gray-300 flex flex-col justify-center items-center border-r border-gray-600">
+                        <i class="fas fa-bullhorn text-blue-500 mb-3 block text-3xl"></i>
+                        <span class="text-lg">당당한 태도</span>
+                        <span class="text-xs text-gray-500 mt-1">[템플릿]</span>
+                    </div>
+                    <div class="w-[50px] flex justify-center items-center text-3xl font-black text-gray-600 bg-gray-750">+</div>
+                    <div class="bg-gray-700 p-4 w-1/4 text-center font-bold text-pink-400 flex flex-col justify-center items-center border-l border-gray-600">
+                        <i class="fas fa-heart mb-3 block text-3xl"></i>
+                        <span class="text-lg">서브컬처 취미</span>
+                        <span class="text-xs text-pink-300/50 mt-1">[알맹이]</span>
+                    </div>
+                    <div class="flex-1 p-4 text-center bg-gray-900 flex flex-col justify-center items-center border-l border-gray-700">
+                        <span class="text-green-400 font-bold text-2xl mb-2">📢 취향의 절대적 긍정</span>
+                        <span class="text-base text-gray-400">"숨겨야 할 취미"를 "자랑스러운 것"으로 만드는 정당성 부여.</span>
+                    </div>
+                </div>
+
+                <!-- 2. Action Synergy (Middle) -->
+                <div class="flex items-stretch bg-gray-800 rounded-xl overflow-hidden shadow-lg min-h-[140px]">
+                    <div class="bg-gray-700 p-4 w-1/4 text-center font-bold text-gray-300 flex flex-col justify-center items-center border-r border-gray-600">
+                        <i class="fas fa-rocket text-yellow-500 mb-3 block text-3xl"></i>
+                        <span class="text-lg">주도적 행동력</span>
+                        <span class="text-xs text-gray-500 mt-1">[템플릿]</span>
+                    </div>
+                    <div class="w-[50px] flex justify-center items-center text-3xl font-black text-gray-600 bg-gray-750">+</div>
+                    <div class="bg-gray-700 p-4 w-1/4 text-center font-bold text-pink-400 flex flex-col justify-center items-center border-l border-gray-600">
+                        <i class="fas fa-fire mb-3 block text-3xl"></i>
+                        <span class="text-lg">코스프레 열망</span>
+                        <span class="text-xs text-pink-300/50 mt-1">[알맹이]</span>
+                    </div>
+                    <div class="flex-1 p-4 text-center bg-gray-900 flex flex-col justify-center items-center border-l border-gray-700">
+                        <span class="text-green-400 font-bold text-2xl mb-2">🚀 스토리의 추진 엔진</span>
+                        <span class="text-base text-gray-400">고민할 시간에 남주인공을 끌고 나가 사건을 주도함.</span>
+                    </div>
+                </div>
+
+                <!-- 3. Functional Synergy (Bottom) -->
+                <div class="flex items-stretch bg-gray-800 rounded-xl overflow-hidden shadow-lg min-h-[140px]">
+                    <div class="bg-gray-700 p-4 w-1/4 text-center font-bold text-gray-300 flex flex-col justify-center items-center border-r border-gray-600">
+                        <i class="fas fa-magic text-purple-500 mb-3 block text-3xl"></i>
+                        <span class="text-lg">모델 활동 경험</span>
+                        <span class="text-xs text-gray-500 mt-1">[템플릿]</span>
+                    </div>
+                    <div class="w-[50px] flex justify-center items-center text-3xl font-black text-gray-600 bg-gray-750">+</div>
+                    <div class="bg-gray-700 p-4 w-1/4 text-center font-bold text-pink-400 flex flex-col justify-center items-center border-l border-gray-600">
+                        <i class="fas fa-tshirt mb-3 block text-3xl"></i>
+                        <span class="text-lg">캐릭터 구현 욕구</span>
+                        <span class="text-xs text-pink-300/50 mt-1">[알맹이]</span>
+                    </div>
+                    <div class="flex-1 p-4 text-center bg-gray-900 flex flex-col justify-center items-center border-l border-gray-700">
+                        <span class="text-green-400 font-bold text-2xl mb-2">💎 퀄리티 증폭</span>
+                        <span class="text-base text-gray-400">뷰티/포징 스킬(사실)로 옷의 퀄리티를 넘어선 완벽한 재현.</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Slide 9: 결론 및 토론 -->
+        <div class="slide" id="slide9">
+            <h2 class="text-4xl font-bold mb-10 border-b border-gray-600 pb-6">결론 및 토론</h2>
+            <div class="text-center h-full flex flex-col justify-center px-10">
+                <p class="text-4xl font-light mb-16 leading-relaxed">
+                    템플릿은 유저를 부르는 <span class="text-yellow-400 font-bold border-b-4 border-yellow-500">미끼</span>이고,<br>
+                    알맹이는 유저를 잡아두는 <span class="text-blue-400 font-bold border-b-4 border-blue-500">닻</span>이다.
+                </p>
+                
+                <div class="bg-gray-800 p-10 rounded-2xl border border-gray-600 shadow-2xl text-left">
+                    <h3 class="text-2xl font-bold mb-6 text-blue-400 flex items-center"><i class="fas fa-comments mr-3"></i> 토론 주제</h3>
+                    <div class="space-y-6">
+                        <div class="flex items-start">
+                            <span class="bg-gray-700 text-gray-300 font-bold rounded px-3 py-1 mr-4">주제 1</span>
+                            <div>
+                                <h4 class="text-xl font-bold text-white">소거 불가능한 캐릭터?</h4>
+                                <p class="text-gray-400">템플릿을 지웠더니 남는 게 없는 '무색무취' 캐릭터의 구제 방법은?</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="bg-gray-700 text-gray-300 font-bold rounded px-3 py-1 mr-4">주제 2</span>
+                            <div>
+                                <h4 class="text-xl font-bold text-white">알맹이의 역습</h4>
+                                <p class="text-gray-400">반대로 '알맹이'가 너무 강해서 템플릿(장르적 재미)을 파괴하는 경우는?</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="bg-gray-700 text-gray-300 font-bold rounded px-3 py-1 mr-4">주제 3</span>
+                            <div>
+                                <h4 class="text-xl font-bold text-white">실무 적용</h4>
+                                <p class="text-gray-400">우리 프로젝트의 캐릭터는 어떤 '템플릿'을 입고 있으며, 어떤 '알맹이'를 숨기고 있는가?</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Controls -->
+        <div class="controls">
+            <button onclick="prevSlide()"><i class="fas fa-arrow-left mr-2"></i> 이전</button>
+            <button onclick="nextSlide()">다음 <i class="fas fa-arrow-right ml-2"></i></button>
+        </div>
+        <div class="page-indicator" id="page-indicator">1 / 9</div>
+    </div>
+
+    <script>
+        let currentSlide = 1;
+        const totalSlides = 9;
+
+        function showSlide(n) {
+            // Hide all slides
+            const slides = document.querySelectorAll('.slide');
+            slides.forEach(slide => {
+                slide.classList.remove('active');
+            });
+
+            // Update current slide index
+            if (n > totalSlides) currentSlide = 1;
+            if (n < 1) currentSlide = totalSlides;
+
+            // Show current slide
+            const activeSlide = document.getElementById('slide' + currentSlide);
+            activeSlide.classList.add('active');
+
+            // Update page indicator
+            document.getElementById('page-indicator').innerText = currentSlide + ' / ' + totalSlides;
+        }
+
+        function nextSlide() {
+            currentSlide++;
+            showSlide(currentSlide);
+        }
+
+        function prevSlide() {
+            currentSlide--;
+            showSlide(currentSlide);
+        }
+
+        // Initialize
+        showSlide(currentSlide);
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(event) {
+            if (event.key === "ArrowRight") {
+                nextSlide();
+            } else if (event.key === "ArrowLeft") {
+                prevSlide();
+            }
+        });
+    </script>
+</body>
+</html>

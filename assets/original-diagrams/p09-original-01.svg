@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" font-family="Pretendard, -apple-system, sans-serif" width="240" height="80" viewBox="0 0 240 80">
+                    <!-- HP Bar Background -->
+                    <rect x="20" y="50" width="200" height="8" rx="4" fill="#ddd" />
+                    <!-- HP Bar Fill -->
+                    <rect x="20" y="50" width="160" height="8" rx="4" fill="#3b82f6" />
+                    <!-- Circuit Bar Background -->
+                    <rect x="30" y="30" width="180" height="12" rx="2" fill="#ddd" />
+                    <!-- Circuit Bar Fill & Segments -->
+                    <rect x="30" y="30" width="140" height="12" rx="2" fill="#d93025" />
+                    <line x1="90" y1="30" x2="90" y2="42" stroke="#fff" stroke-width="2" />
+                    <line x1="150" y1="30" x2="150" y2="42" stroke="#fff" stroke-width="2" />
+                    <!-- Glowing Indicator -->
+                    <circle cx="170" cy="36" r="6" fill="#fff" stroke="#d93025" stroke-width="3" />
+                </svg>

@@ -1,0 +1,640 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>명조 전투 조작 분석 · 설명 시뮬레이터</title><style>
+*{font-family:'Pretendard',-apple-system,sans-serif;box-sizing:border-box}
+html,body{margin:0;background:#fff;overflow:hidden;width:100%;height:100%}
+.tool-canvas{position:absolute;width:1720px;height:768.5px;display:flex;flex-direction:column;transform-origin:top left;transform:scale(var(--tool-scale,1));user-select:none}
+@font-face{font-family:'Noto Sans KR';src:url('assets/fonts/NotoSansKR-VF.ttf') format('truetype');font-weight:100 900;font-display:swap}
+.tool-title-row{display:flex;align-items:center;gap:16px}
+.tool-help-open{flex:none;padding:6px 12px;border:1px solid #a85b55;border-radius:6px;background:#fff;color:#a85b55;font:800 13px 'Noto Sans KR',sans-serif;cursor:pointer}
+.tool-help-open.is-guide-closed{color:#7d3f3a;animation:var(--tool-help-attention,tool-help-attention 2s ease-in-out infinite)}
+@keyframes tool-help-attention{0%,100%{background-color:#fff;box-shadow:0 0 0 0 rgba(168,91,85,0)}50%{background-color:#f3d6d0;box-shadow:0 0 0 4px rgba(168,91,85,.22)}}
+@media (prefers-reduced-motion:reduce){[aria-controls="tool-help"].is-guide-closed{--tool-help-attention:none;background:#f3d6d0;box-shadow:0 0 0 2px rgba(168,91,85,.22)}}
+.tool-help{width:min(980px,calc(100vw - 32px));max-width:none;max-height:min(560px,calc(100vh - 32px));margin:auto;padding:0;border:2px solid #a85b55;border-radius:6px;background:#fff;color:#17191e;font-family:'Noto Sans KR','Malgun Gothic',sans-serif;word-break:keep-all;overflow-wrap:break-word;box-shadow:0 16px 35px #0004;overflow:hidden}
+.tool-help[open]{display:flex;flex-direction:column}
+.tool-help::backdrop{background:transparent}
+.tool-help *{font-family:inherit}
+.tool-help-head{display:flex;align-items:center;justify-content:space-between;gap:16px;flex:none;min-height:56px;padding:9px 14px 9px 20px;background:#17191e}
+.tool-help-head h2{margin:0;color:#fff;font-size:24px;font-weight:900;line-height:1.3}
+.tool-help-close{width:38px;height:38px;flex:none;border:2px solid #fff;border-radius:6px;background:#fff;color:#17191e;font-size:25px;font-weight:800;line-height:1;cursor:pointer}
+.tool-help-close:is(:hover,:focus-visible){background:#f1f2f4;border-color:#d93025}
+.tool-help-body{min-height:0;overflow:auto;padding:16px 20px}
+.tool-help-body>#tool-help-lead{margin:0 0 14px;font-size:18px;font-weight:800;line-height:1.5}
+.tool-help-controls{display:grid;gap:8px;margin:0}
+.tool-help-row{display:grid;grid-template-columns:var(--help-name-width,132px) minmax(0,1fr);gap:var(--help-row-gap,16px);align-items:start;min-height:32px;padding-bottom:8px;border-bottom:1px solid #d9dce1;font-size:18px;line-height:1.52}
+.tool-help-row:last-child{border-bottom:0;padding-bottom:0}
+.tool-help-row dt{margin:0;color:#17191e;font-weight:900}
+.tool-help-row dd{display:grid;grid-template-columns:var(--help-key-columns,230px minmax(0,1fr));gap:var(--help-key-gap,12px);margin:0;color:#373b43;font-weight:600}
+.tool-help-row .tool-help-attack{display:grid;grid-template-columns:minmax(0,1fr);gap:4px}
+.tool-help-method{display:grid;grid-template-columns:var(--help-key-columns,230px minmax(0,1fr));gap:var(--help-key-gap,12px)}
+.tool-help-key{font-weight:800;color:#17191e}
+.tool-help-reading{margin:12px 0 0;padding-top:12px;border-top:1px solid #d9dce1;color:#373b43;font-size:18px;font-weight:600;line-height:1.52}
+
+
+.tool-help button:focus-visible,.tool-help-open:focus-visible{outline:3px solid #a85b55;outline-offset:2px}
+@media(max-width:760px){:root{--help-name-width:110px;--help-row-gap:10px;--help-key-columns:minmax(0,1fr);--help-key-gap:2px}}
+@media print{.tool-help,.tool-help-open{display:none}}
+</style></head><body><div class="tool-canvas" tabindex="0" aria-label="시뮬레이터 조작 영역"><div style="flex: 1; background: #16161e; border-radius: 20px; padding: 35px; display: flex; flex-direction: column; gap: 30px; box-shadow: inset 0 0 50px rgba(0,0,0,0.5); border: 1px solid #2a2a35; min-height: 0;">
+<div style="background: #1f1f2e; padding: 20px 30px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #333; flex-shrink: 0; box-shadow: 0 10px 20px rgba(0,0,0,0.2);">
+<div style="display: flex; flex-direction: column; gap: 8px;">
+<div class="tool-title-row"><span style="font-size: 22px; font-weight: 900; color: #a855f7; letter-spacing: 1px;">🎮 교대·입력 관계를 살펴보는 도구 <span style="font-size:16px; color:#6b7280;">(천천히 진행)</span></span><button class="tool-help-open" type="button" aria-haspopup="dialog" aria-controls="tool-help">조작법</button></div>
+<span style="font-size: 15px; color: #9ca3af; font-weight: 500;">조작법: [1, 2] 캐릭터 교체 / [클릭] 일반 공격(홀드 시 강공격) / [Q, E, R, Shift] 스킬 및 회피</span>
+</div>
+<div style="display: flex; gap: 20px; align-items: center;">
+<div style="display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.3); padding: 10px 15px; border-radius: 10px; border: 1px solid #444;">
+<span style="font-size: 15px; font-weight: 800; color: #10b981;">[Q] 에코 타입:</span>
+<select id="echoTypeToggle" style="background: transparent; color: white; border: none; font-size: 15px; font-weight: 700; cursor: pointer; outline: none;">
+<option value="TRANSFORM">변신형 (캐릭터가 변신)</option>
+<option value="SUMMON">소환형 (캐릭터와 별도 행동)</option>
+</select>
+</div>
+<div style="display: flex; gap: 10px;">
+<button id="btn-swap-1" onclick="triggerSwap(1)" style="background: #ef4444; color: white; border: 2px solid #fff; padding: 12px 20px; border-radius: 10px; font-weight: 900; cursor: pointer; font-size: 16px; transition: all 0.1s;">[1] 캐릭터 1</button>
+<button id="btn-swap-2" onclick="triggerSwap(2)" style="background: #3b82f6; color: white; border: 2px solid transparent; padding: 12px 20px; border-radius: 10px; font-weight: 900; cursor: pointer; font-size: 16px; transition: all 0.1s;">[2] 캐릭터 2</button>
+</div>
+</div>
+</div>
+<div style="display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 35px; flex: 1; min-height: 0;">
+<div style="background: #1a1a24; border-radius: 16px; padding: 30px; display: flex; flex-direction: column; gap: 25px; justify-content: center; border: 1px solid #2a2a35; box-shadow: inset 0 0 20px rgba(0,0,0,0.2);">
+<div style="font-size: 15px; font-weight: 900; color: #6b7280; letter-spacing: 2px; margin-bottom: -5px;">캐릭터별 행동 진행</div>
+<div id="pc1-container" style="background: #252538; padding: 25px; border-radius: 14px; border: 1px solid transparent; border-left: 6px solid #ef4444; position: relative; transition: all 0.2s;">
+<div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 18px; font-weight: 900; color: #fff;">
+<span>캐릭터 1 <span id="pc1-authority" style="color: #fcd34d; margin-left: 10px;">👑 조작 중</span></span>
+<span id="pc1-state" style="color: #fca5a5;">행동 없음</span>
+</div>
+<div style="background: #111; height: 28px; border-radius: 8px; overflow: hidden; position: relative; border: 1px solid #000;">
+<div id="pc1-progress" style="width: 0%; height: 100%; background: #ef4444; box-shadow: 0 0 15px rgba(239,68,68,0.6);"></div>
+<div style="position: absolute; left: 60%; top: 0; width: 3px; height: 100%; background: #fff; opacity: 0.9;"></div>
+</div>
+<div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 800; color: #6b7280; margin-top: 8px;">
+<span>0%</span><span style="color: #e5e7eb;">다음 행동 (예시 60%)</span><span>100%</span>
+</div>
+</div>
+<div id="pc2-container" style="background: #252538; padding: 25px; border-radius: 14px; border: 1px solid transparent; border-left: 6px solid #3b82f6; position: relative; transition: all 0.2s; opacity: 0.4;">
+<div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 18px; font-weight: 900; color: #fff;">
+<span>캐릭터 2 <span id="pc2-authority" style="display:none; color: #fcd34d; margin-left: 10px;">👑 조작 중</span></span>
+<span id="pc2-state" style="color: #93c5fd;">행동 없음</span>
+</div>
+<div style="background: #111; height: 28px; border-radius: 8px; overflow: hidden; position: relative; border: 1px solid #000;">
+<div id="pc2-progress" style="width: 0%; height: 100%; background: #3b82f6; box-shadow: 0 0 15px rgba(59,130,246,0.6);"></div>
+<div style="position: absolute; left: 60%; top: 0; width: 3px; height: 100%; background: #fff; opacity: 0.9;"></div>
+</div>
+<div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 800; color: #6b7280; margin-top: 8px;">
+<span>0%</span><span style="color: #e5e7eb;">다음 행동 (예시 60%)</span><span>100%</span>
+</div>
+</div>
+<div id="echo-container" style="background: #252538; padding: 25px; border-radius: 14px; border: 1px solid transparent; border-left: 6px solid #10b981; opacity: 0.3; transition: all 0.2s;">
+<div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 18px; font-weight: 900; color: #fff;">
+<span>소환 에코 행동 <span id="echo-authority" style="display:none; color: #9ca3af; margin-left: 10px;">⚙️ 별도로 행동 중</span></span>
+<span id="echo-state" style="color: #6ee7b7;">행동 없음</span>
+</div>
+<div style="background: #111; height: 28px; border-radius: 8px; overflow: hidden; border: 1px solid #000;">
+<div id="echo-progress" style="width: 0%; height: 100%; background: #10b981; box-shadow: 0 0 15px rgba(16,185,129,0.6);"></div>
+</div>
+</div>
+</div>
+<div style="background: #1a1a24; border-radius: 16px; padding: 30px; display: flex; flex-direction: column; gap: 20px; border: 1px solid #2a2a35; justify-content: space-between; box-shadow: inset 0 0 20px rgba(0,0,0,0.2);">
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; flex-shrink: 0;">
+<div style="background: #252538; padding: 20px; border-radius: 14px; border: 1px solid #333;">
+<div style="font-size: 14px; font-weight: 800; color: #9ca3af; margin-bottom: 10px;">미리 누른 다음 행동</div>
+<div id="buffer-slot" style="font-size: 18px; font-weight: 900; color: #fff; background: #111; padding: 15px; border-radius: 10px; border: 2px dashed #444; text-align: center; letter-spacing: 1px;">
+                            미리 누른 행동 없음
+                        </div>
+</div>
+<div style="background: #252538; padding: 20px; border-radius: 14px; border: 1px solid #333; display: flex; flex-direction: column; justify-content: center; gap: 10px;">
+<div style="display: flex; justify-content: space-between; align-items: center;">
+<span style="font-size: 16px; font-weight: 900; color: #e5e7eb;">회피 [Shift]</span>
+</div>
+<div style="display: flex; gap: 10px; width: 100%; height: 20px;">
+<div id="dodge-bar-1" style="flex: 1; height: 100%; background: #10b981; border-radius: 4px; box-shadow: 0 0 12px rgba(16,185,129,0.5); border: 1px solid #059669;"></div>
+<div id="dodge-bar-2" style="flex: 1; height: 100%; background: #10b981; border-radius: 4px; box-shadow: 0 0 12px rgba(16,185,129,0.5); border: 1px solid #059669;"></div>
+</div>
+</div>
+</div>
+<div style="display: grid; grid-template-columns: 0.6fr 1.4fr; gap: 20px; flex: 1; min-height: 0;">
+<div style="background: #252538; border-radius: 14px; border: 1px solid #333; display: flex; flex-direction: column; padding: 15px; gap: 10px;">
+<div style="font-size: 14px; font-weight: 800; color: #9ca3af; text-align: center; margin-bottom: 5px;">캐릭터 상태</div>
+<div id="vulnerable-alert" style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #1a1a24; border-radius: 10px; font-size: 14px; font-weight: 900; color: #9ca3af; transition: all 0.2s; border: 1px solid #444;">
+<div style="font-size: 24px; margin-bottom: 5px;">🛡️</div><div>기본 상태</div>
+</div>
+<div id="timestop-alert" style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(147,51,234,0.1); border: 1px solid rgba(147,51,234,0.3); border-radius: 10px; font-size: 14px; font-weight: 900; color: #d8b4fe; opacity: 0; transition: opacity 0.1s;">
+<div style="font-size: 24px; margin-bottom: 5px;">⚡</div><div>시간 정지</div>
+</div>
+</div>
+<div style="background: #252538; border-radius: 14px; border: 1px solid #333; position: relative; overflow: hidden; background-image: radial-gradient(circle at 70% 70%, rgba(255,255,255,0.05) 0%, transparent 60%);">
+<style>
+        html { scroll-behavior: smooth; }
+                            .v-pad-btn {
+                                position: absolute; border-radius: 50%; display: flex; justify-content: center; align-items: center; 
+                                font-weight: 900; color: #fff; cursor: pointer; transition: all 0.1s ease-out;
+                                border: 2px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.05); box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+                            }
+                            .v-pad-btn:active { transform: scale(0.92); }
+                            .v-pad-label { position: absolute; bottom: -30px; font-size: 14px; color: #9ca3af; text-align: center; width: 100%; pointer-events: none; letter-spacing: 0.5px; font-weight: 700;}
+                        </style>
+<div class="v-pad-btn" id="vpad-atk" style="right: 30px; bottom: 50px; width: 140px; height: 140px; font-size: 55px;">
+                            ⚔️<div class="v-pad-label" style="bottom:-35px; color:#fff;">공격 (클릭)</div>
+</div>
+<div class="v-pad-btn" id="vpad-dodge" style="right: 190px; bottom: 40px; width: 85px; height: 85px; font-size: 32px;">
+                            💨<div class="v-pad-label">회피</div>
+</div>
+<div class="v-pad-btn" id="vpad-skill" style="right: 160px; bottom: 145px; width: 95px; height: 95px; font-size: 36px;">
+                            🌀<div class="v-pad-label">스킬 (E)</div>
+</div>
+<div class="v-pad-btn" id="vpad-echo" style="right: 60px; bottom: 220px; width: 80px; height: 80px; font-size: 32px;">
+                            🐢<div class="v-pad-label">에코 (Q)</div>
+</div>
+<div class="v-pad-btn" id="vpad-ult" style="right: 285px; bottom: 90px; width: 75px; height: 75px; font-size: 28px;">
+                            🌠<div class="v-pad-label">공명 해방 (R)</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div></div><script>
+let engineTimer = null;
+let worldTimeScale = 1.0;
+
+let activeCharId = 1;
+
+let char1 = { id: 1, state: 'IDLE', progress: 0, currentAction: null, combo: 0 };
+let char2 = { id: 2, state: 'IDLE', progress: 0, currentAction: null, combo: 0 };
+let echo = { state: 'INACTIVE', progress: 0, currentAction: null };
+
+let bufferSlot = null;
+let dodgeStacks = 2;
+let dodgeCooldown = 0;
+let vulnerableTimer = 0;
+let timeStopTimer = 0;
+
+let mouseHoldTimer = null;
+let isHeavyTriggered = false;
+
+function getActiveChar() {
+    return activeCharId === 1 ? char1 : char2;
+}
+
+function triggerSwap(targetId) {
+    let current = getActiveChar();
+    if (current.currentAction === '공명해방 (R)') return;
+    if (vulnerableTimer > 0) return; 
+    if (activeCharId === targetId) return;
+
+    activeCharId = targetId;
+    let newActive = getActiveChar();
+    
+    newActive.state = 'IDLE';
+    newActive.progress = 0;
+    newActive.currentAction = null;
+    newActive.combo = 2; 
+    
+    bufferSlot = null;
+    updateBufferUI();
+    renderDOM(); 
+}
+
+function startEngine() {
+    if (engineTimer) return;
+    function updateFrame() {
+        if (timeStopTimer > 0) {
+            timeStopTimer--;
+            document.getElementById('timestop-alert').style.opacity = '1';
+            worldTimeScale = 0.0;
+        } else {
+            document.getElementById('timestop-alert').style.opacity = '0';
+            worldTimeScale = 1.0;
+        }
+
+        if (vulnerableTimer > 0) {
+            vulnerableTimer--;
+            document.getElementById('vulnerable-alert').innerHTML = "<div style='font-size: 24px; margin-bottom: 5px;'>❌</div><div>피격 가능</div>";
+            document.getElementById('vulnerable-alert').style.borderColor = "#ef4444";
+            document.getElementById('vulnerable-alert').style.color = "#fca5a5";
+            document.getElementById('vulnerable-alert').style.background = "rgba(239,68,68,0.1)";
+        } else {
+            document.getElementById('vulnerable-alert').innerHTML = "<div style='font-size: 24px; margin-bottom: 5px;'>🛡️</div><div>기본 상태</div>";
+            document.getElementById('vulnerable-alert').style.borderColor = "#444";
+            document.getElementById('vulnerable-alert').style.color = "#9ca3af";
+            document.getElementById('vulnerable-alert').style.background = "#1a1a24";
+            
+            if (dodgeStacks < 2) {
+                dodgeCooldown += 1 * worldTimeScale;
+                if (dodgeCooldown >= 60) {
+                    dodgeStacks++;
+                    dodgeCooldown = 0;
+                }
+            }
+        }
+        updateDodgeUI();
+
+        function processChar(c) {
+            if (c.state !== 'IDLE' && worldTimeScale > 0) {
+                c.progress += 0.4; 
+                
+                if (activeCharId === c.id && c.progress >= 60 && bufferSlot && c.currentAction !== '회피' && c.currentAction !== '공명해방 (R)') {
+                    executePCAction(c, bufferSlot);
+                    bufferSlot = null;
+                    updateBufferUI();
+                }
+
+                if (c.progress >= 100) {
+                    if (activeCharId === c.id && bufferSlot) {
+                        executePCAction(c, bufferSlot);
+                        bufferSlot = null;
+                        updateBufferUI();
+                    } else {
+                        c.state = 'IDLE';
+                        c.progress = 0;
+                        c.currentAction = null;
+                        if (activeCharId === c.id) c.combo = 0; 
+                    }
+                }
+            }
+        }
+
+        processChar(char1);
+        processChar(char2);
+
+        if (echo.state === 'ACTIVE' && worldTimeScale > 0) {
+            echo.progress += 0.3; 
+            if (echo.progress >= 100) {
+                echo.state = 'INACTIVE';
+                echo.progress = 0;
+            }
+        }
+
+        renderDOM();
+        requestAnimationFrame(updateFrame);
+    }
+    requestAnimationFrame(updateFrame);
+}
+
+function executePCAction(c, actionType) {
+    if (actionType === 'ATTACK') {
+        c.combo = (c.combo % 5) + 1; 
+        c.currentAction = `평타 ${c.combo}타`;
+    } else if (actionType === 'HEAVY_ATTACK') {
+        c.combo = 0;
+        c.currentAction = `강공격 (Hold)`;
+    } else if (actionType === 'RESONANCE_SKILL') {
+        c.combo = 0;
+        c.currentAction = `공명스킬 (E)`;
+    } else if (actionType === 'ULTIMATE') {
+        c.combo = 0;
+        c.currentAction = `공명해방 (R)`;
+    } else if (actionType === 'DODGE') {
+        c.combo = 0;
+        c.currentAction = `회피`;
+    } else if (actionType === 'ECHO_TRANSFORM') {
+        c.combo = 0;
+        c.currentAction = `변신형 에코`;
+    }
+    c.state = 'ANIMATING';
+    c.progress = 0;
+}
+
+function triggerAction(action) {
+    let c = getActiveChar();
+
+    if (c.currentAction === '공명해방 (R)' && action !== 'ULTIMATE') return;
+
+    if (action === 'ULTIMATE') {
+        timeStopTimer = 150;
+        bufferSlot = null;
+        updateBufferUI();
+        executePCAction(c, 'ULTIMATE');
+        return;
+    }
+
+    if (action === 'DODGE') {
+        if (dodgeStacks > 0) {
+            dodgeStacks--;
+            bufferSlot = null;
+            updateBufferUI();
+            executePCAction(c, 'DODGE');
+        } else {
+            vulnerableTimer = 60;
+        }
+        return;
+    }
+
+    if (action === 'ECHO') {
+        const type = document.getElementById('echoTypeToggle').value;
+        if (type === 'SUMMON') {
+            echo.state = 'ACTIVE';
+            echo.progress = 0;
+            echo.currentAction = '소환형 에코 실행중';
+        } else {
+            if (c.state === 'IDLE') {
+                executePCAction(c, 'ECHO_TRANSFORM');
+            } else {
+                if (c.progress < 60) {
+                    bufferSlot = 'ECHO_TRANSFORM';
+                    updateBufferUI();
+                } else {
+                    executePCAction(c, 'ECHO_TRANSFORM');
+                }
+            }
+        }
+        return;
+    }
+
+    if (action === 'ATTACK' || action === 'HEAVY_ATTACK' || action === 'RESONANCE_SKILL') {
+        if (c.state === 'IDLE') {
+            executePCAction(c, action);
+        } else {
+            if (c.progress < 60) {
+                bufferSlot = action;
+                updateBufferUI();
+            } else {
+                executePCAction(c, action);
+            }
+        }
+    }
+}
+
+function displayAction(action) {
+    return (action || '').replace(/^평타 /, '일반 공격 ').replace('공명스킬', '공명 스킬').replace('공명해방', '공명 해방');
+}
+
+function updateBufferUI() {
+    const slot = document.getElementById('buffer-slot');
+    let activeColor = activeCharId === 1 ? '#ef4444' : '#3b82f6';
+    let bgLight = activeCharId === 1 ? 'rgba(239,68,68,0.15)' : 'rgba(59,130,246,0.15)';
+
+    if (bufferSlot) {
+        let display = bufferSlot;
+        if (bufferSlot === 'ATTACK') display = `평타 ${(getActiveChar().combo % 5) + 1}타`;
+        if (bufferSlot === 'HEAVY_ATTACK') display = `강공격 (Hold)`;
+        if (bufferSlot === 'RESONANCE_SKILL') display = `공명스킬 (E)`;
+        if (bufferSlot === 'ECHO_TRANSFORM') display = `변신형 에코`;
+        
+        slot.innerText = `[${displayAction(display)}] 미리 입력`;
+        slot.style.color = '#fff';
+        slot.style.borderColor = activeColor;
+        slot.style.background = bgLight;
+    } else {
+        slot.innerText = '미리 누른 행동 없음';
+        slot.style.color = '#6b7280';
+        slot.style.borderColor = '#444';
+        slot.style.background = '#111';
+    }
+}
+
+function updateDodgeUI() {
+    const bar1 = document.getElementById('dodge-bar-1');
+    const bar2 = document.getElementById('dodge-bar-2');
+    const activeColor = '#10b981';
+    const inactiveColor = '#374151';
+    const shadow = '0 0 15px rgba(16,185,129,0.6)';
+    
+    if (dodgeStacks >= 2) {
+        bar1.style.background = activeColor; bar1.style.borderColor = '#059669'; bar1.style.boxShadow = shadow;
+        bar2.style.background = activeColor; bar2.style.borderColor = '#059669'; bar2.style.boxShadow = shadow;
+    } else if (dodgeStacks === 1) {
+        bar1.style.background = activeColor; bar1.style.borderColor = '#059669'; bar1.style.boxShadow = shadow;
+        bar2.style.background = inactiveColor; bar2.style.borderColor = '#4b5563'; bar2.style.boxShadow = 'none';
+    } else {
+        bar1.style.background = inactiveColor; bar1.style.borderColor = '#4b5563'; bar1.style.boxShadow = 'none';
+        bar2.style.background = inactiveColor; bar2.style.borderColor = '#4b5563'; bar2.style.boxShadow = 'none';
+    }
+}
+
+function setVPadStyle(id, isLocked, isRunning, isReserved, color) {
+    const btn = document.getElementById(id);
+    if (!btn) return;
+    if (isLocked) {
+        btn.style.opacity = '0.3';
+        btn.style.borderColor = '#333';
+        btn.style.boxShadow = 'none';
+        btn.style.background = 'rgba(0,0,0,0.5)';
+    } else if (isRunning) {
+        btn.style.opacity = '1';
+        btn.style.borderColor = color;
+        btn.style.boxShadow = `0 0 30px ${color}`;
+        btn.style.background = `rgba(${color === '#ef4444' ? '239,68,68' : color === '#3b82f6' ? '59,130,246' : color === '#06b6d4' ? '6,182,212' : '168,85,247'}, 0.5)`;
+    } else if (isReserved) {
+        btn.style.opacity = '0.9';
+        btn.style.borderColor = color;
+        btn.style.boxShadow = 'none';
+        btn.style.background = 'rgba(255,255,255,0.15)';
+        btn.style.borderStyle = 'dashed';
+    } else {
+        btn.style.opacity = '0.8';
+        btn.style.borderColor = 'rgba(255,255,255,0.2)';
+        btn.style.boxShadow = 'inset 0 0 20px rgba(0,0,0,0.5)';
+        btn.style.background = 'rgba(255,255,255,0.05)';
+        btn.style.borderStyle = 'solid';
+    }
+}
+
+function renderDOM() {
+    let activeColor = activeCharId === 1 ? '#ef4444' : '#3b82f6';
+    let c = getActiveChar();
+
+    document.getElementById('btn-swap-1').style.border = activeCharId === 1 ? '2px solid #fff' : '2px solid transparent';
+    document.getElementById('btn-swap-1').style.opacity = activeCharId === 1 ? '1' : '0.4';
+    document.getElementById('btn-swap-2').style.border = activeCharId === 2 ? '2px solid #fff' : '2px solid transparent';
+    document.getElementById('btn-swap-2').style.opacity = activeCharId === 2 ? '1' : '0.4';
+
+    // PC 1 UI
+    const pc1Container = document.getElementById('pc1-container');
+    const pc1Auth = document.getElementById('pc1-authority');
+    document.getElementById('pc1-progress').style.width = char1.progress + '%';
+    document.getElementById('pc1-state').innerText = char1.currentAction ? `${displayAction(char1.currentAction)} (${Math.floor(char1.progress)}%)` : '행동 없음';
+    
+    if (activeCharId === 1) {
+        pc1Container.style.opacity = '1';
+        pc1Container.style.border = '1px solid #ef4444';
+        pc1Container.style.borderLeft = '6px solid #ef4444';
+        pc1Container.style.boxShadow = '0 0 20px rgba(239,68,68,0.3)';
+        pc1Auth.style.display = 'inline';
+        pc1Auth.innerHTML = '👑 조작 중';
+        pc1Auth.style.color = '#fcd34d';
+    } else if (char1.state !== 'IDLE') {
+        pc1Container.style.opacity = '0.8';
+        pc1Container.style.border = '1px solid #444';
+        pc1Container.style.borderLeft = '6px solid #ef4444';
+        pc1Container.style.boxShadow = 'none';
+        pc1Auth.style.display = 'inline';
+        pc1Auth.innerHTML = '⚙️ 계속 행동 중';
+        pc1Auth.style.color = '#9ca3af';
+    } else {
+        pc1Container.style.opacity = '0.3';
+        pc1Container.style.border = '1px solid transparent';
+        pc1Container.style.borderLeft = '6px solid #ef4444';
+        pc1Container.style.boxShadow = 'none';
+        pc1Auth.style.display = 'none';
+    }
+
+    // PC 2 UI
+    const pc2Container = document.getElementById('pc2-container');
+    const pc2Auth = document.getElementById('pc2-authority');
+    document.getElementById('pc2-progress').style.width = char2.progress + '%';
+    document.getElementById('pc2-state').innerText = char2.currentAction ? `${displayAction(char2.currentAction)} (${Math.floor(char2.progress)}%)` : '행동 없음';
+    
+    if (activeCharId === 2) {
+        pc2Container.style.opacity = '1';
+        pc2Container.style.border = '1px solid #3b82f6';
+        pc2Container.style.borderLeft = '6px solid #3b82f6';
+        pc2Container.style.boxShadow = '0 0 20px rgba(59,130,246,0.3)';
+        pc2Auth.style.display = 'inline';
+        pc2Auth.innerHTML = '👑 조작 중';
+        pc2Auth.style.color = '#fcd34d';
+    } else if (char2.state !== 'IDLE') {
+        pc2Container.style.opacity = '0.8';
+        pc2Container.style.border = '1px solid #444';
+        pc2Container.style.borderLeft = '6px solid #3b82f6';
+        pc2Container.style.boxShadow = 'none';
+        pc2Auth.style.display = 'inline';
+        pc2Auth.innerHTML = '⚙️ 계속 행동 중';
+        pc2Auth.style.color = '#9ca3af';
+    } else {
+        pc2Container.style.opacity = '0.3';
+        pc2Container.style.border = '1px solid transparent';
+        pc2Container.style.borderLeft = '6px solid #3b82f6';
+        pc2Container.style.boxShadow = 'none';
+        pc2Auth.style.display = 'none';
+    }
+
+    // Echo UI
+    const echoContainer = document.getElementById('echo-container');
+    const echoAuth = document.getElementById('echo-authority');
+    document.getElementById('echo-progress').style.width = echo.progress + '%';
+    document.getElementById('echo-state').innerText = echo.state === 'ACTIVE' ? `${echo.currentAction} (${Math.floor(echo.progress)}%)` : '행동 없음';
+    
+    if (echo.state === 'ACTIVE') {
+        echoContainer.style.opacity = '0.9';
+        echoContainer.style.border = '1px solid #059669';
+        echoContainer.style.borderLeft = '6px solid #10b981';
+        echoAuth.style.display = 'inline';
+    } else {
+        echoContainer.style.opacity = '0.3';
+        echoContainer.style.border = '1px solid transparent';
+        echoContainer.style.borderLeft = '6px solid #10b981';
+        echoAuth.style.display = 'none';
+    }
+
+    const isUltActive = c.currentAction === '공명해방 (R)';
+    const isTS = timeStopTimer > 0;
+    
+    const isAtkRun = c.currentAction?.includes('평타') || c.currentAction?.includes('강공격');
+    const isAtkRes = bufferSlot === 'ATTACK' || bufferSlot === 'HEAVY_ATTACK';
+    setVPadStyle('vpad-atk', isUltActive || isTS, isAtkRun, isAtkRes, activeColor);
+
+    const isSkillRun = c.currentAction?.includes('공명스킬');
+    setVPadStyle('vpad-skill', isUltActive || isTS, isSkillRun, bufferSlot === 'RESONANCE_SKILL', '#06b6d4');
+
+    setVPadStyle('vpad-dodge', dodgeStacks === 0 || isUltActive || isTS, c.currentAction === '회피', false, '#10b981'); 
+    setVPadStyle('vpad-ult', false, c.currentAction === '공명해방 (R)', false, '#a855f7');
+    const isEchoRun = echo.state === 'ACTIVE' || c.currentAction === '변신형 에코';
+    setVPadStyle('vpad-echo', isUltActive || isTS, isEchoRun, bufferSlot === 'ECHO_TRANSFORM', '#10b981');
+}
+
+// 이벤트 핸들러
+function handleMouseDown() {
+    isHeavyTriggered = false;
+    mouseHoldTimer = setTimeout(() => {
+        isHeavyTriggered = true;
+        triggerAction('HEAVY_ATTACK'); 
+    }, 300);
+}
+
+function handleMouseUp() {
+    if (mouseHoldTimer) {
+        clearTimeout(mouseHoldTimer);
+        mouseHoldTimer = null;
+    }
+    if (!isHeavyTriggered) triggerAction('ATTACK');
+}
+
+const vpadAtk = document.getElementById('vpad-atk');
+vpadAtk.addEventListener('mousedown', (e) => { e.stopPropagation(); handleMouseDown(); });
+vpadAtk.addEventListener('mouseup', (e) => { e.stopPropagation(); handleMouseUp(); });
+vpadAtk.addEventListener('mouseleave', () => { if(mouseHoldTimer) { clearTimeout(mouseHoldTimer); mouseHoldTimer = null; } });
+
+document.getElementById('vpad-dodge').addEventListener('mousedown', () => triggerAction('DODGE'));
+document.getElementById('vpad-skill').addEventListener('mousedown', () => triggerAction('RESONANCE_SKILL'));
+document.getElementById('vpad-echo').addEventListener('mousedown', () => triggerAction('ECHO'));
+document.getElementById('vpad-ult').addEventListener('mousedown', () => triggerAction('ULTIMATE'));
+
+window.addEventListener('mousedown', (e) => {
+    if (e.button !== 0 || e.target.closest('.v-pad-btn') || e.target.closest('select') || e.target.closest('button')) return;
+    handleMouseDown();
+});
+window.addEventListener('mouseup', (e) => {
+    if (e.button !== 0 || e.target.closest('.v-pad-btn') || e.target.closest('select') || e.target.closest('button')) return;
+    handleMouseUp();
+});
+
+window.addEventListener('keydown', (e) => {
+    if (e.repeat) return; 
+    const key = e.key.toLowerCase();
+    
+    if (key === '1') triggerSwap(1);
+    if (key === '2') triggerSwap(2);
+    
+    if (key === 'e') triggerAction('RESONANCE_SKILL');
+    if (key === 'q') triggerAction('ECHO');
+    if (key === 'shift') { e.preventDefault(); triggerAction('DODGE'); }
+    if (key === 'r') triggerAction('ULTIMATE');
+});
+
+setTimeout(startEngine, 500);
+</script><script>
+(()=>{const canvas=document.querySelector('.tool-canvas');function fit(){const space=innerHeight;const scale=Math.min(innerWidth/1720,space/768.5);canvas.style.setProperty('--tool-scale',scale);canvas.style.left=((innerWidth-1720*scale)/2)+'px';canvas.style.top=((space-768.5*scale)/2)+'px'}addEventListener('resize',fit);fit()})();
+</script><dialog class="tool-help" id="tool-help" aria-labelledby="tool-help-title" aria-describedby="tool-help-lead">
+<header class="tool-help-head"><h2 id="tool-help-title">시뮬레이터 조작법</h2><button class="tool-help-close" type="button" aria-label="조작 안내 닫기">×</button></header>
+<div class="tool-help-body"><p id="tool-help-lead">화면의 버튼을 누르거나 키보드로 조작합니다.</p>
+<dl class="tool-help-controls">
+<div class="tool-help-row"><dt>캐릭터 교대</dt><dd><span class="tool-help-key">1 / 2 또는 위쪽 캐릭터 버튼</span><span>조작할 캐릭터를 선택합니다.</span></dd></div>
+<div class="tool-help-row"><dt>공격</dt><dd class="tool-help-attack"><div class="tool-help-method"><span class="tool-help-key">공격 버튼을 짧게 누르기</span><span>짧게 눌렀다 떼면 일반 공격(평타)을 입력합니다.</span></div><div class="tool-help-method"><span class="tool-help-key">공격 버튼을 길게 누르기</span><span>길게 누르면 강공격을 입력합니다.</span></div></dd></div>
+<div class="tool-help-row"><dt>공명 스킬</dt><dd><span class="tool-help-key">E 또는 스킬 버튼</span><span>공명 스킬을 입력합니다.</span></dd></div>
+<div class="tool-help-row"><dt>에코</dt><dd><span class="tool-help-key">Q 또는 에코 버튼</span><span>위쪽 선택 상자에서 변신형·소환형을 고른 뒤 에코를 입력합니다.</span></dd></div>
+<div class="tool-help-row"><dt>공명 해방</dt><dd><span class="tool-help-key">R 또는 공명 해방 버튼</span><span>공명 해방을 입력합니다.</span></dd></div>
+<div class="tool-help-row"><dt>회피</dt><dd><span class="tool-help-key">Shift 또는 회피 버튼</span><span>회피를 입력합니다.</span></dd></div>
+</dl>
+<p class="tool-help-reading">‘조작 중’과 두 행동 막대로 조작 대상과 남은 행동을 비교합니다. 막대의 60%는 이 도구에서 다음 행동을 잇도록 둔 기준이고, ‘미리 누른 다음 행동’에는 대기 입력이 표시됩니다.</p>
+</div>
+</dialog>
+<script>(()=>{
+const guide=document.getElementById('tool-help'),canvas=document.querySelector('.tool-canvas'),helpOpener=document.querySelector('.tool-help-open');
+const embedded=parent!==window;helpOpener.hidden=embedded;let activated=false,needsFreshPress=false;
+const send=state=>{if(embedded)parent.postMessage({type:'switch-tool-help',state},'*');};
+function openHelp(){
+ helpOpener.classList.remove('is-guide-closed');activated=true;
+ if(guide.open){guide.querySelector('.tool-help-close').focus({preventScroll:true});return;}
+ if(mouseHoldTimer){clearTimeout(mouseHoldTimer);mouseHoldTimer=null;}
+ needsFreshPress=true;canvas.inert=true;guide.showModal();send('open');
+ guide.querySelector('.tool-help-close').focus({preventScroll:true});
+}
+function closeHelp(){if(guide.open)guide.close();}
+guide.addEventListener('close',()=>{helpOpener.classList.add('is-guide-closed');canvas.inert=false;canvas.focus({preventScroll:true});send('closed');});
+guide.addEventListener('cancel',e=>{e.preventDefault();closeHelp();});
+guide.querySelector('.tool-help-close').addEventListener('click',closeHelp);
+helpOpener.addEventListener('click',openHelp);
+window.addEventListener('message',e=>{
+ if(e.source!==parent||!e.data||e.data.type!=='switch-tool-help')return;
+ if(e.data.action==='activate'&&!activated)openHelp();
+ else if(e.data.action==='open')openHelp();
+});
+window.addEventListener('keydown',e=>{
+ if(guide.open&&e.key==='Tab'){
+  const buttons=[...guide.querySelectorAll('button')];
+  const index=buttons.indexOf(document.activeElement);
+  const next=(index+(e.shiftKey?-1:1)+buttons.length)%buttons.length;
+  e.preventDefault();e.stopImmediatePropagation();buttons[next].focus({preventScroll:true});return;
+ }
+ if(e.key==='Escape'){
+  if(guide.open){e.preventDefault();e.stopImmediatePropagation();closeHelp();}
+  else if(embedded){e.preventDefault();e.stopImmediatePropagation();send('escape');}
+  return;
+ }
+ if(guide.open&&['1','2','q','e','r','shift'].includes(e.key.toLowerCase())){e.preventDefault();e.stopImmediatePropagation();}
+},true);
+window.addEventListener('mousedown',e=>{
+ if(guide.open){e.stopImmediatePropagation();return;}
+ if(!e.target.closest('button,select'))needsFreshPress=false;
+},true);
+window.addEventListener('mouseup',e=>{if(guide.open||needsFreshPress)e.stopImmediatePropagation();},true);
+if(embedded)send('ready');else openHelp();
+})();
+</script></body></html>

@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>체인소맨 레제편 캐릭터 메이킹 스터디</title>    <link rel="stylesheet" href="shared/local-display.css">
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #0f0f11;
+            color: #e0e0e0;
+            overflow: hidden; /* 스크롤 방지 */
+        }
+        .slide {
+            display: none; /* 기본적으로 숨김 */
+            height: 100vh;
+            width: 100vw;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            position: absolute;
+            top: 0;
+            left: 0;
+            transition: opacity 0.5s ease-in-out;
+            background: radial-gradient(circle at center, #1a1a2e 0%, #000000 100%);
+        }
+        .slide.active {
+            display: flex;
+            animation: fadeIn 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.98); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .accent-text {
+            color: #a78bfa; /* 연보라색 (레제 느낌) */
+        }
+        .nav-area {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            width: 10%;
+            z-index: 50;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .nav-area:hover { opacity: 1; background: rgba(255,255,255,0.02); }
+        .nav-left { left: 0; }
+        .nav-right { right: 0; }
+        
+        /* Discussion Box Style */
+        .discussion-box {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            width: 100%;
+            max-width: 900px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+        .key-point {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #c4b5fd;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        ul { list-style-type: none; padding: 0; }
+        li { margin-bottom: 0.8rem; padding-left: 1.2rem; position: relative; color: #d1d5db; }
+        li::before {
+            content: "•";
+            color: #a78bfa;
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation Areas -->
+    <div class="nav-area nav-left" onclick="linearMove('prev')">
+        <i class="ph ph-caret-left text-4xl text-gray-500"></i>
+    </div>
+    <div class="nav-area nav-right" onclick="linearMove('next')">
+        <i class="ph ph-caret-right text-4xl text-gray-500"></i>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="fixed bottom-0 left-0 h-1 bg-purple-900 w-full z-50">
+        <div id="progressBar" class="h-full bg-purple-500 transition-all duration-300" style="width: 0%"></div>
+    </div>
+    <div class="fixed bottom-4 right-6 text-gray-500 text-sm font-mono z-50">
+        <span id="slideCounter">1 / 9</span>
+    </div>
+
+    <!-- Slide 1: Title -->
+    <div class="slide active">
+        <div class="text-center flex flex-col items-center">
+            <!-- 이미지 영역: 안내 문구 제거됨 -->
+            <div class="mb-6">
+                 <img src="../assets/images/reze_invitation.png" 
+                      alt="스터디 대표 이미지" 
+                      class="w-full max-w-2xl h-auto object-cover rounded-lg shadow-2xl border border-purple-500/30 max-h-[40vh]">
+            </div>
+
+            <h2 class="text-2xl text-gray-400 font-light mb-2 tracking-widest">CHARACTER MAKING STUDY</h2>
+            <h1 class="text-4xl md:text-6xl font-black text-white mb-4 leading-tight">
+                체인소맨 <span class="accent-text">레제편</span> 분석<br>
+                <span class="text-2xl md:text-3xl font-bold text-gray-500 mt-2 block">우리는 왜 레제에게 열광하는가</span>
+            </h1>
+            <div class="mt-8 text-sm text-gray-600 font-mono border-t border-gray-800 pt-4 inline-block px-8">
+                Presenter: <span class="text-gray-400">커렁 (keorung)</span>
+            </div>
+        </div>
+        <div class="absolute bottom-10 text-gray-600 text-sm animate-bounce">
+            화살표 키(←/→) 또는 클릭으로 이동
+        </div>
+    </div>
+
+    <!-- Slide 2: Table of Contents (Shortcut Enabled) -->
+    <div class="slide">
+        <h2 class="text-4xl font-bold mb-12 border-b-2 border-purple-800 pb-4 px-8">Table of Contents</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-6 text-xl max-w-4xl w-full px-6">
+            <!-- jumpToShortcut 함수 사용 -->
+            <div onclick="jumpToShortcut(2)" class="flex items-center gap-4 p-4 hover:bg-white/10 rounded-lg transition cursor-pointer group">
+                <span class="text-purple-400 font-mono font-bold group-hover:text-purple-300">01.</span>
+                <span class="group-hover:text-white transition">[Visual] 의복과 나체의 경계</span>
+            </div>
+            <div onclick="jumpToShortcut(3)" class="flex items-center gap-4 p-4 hover:bg-white/10 rounded-lg transition cursor-pointer group">
+                <span class="text-purple-400 font-mono font-bold group-hover:text-purple-300">02.</span>
+                <span class="group-hover:text-white transition">[Character] 리얼리티의 구축</span>
+            </div>
+            <div onclick="jumpToShortcut(4)" class="flex items-center gap-4 p-4 hover:bg-white/10 rounded-lg transition cursor-pointer group">
+                <span class="text-purple-400 font-mono font-bold group-hover:text-purple-300">03.</span>
+                <span class="group-hover:text-white transition">[Voice] 숨결을 불어넣는 연기</span>
+            </div>
+            <div onclick="jumpToShortcut(5)" class="flex items-center gap-4 p-4 hover:bg-white/10 rounded-lg transition cursor-pointer group">
+                <span class="text-purple-400 font-mono font-bold group-hover:text-purple-300">04.</span>
+                <span class="group-hover:text-white transition">[Sound] 침묵과 소음의 연출</span>
+            </div>
+            <div onclick="jumpToShortcut(6)" class="flex items-center gap-4 p-4 hover:bg-white/10 rounded-lg transition cursor-pointer group">
+                <span class="text-purple-400 font-mono font-bold group-hover:text-purple-300">05.</span>
+                <span class="group-hover:text-white transition">[Mise-en-scène] 시각적 복선</span>
+            </div>
+            <div onclick="jumpToShortcut(7)" class="flex items-center gap-4 p-4 hover:bg-white/10 rounded-lg transition cursor-pointer group">
+                <span class="text-purple-400 font-mono font-bold group-hover:text-purple-300">06.</span>
+                <span class="group-hover:text-white transition">[Theme] 시골 쥐와 도시 쥐</span>
+            </div>
+            <div onclick="jumpToShortcut(8)" class="flex items-center gap-4 p-4 hover:bg-white/10 rounded-lg transition cursor-pointer md:col-span-2 justify-center border-t border-gray-800 mt-4 pt-8 group">
+                <span class="text-purple-400 font-mono font-bold group-hover:text-purple-300">07.</span>
+                <span class="group-hover:text-white transition">자유 토의 (Free Discussion)</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 3: Topic 1 -->
+    <div class="slide">
+        <div class="text-purple-400 font-mono mb-2 text-lg">TOPIC 01</div>
+        <h2 class="text-4xl font-bold mb-8 text-white">Visual: 의복(Costume)과 나체(Nudity)</h2>
+        <div class="discussion-box">
+            <div class="key-point">
+                <i class="ph ph-shirt-folded text-2xl"></i>
+                KEY POINT: 의복은 '사회적 가면'이자 '보호막'
+            </div>
+            <p class="text-gray-400 mb-6 pl-8">
+                레제는 다양한 사복과 유니폼으로 '일상'을 연기하지만,<br>
+                결정적인 순간(수영장, 해변)에는 알몸이 되어 덴지와 마주합니다.
+            </p>
+            <div class="bg-black/30 p-6 rounded-lg border-l-4 border-purple-600">
+                <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                    <i class="ph ph-chats-circle"></i> Discussion
+                </h3>
+                <ul>
+                    <li>레제의 다양한 사복 패션이 캐릭터에게 '생명력'을 불어넣었다면, <strong class="text-purple-300">수영장에서의 나체</strong>는 심리적 거리를 어떻게 변화시켰나?</li>
+                    <li>옷을 다 벗어던지고 수영을 가르쳐주는 행위가, 덴지에게 어떤 <strong class="text-purple-300">심리적 해방감</strong>이나 <strong class="text-purple-300">친밀감</strong>을 주었는가?</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 4: Topic 2 -->
+    <div class="slide">
+        <div class="text-purple-400 font-mono mb-2 text-lg">TOPIC 02</div>
+        <h2 class="text-4xl font-bold mb-8 text-white">Character: '모에 요소' 없는 리얼리티</h2>
+        <div class="discussion-box">
+            <div class="key-point">
+                <i class="ph ph-user-focus text-2xl"></i>
+                KEY POINT: 작위적 '속성' 대신, 현실적 '리액션'
+            </div>
+            <p class="text-gray-400 mb-6 pl-8">
+                과장된 애교나 말투 대신, 썰렁한 농담에 웃어주고 먼저 손을 잡는<br>
+                "손이 닿을 듯한" 현실적인 호감 표시가 주를 이룹니다.
+            </p>
+            <div class="bg-black/30 p-6 rounded-lg border-l-4 border-purple-600">
+                <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                    <i class="ph ph-chats-circle"></i> Discussion
+                </h3>
+                <ul>
+                    <li>기존 서브컬처 캐릭터들과 비교했을 때, 레제의 <strong class="text-purple-300">대화 방식이나 행동</strong>에서 가장 차별화된 지점은?</li>
+                    <li>특별한 속성(Attribute) 없이도 우리가 레제에게 깊이 몰입할 수 있었던 가장 큰 이유는?</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 5: Topic 3 -->
+    <div class="slide">
+        <div class="text-purple-400 font-mono mb-2 text-lg">TOPIC 03</div>
+        <h2 class="text-4xl font-bold mb-8 text-white">Voice: 숨결을 불어넣는 연기</h2>
+        <div class="discussion-box">
+            <div class="key-point">
+                <i class="ph ph-microphone-stage text-2xl"></i>
+                KEY POINT: 성우(우에다 레이나)의 숨소리 디테일
+            </div>
+            <p class="text-gray-400 mb-6 pl-8">
+                나긋나긋한 ASMR 톤의 일상 연기와,<br>
+                전투 씬에서의 차갑고 건조한 목소리의 극명한 낙차(Gap).
+            </p>
+            <div class="bg-black/30 p-6 rounded-lg border-l-4 border-purple-600">
+                <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                    <i class="ph ph-chats-circle"></i> Discussion
+                </h3>
+                <ul>
+                    <li>'현실적인 매력'이 성우의 목소리를 입으면서 어떻게 구체화되었다고 느끼셨나요?</li>
+                    <li>대사 텍스트에는 없는 <strong class="text-purple-300">미묘한 숨소리, 호흡, 웃음소리</strong>가 감정 전달에 미친 영향은?</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 6: Topic 4 -->
+    <div class="slide">
+        <div class="text-purple-400 font-mono mb-2 text-lg">TOPIC 04</div>
+        <h2 class="text-4xl font-bold mb-8 text-white">Sound: 침묵과 소음의 연출</h2>
+        <div class="discussion-box">
+            <div class="key-point">
+                <i class="ph ph-speaker-slash text-2xl"></i>
+                KEY POINT: 소리의 부재(Negative Space)를 통한 집중
+            </div>
+            <p class="text-gray-400 mb-6 pl-8">
+                불꽃놀이의 폭음과 대비되는, 숨 막히는 정적의 순간들.<br>
+                BGM을 배제하고 환경음만 남겨 현장감을 극대화했습니다.
+            </p>
+            <div class="bg-black/30 p-6 rounded-lg border-l-4 border-purple-600">
+                <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                    <i class="ph ph-chats-circle"></i> Discussion
+                </h3>
+                <ul>
+                    <li>가장 숨죽이고 보게 만들었던 <strong class="text-purple-300">'소리가 멈춘 순간'</strong>은 언제였나요?</li>
+                    <li>축제의 '불꽃놀이'와 레제의 '폭발 능력'을 시청각적으로 중첩시킨 연출의 효과는?</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 7: Topic 5 (Updated Content) -->
+    <div class="slide">
+        <div class="text-purple-400 font-mono mb-2 text-lg">TOPIC 05</div>
+        <h2 class="text-4xl font-bold mb-8 text-white">Mise-en-scène: 대사 없는 은유</h2>
+        <div class="discussion-box">
+            <div class="key-point">
+                <i class="ph ph-apple-logo text-2xl"></i>
+                KEY POINT: 사과사탕(심장)과 폭발(레제)
+            </div>
+            <p class="text-gray-400 mb-6 pl-8">
+                축제 현장을 비춰주는 카메라에 비친 <strong>엑스트라</strong>가 들고 있는 사과사탕(심장) 뒤로<br>
+                불꽃이 터지는 구도는 폭탄이 심장을 집어삼키거나 위협하는 듯한 시각적 복선입니다.
+            </p>
+            <div class="bg-black/30 p-6 rounded-lg border-l-4 border-purple-600">
+                <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                    <i class="ph ph-chats-circle"></i> Discussion
+                </h3>
+                <ul>
+                    <li>대사 한마디 없이 <strong class="text-purple-300">'이미지'만으로 비극이나 관계성을 암시</strong>했던 또 다른 장면이 있었나요?</li>
+                    <li>이러한 영화적 미장센이 애니메이션 매체에서 독자의 무의식에 미치는 영향은?</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 8: Topic 6 -->
+    <div class="slide">
+        <div class="text-purple-400 font-mono mb-2 text-lg">TOPIC 06</div>
+        <h2 class="text-4xl font-bold mb-8 text-white">Theme: 시골 쥐와 도시 쥐</h2>
+        <div class="discussion-box">
+            <div class="key-point">
+                <i class="ph ph-mouse text-2xl"></i>
+                KEY POINT: 평온과 결핍(시골) vs 풍요와 위험(도시)
+            </div>
+            <p class="text-gray-400 mb-6 pl-8">
+                레제가 던진 이 질문은 덴지와의 관계, 그리고 그녀의 운명을 관통하는<br>
+                핵심적인 철학적 딜레마입니다.
+            </p>
+            <div class="bg-black/30 p-6 rounded-lg border-l-4 border-purple-600">
+                <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                    <i class="ph ph-chats-circle"></i> Discussion
+                </h3>
+                <ul>
+                    <li>레제가 "도망치자"고 제안했던 것은, 그녀가 진심으로 <strong class="text-purple-300">'시골 쥐'의 삶</strong>을 동경했기 때문일까요?</li>
+                    <li>로코에서 느와르로 전환되는 구조가 '여운'을 남기는 데 어떤 역할을 했는가?</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 9: Free Discussion -->
+    <div class="slide">
+        <div class="text-purple-400 font-mono mb-2 text-lg">FINAL</div>
+        <h2 class="text-4xl font-bold mb-8 text-white">자유 토의 (Free Discussion)</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-6xl px-8">
+            <div class="bg-white/5 p-8 rounded-xl border border-white/10 hover:border-purple-500 transition">
+                <div class="text-4xl text-purple-400 mb-4"><i class="ph ph-heart"></i></div>
+                <h3 class="text-xl font-bold mb-2 text-white">ONE PICK</h3>
+                <p class="text-gray-400">오늘 분석을 통해 다시 보게 된,<br>혹은 원래 가장 좋아했던<br>최애 장면은?</p>
+            </div>
+            <div class="bg-white/5 p-8 rounded-xl border border-white/10 hover:border-purple-500 transition">
+                <div class="text-4xl text-purple-400 mb-4"><i class="ph ph-path"></i></div>
+                <h3 class="text-xl font-bold mb-2 text-white">IF SCENARIO</h3>
+                <p class="text-gray-400">만약 레제가 카페로 돌아가<br>덴지를 만나는 데 성공했다면,<br>어떻게 되었을까?</p>
+            </div>
+            <div class="bg-white/5 p-8 rounded-xl border border-white/10 hover:border-purple-500 transition">
+                <div class="text-4xl text-purple-400 mb-4"><i class="ph ph-quotes"></i></div>
+                <h3 class="text-xl font-bold mb-2 text-white">COMMENT</h3>
+                <p class="text-gray-400">레제편을 한 문장으로<br>정의한다면?</p>
+            </div>
+        </div>
+        <div class="mt-12 text-gray-500">Thank you for participating</div>
+    </div>
+
+    <script>
+        const slides = document.querySelectorAll('.slide');
+        const progressBar = document.getElementById('progressBar');
+        const slideCounter = document.getElementById('slideCounter');
+        let currentSlide = 0;
+
+        // 1. 초기화: 현재 상태를 History에 기록 (replaceState)
+        // 페이지 로드 시점에 초기 상태를 저장하여, 뒤로가기 시 돌아올 기준점을 만듭니다.
+        history.replaceState({ slideIndex: 0 }, '');
+
+        // 2. 화면 렌더링 함수
+        function renderSlide(index) {
+            slides.forEach((slide, i) => {
+                slide.classList.remove('active');
+                if (i === index) {
+                    slide.classList.add('active');
+                }
+            });
+            
+            // Progress Bar Update
+            const progress = ((index + 1) / slides.length) * 100;
+            progressBar.style.width = `${progress}%`;
+            
+            // Counter Update
+            slideCounter.textContent = `${index + 1} / ${slides.length}`;
+        }
+
+        // 3. 선형 이동 (화살표/클릭) - History를 쌓지 않음 (replaceState)
+        function linearMove(direction) {
+            let nextIndex = currentSlide;
+            if (direction === 'next' && currentSlide < slides.length - 1) {
+                nextIndex++;
+            } else if (direction === 'prev' && currentSlide > 0) {
+                nextIndex--;
+            }
+
+            if (nextIndex !== currentSlide) {
+                currentSlide = nextIndex;
+                renderSlide(currentSlide);
+                // 이동하지만 '뒤로가기' 스택은 만들지 않고 현재 기록만 덮어씁니다.
+                history.replaceState({ slideIndex: currentSlide }, '');
+            }
+        }
+
+        // 4. 숏컷 이동 (목차 클릭) - History를 쌓음 (pushState)
+        // 여기서만 스택을 쌓으므로, 뒤로가기 버튼을 누르면 이 함수 호출 이전 시점(목차)으로 돌아갑니다.
+        function jumpToShortcut(index) {
+            if (index >= 0 && index < slides.length) {
+                // 1. 현재 상태(목차)를 스택에 확실히 저장 (안전장치)
+                // (이미 replaceState로 되어있겠지만 명시적 흐름을 위해)
+                
+                // 2. 새로운 상태(토픽)를 스택에 추가
+                history.pushState({ slideIndex: index }, '');
+                
+                currentSlide = index;
+                renderSlide(currentSlide);
+            }
+        }
+
+        // 5. 브라우저 뒤로가기/앞으로가기 감지 (popstate)
+        window.onpopstate = function(event) {
+            if (event.state) {
+                // History에 저장된 인덱스로 화면만 갱신
+                currentSlide = event.state.slideIndex;
+                renderSlide(currentSlide);
+            } else {
+                // State가 없는 경우 (매우 드물지만) 초기화
+                renderSlide(0);
+            }
+        };
+
+        // Keyboard Navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === 'Space') {
+                linearMove('next');
+            } else if (e.key === 'ArrowLeft') {
+                linearMove('prev');
+            }
+        });
+
+        // Initial Load
+        renderSlide(0);
+    </script>
+</body>
+</html>

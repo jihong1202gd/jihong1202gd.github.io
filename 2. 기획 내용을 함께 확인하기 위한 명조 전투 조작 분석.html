@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="utf-8"><meta content="width=device-width,initial-scale=1" name="viewport"><title>명조 전투 조작 분석</title><style>
+/* Isolated module B. CSS_ARCHITECTURE_V108.md sections 2, 3, 6. */
+
+/* 01 Tokens and module defaults */
+@font-face{font-family:'Noto Sans KR';src:url('assets/fonts/NotoSansKR-VF.ttf') format('truetype');font-weight:100 900;font-style:normal;font-display:swap}
+body[data-layout-system="v106"]{--ink:#17191E;--copy:#373B43;--sub:#5D616B;--structure:#D93025;--accent:#A85B55;--group:#F4F5F6;--line:#D9DCE1;--taupe:#685951;--taupe-line:#C8BAB2;--taupe-fill:#EEE8E4;margin:0;background:var(--paper-background,#DFE1E5);color:var(--ink);font-family:'Noto Sans KR','Malgun Gothic',sans-serif;word-break:keep-all;overflow-wrap:break-word}
+body[data-layout-system="v106"] .pr-guide-page{--pr-ink:#17191e;--pr-copy:#373b43;--pr-sub:#5d616b;--pr-line:#d9dce1;--pr-zone:#f1f3f4;--pr-node:#e7e9eb;--pr-red:#d93025;--pr-body-red:#a85b55;--pr-taupe:#685951;--pr-taupe-bg:#eee8e4;--pr-taupe-line:#c8bab2;color:var(--pr-ink);font-family:"Noto Sans KR","Malgun Gothic",sans-serif;border-radius:0}
+
+/* 02 Document shell */
+body[data-layout-system="v106"] .v106-main{padding:var(--main-padding,40px 0)}
+body[data-layout-system="v106"] .v106-page-wrap{position:relative;width:var(--paper-width,min(1920px,calc(100vw / 1960 * 1920),calc(100vh / 1100 * 1920)));aspect-ratio:16/9;margin:var(--paper-margin,0 auto 60px);break-after:var(--paper-break,auto)}
+body[data-layout-system="v106"] .v106-page-wrap:last-child{margin-bottom:0}
+body[data-layout-system="v106"] .v106-page{position:absolute;display:flex;flex-direction:column;width:1920px;height:1080px;padding:54px 92px 146px 126px;background:white;transform:var(--paper-transform,scale(var(--scale,1)));transform-origin:top left;print-color-adjust:exact}
+body[data-layout-system="v106"] .v106-doc-header{flex:none;height:37px;display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;color:#888;font-size:13px;line-height:1.58;font-weight:800;letter-spacing:.1em}
+body[data-layout-system="v106"] .v106-doc-header nav{display:flex;align-items:center;gap:12px}
+body[data-layout-system="v106"] .v106-doc-header a{display:inline-block;border:1px solid #E5E7EB;border-radius:6px;padding:6px 13px;background:white;color:#555;font-size:12px;letter-spacing:0;text-decoration:none}
+body[data-layout-system="v106"] .v106-page-header{height:110px;flex:none;border-bottom:5px solid var(--structure);display:flex;flex-direction:column;gap:10px;padding-bottom:16px}
+body[data-layout-system="v106"] .v106-page-header small{font-size:18px;line-height:28px;font-weight:800;color:var(--structure);letter-spacing:4px}
+body[data-layout-system="v106"] .v106-page-header h2{font-size:44px;line-height:1.12;letter-spacing:-.04em;font-weight:900;margin:0;padding:0 0 4px}
+body[data-layout-system="v106"] .v106-page::after{content:'';position:absolute;bottom:132px;left:126px;right:92px;height:5px;background:var(--ink)}
+body[data-layout-system="v106"] .v106-page-footer{position:absolute;bottom:30px;left:100px;right:100px;display:flex;justify-content:space-between;color:#888;font-size:13px;line-height:1.58;letter-spacing:.06em;font-weight:700}
+
+/* 03 Components and their states */
+body[data-layout-system="v106"] *,body[data-layout-system="v106"] *::before,body[data-layout-system="v106"] *::after{box-sizing:border-box}
+body[data-layout-system="v106"] :is(button,select){font:inherit;cursor:pointer}
+body[data-layout-system="v106"] a{color:inherit;text-underline-offset:4px}
+body[data-layout-system="v106"] :is(a,button,select):focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+body[data-layout-system="v106"] .v106-claim{flex:none;min-height:84px;display:flex;align-items:center;margin:18px 0;padding:10px 18px;border:1px solid #D8DCE0;border-left:3px solid #34383E;background:#F1F3F4;font-size:30px;line-height:1.3;letter-spacing:-.025em;font-weight:900}
+body[data-layout-system="v106"] .v106-claim strong{font:inherit}
+body[data-layout-system="v106"] .v106-page-body{flex:1;min-height:0}
+body[data-layout-system="v106"] :is(h3,p,figure){margin:0}
+body[data-layout-system="v106"] h3{font-size:24px;line-height:1.4;font-weight:800;letter-spacing:-.015em;color:var(--ink)}
+body[data-layout-system="v106"] p{font-size:18px;line-height:1.6;font-weight:600;letter-spacing:-.01em;color:var(--copy)}
+body[data-layout-system="v106"] .v106-section-tab{position:absolute;top:0;left:0;z-index:3;display:inline-flex;align-items:center;height:28px;max-width:100%;padding:0 19px 0 10px;background:var(--ink);color:white;clip-path:polygon(0 0,100% 0,calc(100% - 10px) 100%,0 100%);font-size:13px;line-height:1.35;font-weight:900;letter-spacing:.08em;white-space:nowrap}
+body[data-layout-system="v106"] .v106-evidence-kind{display:inline-flex;width:max-content;max-width:100%;align-items:center;padding:4px 9px;border:1px solid var(--taupe-line);background:var(--taupe-fill);color:var(--taupe);font-size:13px;line-height:1.35;font-weight:900;letter-spacing:.08em}
+body[data-layout-system="v106"] .v106-role-body .v106-evidence-kind{min-height:22px;margin:0 0 7px;border-radius:0;clip-path:none;box-shadow:none}
+body[data-layout-system="v106"] .v106-role-body .v106-heading-copy>.v106-evidence-kind{position:absolute;bottom:calc(100% + 8px);left:0;z-index:2;margin:0}
+body[data-layout-system="v106"] .v106-step-marker{display: inline-flex; width: max-content; max-width: 100%; min-height: 24px; align-items: center; gap: 7px; margin-bottom: 8px; padding: 0px; border: 0px; border-radius: 0px; background: transparent; clip-path: none; box-shadow: none; line-height: 1;}
+body[data-layout-system="v106"] .v106-step-no{display: inline-grid; width: 24px; height: 24px; flex: 0 0 24px; place-items: center; border-radius: 6px; background: var(--accent); color: rgb(255, 255, 255); font-size: 14px; font-weight: 950; line-height: 1; letter-spacing: 0px;}
+body[data-layout-system="v106"] .v106-step-kind{color:var(--taupe);font-size:13px;line-height:1.35;font-weight:900;letter-spacing:.08em}
+body[data-layout-system="v106"] .v106-flow-condition:not([hidden]){display:block;margin-right:3px;margin-bottom:3px;padding:6px 9px;background:#FAF7F4;border:1px solid var(--taupe-line);border-radius:0;box-shadow:3px 3px 0 #E0D6D0;color:#514943;font-size:14px;line-height:1.45;font-weight:700}
+body[data-layout-system="v106"] .v106-role-body .v106-flow-condition:not([hidden]){position:relative;margin:5px 3px 3px 0;font-weight:720;line-height:1.42;letter-spacing:normal}
+body[data-layout-system="v106"] .v106-role-body .v106-flow-condition[data-note-label]::before{content:attr(data-note-label);display:inline-block;margin-right:7px;color:var(--taupe);font-size:14px;font-weight:950;line-height:1;letter-spacing:.08em}
+body[data-layout-system="v106"] .v106-narrative{position:relative;background:var(--group);padding:48px 28px 24px;min-height:0;display:flex;flex-direction:column;gap:22px}
+body[data-layout-system="v106"] .v106-prose-section{min-width:0;flex:1;display:grid;grid-template-columns:var(--prose-columns,300px minmax(0,1fr));gap:var(--prose-gap,28px);align-items:center}
+body[data-layout-system="v106"] .v106-prose-section+ .v106-prose-section{border-top:1px solid var(--line);padding-top:20px}
+body[data-layout-system="v106"] .v106-depth-summary{min-width:0;display:flex;align-items:center;height:100%}
+body[data-layout-system="v106"] .v106-heading-copy{position:relative;width:100%}
+body[data-layout-system="v106"] :is(.v106-heading-copy>.v106-step-marker,.v106-heading-copy>.v106-evidence-kind){position:absolute;left:0;bottom:calc(100% + 8px);margin:0}
+body[data-layout-system="v106"] .v106-depth-detail{min-width:0;text-wrap:pretty}
+body[data-layout-system="v106"] .v106-prose-section p+p{margin-top:8px}
+body[data-layout-system="v106"] .v106-proof{--proof-label-space:105px;position:relative;display:flex;flex-direction:column;gap:12px;min-height:0;min-width:0;padding:18px 20px 20px;border:1px solid var(--line);border-top:3px solid var(--accent);border-radius:0;background:white;box-shadow:0 5px 12px rgb(23 25 30 / .06)}
+body[data-layout-system="v106"] .v106-role-body .ap-proof-mark{position:absolute;top:0;right:0;z-index:4;padding:5px 8px 4px;border:1px solid #c8bab2;border-top:0;border-right:0;background:#eee8e4;color:#685951;font-size:13px;font-weight:900;line-height:1.25;pointer-events:none}
+body[data-layout-system="v106"] .v106-proof-header{display:flex;align-items:center;gap:10px;min-height:28px;padding-right:var(--proof-label-space,0);flex:none;font-size:14px;line-height:1.45;font-weight:700;color:var(--sub)}
+body[data-layout-system="v106"] .v106-proof-header p{font-size:14px;line-height:1.45;font-weight:700;color:var(--sub)}
+body[data-layout-system="v106"] .v106-pin-key{display:flex;flex-direction:column;gap:6px}
+body[data-layout-system="v106"] .v106-pin-key-item{display:grid;grid-template-columns:24px 64px minmax(0,1fr);gap:12px;align-items:start;min-width:0}
+body[data-layout-system="v106"] .v106-pin-key-glyph{display:block;width:24px;height:24px;color:var(--copy)}
+body[data-layout-system="v106"] .v106-pin-key-item strong{font-size:18px;line-height:1.45;font-weight:800;color:var(--ink)}
+body[data-layout-system="v106"] .v106-pin-key-item p{font-size:18px;line-height:1.45;font-weight:600}
+body[data-layout-system="v106"] .v106-pin-key .v106-pin-key-note{font-size:14px;line-height:1.45;font-weight:700;color:var(--sub);padding-left:112px}
+body[data-layout-system="v106"] .v106-proof-header-context{flex-direction:column;align-items:flex-start;gap:10px}
+body[data-layout-system="v106"] .v106-proof-header-context p{font-size:18px;line-height:1.6;font-weight:600;color:var(--copy)}
+body[data-layout-system="v106"] .v106-proof > .v106-section-tab+.v106-proof-header{margin-top:18px}
+body[data-layout-system="v106"] .v106-diagram-unit{position:relative;display:flex;flex-direction:column;gap:12px;min-height:0;min-width:0;height:100%;padding:18px 20px 20px;border:1px solid var(--line);border-radius:0;background:white}
+body[data-layout-system="v106"] .v106-timeline-comparison{padding:18px 20px 20px;gap:14px}
+body[data-layout-system="v106"] .v106-chart-visual{position:relative;display:flex;align-items:center;justify-content:center;flex:1;min-height:0;min-width:0;padding-bottom:28px}
+body[data-layout-system="v106"] .v106-original-chart{display:block;width:100%;height:100%;max-height:100%;min-height:0}
+body[data-layout-system="v106"] .v106-chart-visual>img{display:block;width:100%;height:100%;object-fit:contain;min-height:0}
+body[data-layout-system="v106"] .v106-image-caption{position:absolute;bottom:var(--chart-bottom,0);right:var(--chart-right,0);display:flex;align-items:center;height:28px;max-width:100%;padding:0 8px 0 19px;clip-path:polygon(10px 0,100% 0,100% 100%,0 100%);background:var(--ink);color:white;font-size:14px;line-height:1.25;font-weight:850;pointer-events:none}
+body[data-layout-system="v106"] .v106-media-visual{position:relative;display:flex;align-items:center;justify-content:center;flex:1;min-height:0;min-width:0;padding-bottom:28px;background:#000}
+body[data-layout-system="v106"] .v106-media-visual>video{display:block;width:100%;height:100%;object-fit:contain;min-height:0}
+body[data-layout-system="v106"] .v106-media-visual>.v106-image-caption{bottom:0}
+body[data-layout-system="v106"] .v106-zoom{position:absolute;top:8px;right:8px;z-index:3;border:1px solid var(--accent);border-radius:6px;padding:3px 6px;background:rgb(255 255 255 / .94);color:var(--accent);font-size:12px;line-height:1.25;font-weight:900}
+body[data-layout-system="v106"] .v106-zoom:hover{background:var(--accent);color:white}
+body[data-layout-system="v106"] .v106-detail-note{padding:14px 18px;border:1px solid var(--line);border-radius:0;background:white;display:grid;grid-template-columns:max-content repeat(3,minmax(0,1fr)) max-content;align-items:center;gap:18px}
+body[data-layout-system="v106"] .v106-detail-note p{font-size:14px;line-height:1.45;font-weight:700;color:var(--sub)}
+body[data-layout-system="v106"] .v106-detail-note p strong{font-size:18px;line-height:1.4;font-weight:750;color:var(--copy)}
+body[data-layout-system="v106"] .v106-detail-note .v106-zoom{position:static;align-self:center}
+body[data-layout-system="v106"] .v106-choice{position:relative;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:40px;padding:44px 28px 22px;background:var(--group)}
+body[data-layout-system="v106"] .v106-choice-symbols{height:36px;display:flex;align-items:center;gap:14px;flex:none}
+body[data-layout-system="v106"] .v106-choice-symbols img{height:36px;width:auto}
+body[data-layout-system="v106"] .v106-choice-detail{min-width:0;display:flex;flex-direction:column;justify-content:center;gap:10px;padding:10px 20px;border:1px solid var(--line);background:white}
+body[data-layout-system="v106"] .v106-choice-steps{list-style:none;display:flex;flex-direction:column;gap:6px;margin:0;padding:0;min-height:0}
+body[data-layout-system="v106"] .v106-choice-steps li{position:relative;display:grid;grid-template-columns:160px minmax(0,1fr);gap:20px;align-items:start;padding:6px 0 0;border-top:1px solid var(--line);font-size:18px;line-height:1.5;font-weight:650;color:var(--copy)}
+body[data-layout-system="v106"] .v106-choice-steps .v106-step-marker{margin:0;align-self:start}
+body[data-layout-system="v106"] .v106-tool-page{padding-bottom:74px}
+body[data-layout-system="v106"] .v106-tool-page::after{bottom:62px}
+body[data-layout-system="v106"] .v106-tool-page .v106-claim{margin:12px 0}
+body[data-layout-system="v106"] .v106-simulator-figure{height:100%;display:flex;flex-direction:column;align-items:center;gap:8px;padding-top:24px}
+body[data-layout-system="v106"] .v106-simulator-caption{width:1600px;max-width:100%;display:flex;align-items:center;justify-content:flex-end;gap:12px}
+body[data-layout-system="v106"] .v106-simulator-caption p{font-size:18px;line-height:1.5}
+body[data-layout-system="v106"] .v106-tool-help-open{position:absolute;z-index:5;top:158px;right:116px;min-width:196px;min-height:72px;padding:14px 28px;border:2px solid var(--accent);border-radius:6px;background:white;color:var(--accent);font-size:24px;line-height:1.3;font-weight:800;box-shadow:0 8px 20px rgba(23,25,30,.18);cursor:pointer}
+body[data-layout-system="v106"] .v106-tool-help-open.is-guide-closed{color:#7d3f3a;animation:var(--tool-help-attention,tool-help-attention 2s ease-in-out infinite)}
+body[data-layout-system="v106"] .v106-simulator-surface{position:relative;flex:none;width:1600px;height:715px;border:1px solid var(--line);background:white;--tool-scale:1.1188811189}
+body[data-layout-system="v106"] .v106-live-simulator{position:absolute;top:0;left:0;width:1430px;height:638px;border:0;transform:scale(var(--tool-scale,1));transform-origin:top left}
+body[data-layout-system="v106"] .v106-tool-example{position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:contain}
+body[data-layout-system="v106"] .v106-simulator-surface>.v106-live-simulator{display:var(--live-tool-display,block)}
+body[data-layout-system="v106"] .v106-tool-print-link{display:var(--print-link-display,none);font-size:13px;color:var(--accent)}
+body[data-layout-system="v106"] .v106-media-modal{width:min(1800px,calc(100vw - 64px));max-width:none;max-height:calc(100vh - 48px);padding:16px;border:1px solid var(--line);border-radius:0;background:white;color:var(--ink)}
+body[data-layout-system="v106"] .v106-media-modal::backdrop{background:rgb(23 25 30 / .78)}
+body[data-layout-system="v106"] .v106-media-modal>header{display:flex;align-items:center;justify-content:space-between;gap:24px;margin-bottom:12px}
+body[data-layout-system="v106"] .v106-modal-close{padding:6px 12px;background:white;border:1px solid var(--line);border-radius:6px;font-size:13px;line-height:1.35;font-weight:800}
+body[data-layout-system="v106"] .v106-modal-stage{display:flex;align-items:center;justify-content:center;max-height:var(--media-space,82vh);min-height:0}
+body[data-layout-system="v106"] .v106-modal-visual{position:relative;width:min(100%,calc((var(--media-space,82vh) - 28px) * var(--media-aspect,1.77778)));padding-bottom:28px;border:1px solid var(--line);border-radius:0;background:white}
+body[data-layout-system="v106"] .v106-modal-visual>:is(img,video,svg){display:block;width:100%;height:auto;max-height:calc(var(--media-space,82vh) - 28px);object-fit:contain}
+body[data-layout-system="v106"] .v106-modal-visual:has(>video)>.v106-image-caption{bottom:0}
+body[data-layout-system="v106"] .v106-modal-stage[data-tool="true"]{position:relative;width:calc(1430px * var(--tool-scale,1));height:calc(638px * var(--tool-scale,1));margin:auto}
+body[data-layout-system="v106"] .v106-hover-preview{position:fixed;z-index:9000;max-height:calc(100vh - 64px);width:min(720px,calc(100vw - 64px));padding:10px;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;background:white;border:1px solid var(--line);border-radius:0;box-shadow:0 12px 36px rgb(0 0 0 / .22)}
+body[data-layout-system="v106"] .v106-preview-visual{position:relative;min-height:0}
+body[data-layout-system="v106"] .v106-preview-visual>:is(img,svg){display:block;width:100%;height:auto;max-height:68vh;object-fit:contain}
+body[data-layout-system="v106"] .v106-input-source{display:flex;flex-direction:column;gap:12px;min-width:0;min-height:0;padding:18px 20px 20px;border:1px solid var(--line);background:white}
+body[data-layout-system="v106"] .v106-choice-steps p{font-size:18px;line-height:1.5}
+body[data-layout-system="v106"] .v106-explanation-visual{position:relative;display:flex;align-items:center;justify-content:center;width:100%;height:100%;min-height:0;min-width:0;border:1px solid var(--line);border-radius:0;background:white}
+body[data-layout-system="v106"] .v106-explanation-source{display:block;width:100%;height:100%;min-height:0}
+body[data-layout-system="v106"] .v106-background-comparison rect{fill:white;stroke:var(--line)}
+body[data-layout-system="v106"] .v106-background-comparison text{fill:var(--sub)}
+
+/* 04 Information relations and layouts */
+body[data-layout-system="v106"] .v106-correspondence{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:28px;height:100%;min-height:0}
+body[data-layout-system="v106"] .v106-index-list{flex:1;min-height:0;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;grid-auto-flow:column;gap:24px 30px;background:white;padding:0}
+body[data-layout-system="v106"] .v106-index-section{min-width:0;min-height:0;display:flex;flex-direction:column;padding:24px 32px;background:#F8F9FA;border:1px solid #E0E3E8}
+body[data-layout-system="v106"] .v106-index-section+.v106-index-section{border-top:1px solid #E0E3E8}
+body[data-layout-system="v106"] .v106-index-heading{display:block;margin-bottom:14px;padding-bottom:12px;border-bottom:2px solid #262626;font-size:17px;line-height:1.35;font-weight:900;text-decoration:none}
+body[data-layout-system="v106"] .v106-index-items{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:20px}
+body[data-layout-system="v106"] .v106-index-items a{display:flex;align-items:baseline;gap:8px;font-size:15px;line-height:1.4;font-weight:650;text-decoration:none}
+body[data-layout-system="v106"] .v106-choice-layout{height:100%;display:grid;grid-template-rows:1.12fr .88fr;gap:24px}
+body[data-layout-system="v106"] .v106-input-page{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:28px;height:100%;min-height:0}
+body[data-layout-system="v106"] .v106-input-evidence{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto;gap:16px;flex:1;min-height:0}
+body[data-layout-system="v106"] .v106-observation-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.7fr);--prose-columns:minmax(0,.43fr) minmax(0,.57fr);gap:28px;height:100%;min-height:0}
+body[data-layout-system="v106"] .v106-observation-detail{display:flex;flex-direction:column;gap:18px;min-width:0;min-height:0}
+body[data-layout-system="v106"] .v106-observation-copy{padding:22px var(--observation-side,28px);background:var(--group);flex:none}
+body[data-layout-system="v106"] .v106-observation-detail>.v106-proof{flex:1}
+body[data-layout-system="v106"] .v106-narrative-steps{gap:16px}
+body[data-layout-system="v106"] .v106-narrative-steps .v106-prose-section+ .v106-prose-section{padding-top:16px}
+body[data-layout-system="v106"] .v106-source-context{display:flex;flex-direction:column;gap:8px}
+body[data-layout-system="v106"] .v106-source-context p{font-size:18px;line-height:1.6;font-weight:600;color:var(--copy)}
+body[data-layout-system="v106"] .v106-source-context .v106-source-metrics,body[data-layout-system="v106"] .v106-chart-notes{font-size:14px;line-height:1.45;font-weight:700;color:var(--sub)}
+body[data-layout-system="v106"] .v106-contents-body{display:flex;flex-direction:column;gap:20px;padding-top:18px}
+body[data-layout-system="v106"] .v106-contents-lead{flex:none}
+body[data-layout-system="v106"] .v106-index-items a b{flex:none;width:26px;font-size:14px;line-height:1.4;font-weight:850;color:var(--sub)}
+body[data-layout-system="v106"] .v106-index-items a span{min-width:0}
+body[data-layout-system="v106"] .v106-explanation-process{position:relative;display:grid;grid-template-rows:260px minmax(0,1fr);row-gap:24px;height:100%;padding:24px 28px 0;background:var(--group);min-height:0}
+body[data-layout-system="v106"] .v106-explanation-row{display:grid;grid-template-columns:480px minmax(0,1fr);gap:28px;align-items:center;padding:0;min-height:0}
+body[data-layout-system="v106"] .v106-explanation-row+.v106-explanation-row{border-top:1px solid var(--line)}
+body[data-layout-system="v106"] .v106-explanation-row .v106-prose-section{grid-template-columns:minmax(0,1fr);gap:12px;align-content:center}
+body[data-layout-system="v106"] .v106-explanation-row .v106-depth-detail{max-width:none}
+body[data-layout-system="v106"] .v106-explanation-row h3{margin:0;max-width:none}
+body[data-layout-system="v106"] .v106-explanation-row .v106-chart-notes{margin-top:8px}
+
+/* 05 Role modifiers and utilities */
+body[data-layout-system="v106"] .v106-keep{white-space:nowrap}
+body[data-layout-system="v106"] .v106-narrative-readable{--prose-columns:340px minmax(0,1fr)}
+body[data-layout-system="v106"] .v106-observation-copy-readable{--prose-columns:300px minmax(0,1fr);--observation-side:20px;--prose-gap:16px}
+body[data-layout-system="v106"] .v106-observation-balanced{--prose-columns:260px minmax(0,1fr)}
+body[data-layout-system="v106"] .v106-explanation-visual-captioned{padding-bottom:28px}
+
+/* 06 Page-specific composition */
+body[data-layout-system="v106"] .ako-splash-page{display:flex;flex-direction:column;padding:52px 72px 42px;background:var(--pr-zone)}
+body[data-layout-system="v106"] .ako-splash-top{display:flex;align-items:center;gap:18px;color:#222;font-size:14px;font-weight:800;line-height:1;letter-spacing:2.8px}
+body[data-layout-system="v106"] .ako-splash-line{position:relative;height:2px;flex:1;background:var(--pr-red)}
+body[data-layout-system="v106"] .ako-splash-line::after{content:"";position:absolute;top:-5px;right:-1px;width:12px;height:12px;border-radius:50%;background:var(--pr-red)}
+body[data-layout-system="v106"] .ako-splash-toc{padding:9px 15px;border:1px solid #cfd2d6;background:#fff;color:var(--pr-copy);font-size:13px;font-weight:850;letter-spacing:0;text-decoration:none}
+body[data-layout-system="v106"] .ako-splash-stage{display:flex;min-height:0;flex:1;align-items:center;justify-content:center;padding:30px 40px 0}
+body[data-layout-system="v106"] .ako-splash-copy{width:100%;max-width:1660px;padding:16px 0 20px}
+body[data-layout-system="v106"] .ako-splash-part{margin-bottom:22px;color:var(--pr-red);font-size:18px;font-weight:950;line-height:1;letter-spacing:5px}
+body[data-layout-system="v106"] .ako-splash-main{display:grid;min-height:184px;margin:0;gap:28px;grid-template-columns:repeat(3,minmax(0,1fr));color:#090909;font-size:38px;font-weight:950;line-height:1.2;letter-spacing:-2px;padding-bottom:16px;border-bottom:5px solid var(--pr-red)}
+body[data-layout-system="v106"] .ako-splash-main > span{position:relative;display:flex;min-width:0;min-height:184px;box-sizing:border-box;align-items:center;padding:42px 28px 24px;background:var(--pr-node);word-break:keep-all;text-wrap:balance}
+body[data-layout-system="v106"] .v106-node-copy{display:block;min-height:2.4em}
+body[data-layout-system="v106"] .ako-splash-main > span::before{content:attr(data-label);position:absolute;top:0;left:0;display:inline-flex;height:28px;align-items:center;padding:0 22px 0 14px;background:var(--pr-ink);clip-path:polygon(0 0,100% 0,calc(100% - 10px) 100%,0 100%);color:#fff;font-size:13px;font-weight:900;line-height:1;letter-spacing:.08em}
+body[data-layout-system="v106"] .ako-splash-rule{width:92px;height:7px;margin:28px 0 22px;background:var(--pr-red)}
+body[data-layout-system="v106"] .ako-splash-scope{min-height:68px;margin:0;color:var(--pr-copy);font-size:18px;font-weight:600;line-height:1.55;letter-spacing:-.01em;word-break:keep-all}
+body[data-layout-system="v106"] .ako-splash-footer{display:flex;align-items:center;gap:20px;flex:0 0 34px}
+body[data-layout-system="v106"] .ako-splash-footer i{height:2px;flex:1;background:#262626}
+body[data-layout-system="v106"] .ako-splash-footer b{color:#111;font-size:14px;font-weight:950;letter-spacing:1.2px}
+body[data-layout-system="v106"] .ako-splash-footer span{color:#555;font-size:13px;font-weight:850;letter-spacing:.1em}
+body[data-layout-system="v106"] .v106-role-cover{display:flex;padding:54px 100px 30px 124px;transform:var(--paper-transform,scale(min(calc((100vw - 40px) / 1920px),calc((100vh - 80px) / 1080px),1)))}
+body[data-layout-system="v106"] .v106-role-end{display:block;padding-bottom:74px;background:#F1F3F4}
+body[data-layout-system="v106"] .v106-role-cover::after,body[data-layout-system="v106"] .v106-role-part::after,body[data-layout-system="v106"] .v106-role-end::after{display:none}
+body[data-layout-system="v106"] .v106-cover-content{display:flex;align-self:center;min-width:0;flex-direction:column;padding:24px 0 24px 46px;border-left:12px solid var(--structure)}
+body[data-layout-system="v106"] .v106-cover-type{font-size:18px;line-height:1.58;font-weight:850;color:var(--structure);letter-spacing:4px;margin-bottom:12px}
+body[data-layout-system="v106"] .v106-cover-content h1{font-size:64px;line-height:1.2;letter-spacing:-.055em;font-weight:950;color:#111;margin:0;word-break:keep-all}
+body[data-layout-system="v106"] .v106-cover-content em{font:inherit;font-style:normal;color:var(--structure)}
+body[data-layout-system="v106"] .v106-cover-sub{max-width:1320px;margin:30px 0 0;font-size:24px;line-height:1.65;font-weight:650;color:#4F535B;letter-spacing:-.018em;word-break:keep-all}
+body[data-layout-system="v106"] .v106-cover-path{display:grid;grid-template-columns:1fr 34px 1fr;flex:0 0 auto;align-items:stretch;margin:0 0 24px;border-top:5px solid var(--ink);border-bottom:1px solid #CFD1D5;background:#F8F9FA}
+body[data-layout-system="v106"] .v106-cover-path a{display:flex;gap:10px;align-items:center;padding:17px 18px;border-left:1px solid #CFD1D5;border-radius:0;color:#353940;font-size:15px;font-weight:820;text-decoration:none}
+body[data-layout-system="v106"] .v106-end-content{position:absolute;left:126px;right:92px;top:90px;height:858px;border-left:12px solid var(--structure);padding-left:46px;display:flex;flex-direction:column;justify-content:center}
+body[data-layout-system="v106"] .v106-end-content h1{max-width:1580px;font-size:62px;line-height:1.17;font-weight:950;letter-spacing:-.055em;margin:0 0 26px}
+body[data-layout-system="v106"] .v106-end-content p{max-width:1580px;margin-top:18px;font-size:22px;line-height:1.55;font-weight:760;color:#34373D}
+body[data-layout-system="v106"] .v106-role-purpose{display:block;padding-left:120px;padding-right:120px}
+body[data-layout-system="v106"] .v106-role-purpose::after{display:none}
+body[data-layout-system="v106"] .v106-purpose-overview{display:grid;grid-template-rows:auto 1fr auto;height:858px;position:relative}
+body[data-layout-system="v106"] .v106-purpose-hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:100px;align-items:end;padding:28px 0 34px;border-bottom:5px solid var(--structure)}
+body[data-layout-system="v106"] .v106-purpose-kicker{margin:0 0 12px;color:var(--structure);font-size:16px;font-weight:900;letter-spacing:.22em}
+body[data-layout-system="v106"] .v106-purpose-hero h2{margin:0;font-size:64px;line-height:1.12;letter-spacing:-.055em;font-weight:950}
+body[data-layout-system="v106"] .v106-purpose-hero em,body[data-layout-system="v106"] .v106-end-content em{font:inherit;font-style:normal;color:var(--structure)}
+body[data-layout-system="v106"] .v106-purpose-lead{max-width:710px;margin:0 0 3px;color:var(--ink);font-size:24px;font-weight:750;line-height:1.48;letter-spacing:-.015em}
+body[data-layout-system="v106"] .v106-purpose-pair{display:grid;grid-template-columns:1fr 1fr;gap:28px;min-height:372px;margin-top:34px;padding:26px;border:1px solid var(--line);background:#F1F3F4}
+body[data-layout-system="v106"] .v106-purpose-card{min-width:0;display:flex;flex-direction:column;align-items:flex-start;padding:28px 30px;background:white;border:1px solid var(--line)}
+body[data-layout-system="v106"] .v106-purpose-card h3{margin:18px 0 16px;font-size:30px;line-height:1.28;letter-spacing:-.025em;font-weight:900}
+body[data-layout-system="v106"] .v106-purpose-card p{font-size:18px;line-height:1.55;font-weight:650}
+body[data-layout-system="v106"] .v106-purpose-origin{min-height:72px;margin-top:24px;padding:14px 18px;border-top:1px solid var(--line);border-bottom:3px solid var(--ink);background:white;display:flex;align-items:center}
+body[data-layout-system="v106"] #p10 .v106-page{padding-top:42px;padding-bottom:88px}
+body[data-layout-system="v106"] #p10 .v106-doc-header{margin-bottom:8px}
+body[data-layout-system="v106"] #p10 .v106-page-header{height:101px;gap:8px;padding-bottom:6px}
+body[data-layout-system="v106"] #p10 .v106-claim{margin:14px 0}
+body[data-layout-system="v106"] #p10 .v106-page::after{bottom:76px}
+body[data-layout-system="v106"] .v106-end-content .v106-cover-type{margin:0 0 18px;font-size:18px;line-height:1.58;font-weight:850;color:var(--structure)}
+
+body[data-layout-system="v106"] #cover{width:var(--paper-width,min(1920px,calc(100vw - 40px),calc((100vh - 80px) * 16 / 9)))}
+body[data-layout-system="v106"] .v106-role-cover .v106-cover-type{font-size:18px;line-height:1.58;font-weight:950;color:var(--structure);letter-spacing:.2em;margin:0 0 18px}
+body[data-layout-system="v106"] .v106-role-cover .v106-doc-header{height:24px;margin-bottom:0;color:#555;font-weight:850;letter-spacing:.09em}
+body[data-layout-system="v106"] .v106-role-cover .v106-page-footer{position:static;flex:none;height:24px;align-items:center;color:#555;font-weight:850;letter-spacing:.09em}
+body[data-layout-system="v106"] .v106-cover-path b{color:var(--structure);font-size:18px;font-weight:950}
+body[data-layout-system="v106"] .v106-cover-path i{display:flex;align-items:center;justify-content:center;color:#9A9DA3;font-size:20px;font-style:normal;font-weight:900}
+body[data-layout-system="v106"] .v106-cover-path a:last-child{border-left-color:var(--structure);background:var(--structure);color:#fff}
+body[data-layout-system="v106"] .v106-cover-path a:last-child b{color:#fff}
+
+body[data-layout-system="v106"] .v106-cover-grid{position:relative;display:grid;min-height:0;flex:1;margin-top:24px;margin-bottom:22px}
+
+/* 07 Motion and print boundaries */
+@keyframes tool-help-attention{0%,100%{background-color:#fff;box-shadow:0 8px 20px rgba(23,25,30,.18),0 0 0 0 rgba(168,91,85,0)}50%{background-color:#f3d6d0;box-shadow:0 8px 20px rgba(23,25,30,.18),0 0 0 4px rgba(168,91,85,.22)}}
+@media (prefers-reduced-motion:reduce){#comparison-help-open.is-guide-closed{--tool-help-attention:none;background:#f3d6d0;box-shadow:0 8px 20px rgba(23,25,30,.18),0 0 0 2px rgba(168,91,85,.22)}}
+@page{size:1920px 1080px;margin:0}
+@media print{
+body[data-layout-system="v106"] :is(.v106-main,.v106-page-wrap){--main-padding:0;--paper-width:1920px;--paper-margin:0;--paper-break:page;--paper-transform:none;--example-display:block;--print-link-display:inline-block;--live-tool-display:none;}
+body[data-layout-system="v106"] .v106-zoom,body[data-layout-system="v106"] .v106-tool-help-open,body[data-layout-system="v106"] .v106-hover-preview,body[data-layout-system="v106"] .v106-media-modal{display:none}
+
+
+
+
+
+}
+</style></head><body data-layout-system="v106"><main class="v106-main"><div class="v106-page-wrap" id="cover"><section class="v106-page v106-role-cover" data-info="cover-PAGE" data-page-id="cover" aria-label="기획 내용을 함께 확인하기 위한 명조 전투 조작 분석"><div class="v106-doc-header" data-info="cover-NAV"><span>명조 전투 조작 분석</span><nav aria-label="문서 이동"><a data-info="cover-TEXT-01" href="#contents">↩ 목차</a><span></span></nav></div><div class="v106-cover-grid"><div class="v106-cover-content" data-info="cover-COVER-CONTENT-1"><p class="v106-cover-type" data-info="cover-TEXT-03">전투 조작 분석 포트폴리오</p><h1 data-info="cover-TEXT-04">기획 내용을<br><em>함께 확인하기 위한</em><br>명조 전투 조작 분석</h1><p class="v106-cover-sub" data-info="cover-TEXT-05">교대·회피·입력의 관계를 관찰하고<br>도표와 시뮬레이터로 정리한 작업</p></div></div><nav class="v106-cover-path" data-info="cover-COVER-PATH-2" aria-label="분석과 자료 구간 바로가기"><a data-info="cover-ROUTE-02" href="#part1"><b>01—09</b><span>분석과 고찰</span></a><i aria-hidden="true">→</i><a data-info="cover-ROUTE-03" href="#part4"><b>10—11</b><span>함께 검토할 자료와 도구</span></a></nav><footer class="v106-page-footer"><span>명조 전투 조작 분석 · 김지홍</span><span></span></footer></section></div>
+<div class="v106-page-wrap" id="purpose"><section class="v106-page v106-role-purpose" data-info="purpose-PAGE" data-page-id="purpose" aria-label="문서 목적"><div class="v106-doc-header" data-info="purpose-NAV"><span>명조 전투 조작 분석</span><nav aria-label="문서 이동"><a data-info="purpose-CONTENTS" href="#contents">↩ 목차</a></nav></div><div class="v106-purpose-overview" data-info="purpose-OVERVIEW">
+ <header class="v106-purpose-hero" data-info="purpose-HERO"><div><p class="v106-purpose-kicker" data-info="purpose-KICKER">문서 목적</p><h2 data-info="purpose-TITLE">제가 문제를 풀고<br><em>설명하는 방식</em></h2></div><p class="v106-purpose-lead" data-info="purpose-LEAD">명세에서 막힌 조작을 더 살피고, <br>다른 사람이 함께 살펴볼 설명과 도구로 구체화한 과정입니다.</p></header>
+ <div class="v106-purpose-pair" data-info="purpose-WORK-VIEWS" data-relation="문제 해결과 상대의 이해를 고려한 전달 방식"><section class="v106-purpose-card" data-info="purpose-ANALYSIS"><small class="v106-evidence-kind" data-info="purpose-ANALYSIS-KIND">실제 조작 분석</small><h3 data-info="purpose-ANALYSIS-HEADING">명세에서 막힌 조작을<br>실제 장면에서 더 살폈습니다</h3><p data-info="purpose-ANALYSIS-DETAIL">교대 뒤 남는 행동과 지금 조작하는 대상, 미리 누른 버튼과 실제 나온 행동을 구별했습니다. <br><span class="v106-keep">장리와 앙코의</span> 동작에서는 표현과 다음 행동을 고르는 경험도 살폈습니다.</p></section>
+ <section class="v106-purpose-card" data-info="purpose-COMMUNICATION"><small class="v106-evidence-kind" data-info="purpose-COMMUNICATION-KIND">함께 살펴볼 설명</small><h3 data-info="purpose-COMMUNICATION-HEADING">상대가 함께 살펴보도록<br>설명과 도구로 구체화했습니다</h3><p data-info="purpose-COMMUNICATION-DETAIL">영상으로 실제 장면을, 도표로 비교할 관계를 보여 주었습니다. <br>입력에 따른 변화를 그림만으로 상상할 부담을 줄이고자, <br>한 화면에서 직접 살펴볼 수 있는 도구로 만들었습니다.</p></section></div>
+ <div class="v106-purpose-origin" data-info="purpose-ORIGIN"><p>신규 캐릭터 ‘키자키 아코’의 액션 명세를 작성하다, 프레임과 캔슬 포인트만으로 실제 조작을 설명하기 어렵다고 느낀 데서 시작했습니다.</p></div></div><footer class="v106-page-footer"><span>명조 전투 조작 분석 · 김지홍</span><span></span></footer></section></div>
+<div class="v106-page-wrap" id="contents"><section class="v106-page v106-role-body" data-info="contents-PAGE" data-page-id="contents" aria-label="목차"><div class="v106-doc-header" data-info="contents-NAV"><span>명조 전투 조작 분석</span></div><header class="v106-page-header" data-info="contents-HEADER"><small>목차</small><h2 data-info="contents-TITLE">분석의 출발점에서 함께 살펴볼 설명까지</h2></header><div class="v106-page-body v106-contents-body" data-info="contents-BODY"><p class="v106-contents-lead" data-info="contents-LEAD">장면의 비교와 해석을 거쳐, 다른 사람에게 설명할 자료와 도구로 옮긴 흐름입니다.</p><nav class="v106-index-list" data-info="contents-MAP" aria-label="파트와 본문 바로가기"><section class="v106-index-section" data-info="contents-PART-1"><a class="v106-index-heading" data-info="contents-PART-1-LINK" href="#part1">PART 1. 분석할 장면과 출발점</a><ol class="v106-index-items" data-info="contents-PART-1-ITEMS"><li><a data-info="contents-p01-LINK" href="#p01"><b>01</b><span>분석할 게임 장면</span></a></li><li><a data-info="contents-p02-LINK" href="#p02"><b>02</b><span>명세에서 실제 장면으로</span></a></li></ol></section><section class="v106-index-section" data-info="contents-PART-2"><a class="v106-index-heading" data-info="contents-PART-2-LINK" href="#part2">PART 2. 차이를 설명할 비교와 표시</a><ol class="v106-index-items" data-info="contents-PART-2-ITEMS"><li><a data-info="contents-p03-LINK" href="#p03"><b>03</b><span>진행되는 행동과 지금 조작하는 대상</span></a></li><li><a data-info="contents-p04-LINK" href="#p04"><b>04</b><span>미리 누른 버튼과 실제 다음 행동</span></a></li><li><a data-info="contents-p05-LINK" href="#p05"><b>05</b><span>회피 동작과 앞서 누른 입력</span></a></li><li><a data-info="contents-p06-LINK" href="#p06"><b>06</b><span>공격마다 다른 스왑포인트의 배치</span></a></li></ol></section><section class="v106-index-section" data-info="contents-PART-3"><a class="v106-index-heading" data-info="contents-PART-3-LINK" href="#part3">PART 3. 표현과 전투 선택에 대한 고찰</a><ol class="v106-index-items" data-info="contents-PART-3-ITEMS"><li><a data-info="contents-p07-LINK" href="#p07"><b>07</b><span>장리의 마무리를 보며 전투 이어가기</span></a></li><li><a data-info="contents-p08-LINK" href="#p08"><b>08</b><span>앙코의 공격과 다른 행동 맞물리기</span></a></li><li><a data-info="contents-p09-LINK" href="#p09"><b>09</b><span>교대할 이유와 현재 캐릭터로 이어갈 이유</span></a></li></ol></section><section class="v106-index-section" data-info="contents-PART-4"><a class="v106-index-heading" data-info="contents-PART-4-LINK" href="#part4">PART 4. 함께 검토할 설명과 도구</a><ol class="v106-index-items" data-info="contents-PART-4-ITEMS"><li><a data-info="contents-p10-LINK" href="#p10"><b>10</b><span>관계를 함께 살펴볼 설명 방법</span></a></li><li><a data-info="contents-p12-LINK" href="#p12"><b>11</b><span>교대·입력 관계를 직접 살펴보는 도구</span></a></li></ol></section></nav></div><footer class="v106-page-footer"><span>명조 전투 조작 분석 · 김지홍</span><span></span></footer></section></div>
+<div class="v106-page-wrap" id="part1"><section class="v106-page v106-role-part pr-guide-page ako-splash-page" data-page-id="part1" data-info="part1-PAGE" aria-label="PART 1 분석할 장면과 출발점">
+<header class="ako-splash-top"><span>명조 전투 조작 분석</span><div class="ako-splash-line"></div><a class="ako-splash-toc" href="#contents">목차</a></header>
+<div class="ako-splash-stage"><div class="ako-splash-copy">
+<div class="ako-splash-part">PART 01 · 분석할 장면과 출발점</div>
+<h2 class="ako-splash-main ako-splash-parallel" aria-label="다음 파트에서 확인할 내용">
+<span data-info="part1-NODE-1" data-label="교대 장면">교대 뒤에도 이어지는 행동을 살피고</span>
+<span data-info="part1-NODE-2" data-label="회피 장면">회피와 미리 누른 입력을 비교하고</span>
+<span data-info="part1-NODE-3" data-label="액션 명세">명세에서 더 살펴볼 관계를 찾았습니다</span>
+</h2>
+<div class="ako-splash-rule"></div>
+<p class="ako-splash-scope">신규 캐릭터의 액션 명세를 작성하며 생긴 의문에서, 교대·회피·입력을 다시 살핀 출발점입니다.</p>
+</div></div>
+<div class="ako-splash-footer"><i></i><b>본문 01–02</b><i></i></div>
+</section></div>
+<div class="v106-page-wrap" id="p01"><section class="v106-page v106-role-body" data-info="p01-PAGE" data-page-id="p01" aria-label="분석할 게임 장면"><div class="v106-doc-header" data-info="p01-NAV"><span>명조 전투 조작 분석</span><nav aria-label="문서 이동"><a data-info="p01-TEXT-01" href="#contents">↩ 목차</a><span>01 / 11</span></nav></div><header class="v106-page-header" data-info="p01-PAGE-HEADER-168"><small>PART 1 · 본문 01</small><h2 data-info="p01-TEXT-02">분석할 게임 장면</h2></header><div class="v106-claim" data-info="p01-CLAIM"><strong>명조에서는 캐릭터를 바꾸고, 공격 중 회피하거나 다음 행동을 미리 누르며 전투합니다.</strong></div><div class="v106-page-body" data-info="p01-PAGE-BODY-169"><div class="v106-correspondence" data-info="p01-CORRESPONDENCE-51"><div class="v106-narrative v106-narrative-readable" data-info="p01-NARRATIVE-50"><small class="v106-section-tab" data-info="p01-SECTION-TAB-37">관찰한 조작</small><section class="v106-prose-section" data-info="p01-PROSE-SECTION-41"><div class="v106-depth-summary" data-info="p01-DEPTH-SUMMARY-39"><div class="v106-heading-copy" data-info="p01-HEADING-COPY-38"><small class="v106-evidence-kind" data-info="p01-WARM-1">교대</small><h3 data-info="p01-TEXT-04">공격 도중 교대하자 <br><span class="v106-keep">조작하는 캐릭터가 바뀌었습니다.</span></h3></div></div><div class="v106-depth-detail" data-info="p01-DEPTH-DETAIL-40"><p data-info="p01-TEXT-05">교대 뒤에도 앞 공격의 남은 동작과 타격이 이어지는 기준이 스왑포인트입니다. 그 기준을 지난 뒤 교대하면, 조작 대상이 바뀌어도 앞 캐릭터의 공격이 남습니다.</p></div></section><section class="v106-prose-section" data-info="p01-PROSE-SECTION-45"><div class="v106-depth-summary" data-info="p01-DEPTH-SUMMARY-43"><div class="v106-heading-copy" data-info="p01-HEADING-COPY-42"><small class="v106-evidence-kind" data-info="p01-WARM-2">회피</small><h3 data-info="p01-TEXT-06">공격 중 회피를 <br>누른 장면에서는 <br>회피 동작이 보였습니다.</h3></div></div><div class="v106-depth-detail" data-info="p01-DEPTH-DETAIL-44"><p data-info="p01-TEXT-07">화면에서 보이는 모습과 그 뒤 이어진 행동을 <span class="v106-keep">나누어 보았습니다.</span></p></div></section><section class="v106-prose-section" data-info="p01-PROSE-SECTION-49"><div class="v106-depth-summary" data-info="p01-DEPTH-SUMMARY-47"><div class="v106-heading-copy" data-info="p01-HEADING-COPY-46"><small class="v106-evidence-kind" data-info="p01-WARM-3">선입력</small><h3 data-info="p01-TEXT-08">앞 동작이 진행되는 동안 <br>다음 행동을 미리 <br>누를 수 있습니다.</h3></div></div><div class="v106-depth-detail" data-info="p01-DEPTH-DETAIL-48"><p data-info="p01-TEXT-09">버튼을 누른 시점과 그 뒤 실제 행동이 나온 시점은 따로 살펴볼 필요가 있었습니다.</p></div></section></div><figure class="v106-proof" data-evidence-role="대표 근거" data-info="p01-PROOF-36"><span class="ap-proof-mark" data-info="p01-PROOF-36-WARM-MARK">대표 근거</span><figcaption class="v106-proof-header" data-info="p01-TEXT-03"><span class="v106-evidence-kind">실제 게임 영상</span>교대 전후의 캐릭터와 회피 동작</figcaption><div class="v106-media-visual" data-info="p01-MEDIA-VISUAL-35"><video aria-label="인게임 전투" controls="" data-info="p01-MEDIA" playsinline="" preload="auto" src="assets/video/combat.mov"></video><span class="v106-image-caption" data-info="p01-MEDIA-ID">인게임 전투</span><button aria-label="인게임 전투 확대" class="v106-zoom" data-info="p01-CONTROL-01" data-media-caption="인게임 전투" data-media-kind="video" data-media-src="assets/video/combat.mov" data-media-title="인게임 전투" type="button" data-media-context="교대 전후의 캐릭터와 회피 동작을 함께 볼 실제 게임 영상입니다." aria-haspopup="dialog" aria-controls="media-modal" aria-expanded="false">확대</button></div></figure></div></div><footer class="v106-page-footer"><span>명조 전투 조작 분석 · 김지홍</span><span>01 / 11</span></footer></section></div>
+<div class="v106-page-wrap" id="p02"><section class="v106-page v106-role-body" data-info="p02-PAGE" data-page-id="p02" aria-label="명세에서 실제 장면으로"><div class="v106-doc-header" data-info="p02-NAV"><span>명조 전투 조작 분석</span><nav aria-label="문서 이동"><a data-info="p02-TEXT-01" href="#contents">↩ 목차</a><span>02 / 11</span></nav></div><header class="v106-page-header" data-info="p02-PAGE-HEADER-170"><small>PART 1 · 본문 02</small><h2 data-info="p02-TEXT-02">명세에서 실제 장면으로</h2></header><div class="v106-claim" data-info="p02-CLAIM"><strong>동작 종료와 다음 행동 전환을 적던 명세에서, 교대·회피·입력의 실제 차이까지 함께 살폈습니다.</strong></div><div class="v106-page-body" data-info="p02-PAGE-BODY-171"><div class="v106-correspondence" data-info="p02-CORRESPONDENCE-72"><div class="v106-narrative v106-narrative-steps v106-narrative-readable" data-info="p02-NARRATIVE-71"><small class="v106-section-tab" data-info="p02-SECTION-TAB-55">명세와 실제 장면의 대조</small><section class="v106-prose-section" data-info="p02-PROSE-SECTION-60"><div class="v106-depth-summary" data-info="p02-DEPTH-SUMMARY-58"><div class="v106-heading-copy" data-info="p02-HEADING-COPY-57"><small class="v106-step-marker" data-info="p02-STEP-MARKER-56"><span class="v106-step-no">01</span><span class="v106-step-kind">명세 정리</span></small><h3 data-info="p02-TEXT-03">당시 명세에는 동작 종료와 <br>다음 행동 전환을 표시했습니다.</h3></div></div><div class="v106-depth-detail" data-info="p02-DEPTH-DETAIL-59"><p data-info="p02-TEXT-04">제안한 캐릭터의 동작 전체가 끝나는 지점과, 끝나기 전에도 다음 행동으로 넘어갈 수 있는 지점을 <span class="v106-keep">당시 명세에 적었습니다.</span></p></div></section><section class="v106-prose-section" data-info="p02-PROSE-SECTION-65"><div class="v106-depth-summary" data-info="p02-DEPTH-SUMMARY-63"><div class="v106-heading-copy" data-info="p02-HEADING-COPY-62"><small class="v106-step-marker" data-info="p02-STEP-MARKER-61"><span class="v106-step-no">02</span><span class="v106-step-kind">명세의 한계</span></small><h3 data-info="p02-TEXT-05">교대 뒤 남는 동작과 <br>화면에 보인 회피 동작을 <br>구별해야 했습니다.</h3></div></div><div class="v106-depth-detail" data-info="p02-DEPTH-DETAIL-64"><p data-info="p02-TEXT-06">교대 뒤 앞 동작이 남는 경우와 회피 동작이 공격 위에 보이는 경우를 두 지점만으로 설명하기 어려웠습니다.</p></div></section><section class="v106-prose-section" data-info="p02-PROSE-SECTION-70"><div class="v106-depth-summary" data-info="p02-DEPTH-SUMMARY-68"><div class="v106-heading-copy" data-info="p02-HEADING-COPY-67"><small class="v106-step-marker" data-info="p02-STEP-MARKER-66"><span class="v106-step-no">03</span><span class="v106-step-kind">실제 장면 대조</span></small><h3 data-info="p02-TEXT-07">입력 시점과 실제 행동이 나온 시점도 함께 살폈습니다.</h3></div></div><div class="v106-depth-detail" data-info="p02-DEPTH-DETAIL-69"><p data-info="p02-TEXT-08">버튼을 누른 직후의 화면만으로는 뒤에 무엇이 이어질지 알기 어려웠습니다. <br>익숙하게 하던 조작을 실제 장면에서 <span class="v106-keep">다시 나누어 적었습니다.</span></p></div></section></div><figure class="v106-proof" data-evidence-role="대표 근거" data-info="p02-UI-REGION-02"><span class="ap-proof-mark" data-info="p02-UI-REGION-02-WARM-MARK">대표 근거</span><div class="v106-proof-header" data-info="p02-PROOF-HEADER-53"><span class="v106-evidence-kind" data-info="p02-EVIDENCE-KIND-52">당시 제안 캐릭터 명세</span></div><figcaption class="v106-source-context" data-info="p02-TEXT-11"><p class="v106-source-metrics" data-info="p02-SOURCE-FOCUS">54프레임 · 다음 행동 전환 / 84프레임 · 동작 종료</p></figcaption><div class="v106-chart-visual" data-info="p02-CHART-VISUAL-54"><svg xmlns="http://www.w3.org/2000/svg" class="v106-original-chart" data-info="p02-MEDIA" data-original-source="assets/images/action-spec.png" role="img" aria-label="당시 제안 캐릭터 명세의 54–84프레임 구간 발췌 · 다음 행동 전환과 동작 종료" viewBox="1245 242 850 630" preserveAspectRatio="xMidYMid meet"><title>당시 제안 캐릭터 명세의 54–84프레임 구간 발췌</title><defs><clipPath id="p02-spec-crop"><rect x="1245" y="242" width="850" height="588"/></clipPath></defs><image clip-path="url(#p02-spec-crop)" href="assets/images/action-spec.png" width="2117" height="1187"/></svg><span class="v106-image-caption" data-info="p02-MEDIA-ID">당시 제안 캐릭터 명세 · 54–84프레임 발췌</span><button aria-label="당시 제안 캐릭터 액션 명세 전체 보기" class="v106-zoom" data-hover-preview="true" data-info="p02-CONTROL-01" data-media-caption="당시 제안 캐릭터의 액션 명세" data-media-kind="image" data-media-src="assets/images/action-spec-guide.svg" data-media-title="당시 제안 캐릭터의 액션 명세" type="button" data-media-context="당시 제가 제안한 캐릭터의 액션 명세입니다. 다음 행동 전환을 54프레임, 동작 종료를 84프레임으로 적었습니다. 기본 화면은 54–84프레임 발췌이며, 여기서는 전체 명세를 살펴봅니다." aria-haspopup="dialog" aria-controls="media-modal" aria-expanded="false">전체 보기</button></div></figure></div></div><footer class="v106-page-footer"><span>명조 전투 조작 분석 · 김지홍</span><span>02 / 11</span></footer></section></div>
+<div class="v106-page-wrap" id="part2"><section class="v106-page v106-role-part pr-guide-page ako-splash-page" data-page-id="part2" data-info="part2-PAGE" aria-label="PART 2 차이를 설명할 비교와 표시">
+<header class="ako-splash-top"><span>명조 전투 조작 분석</span><div class="ako-splash-line"></div><a class="ako-splash-toc" href="#contents">목차</a></header>
+<div class="ako-splash-stage"><div class="ako-splash-copy">
+<div class="ako-splash-part">PART 02 · 차이를 설명할 비교와 표시</div>
+<h2 class="ako-splash-main ako-splash-parallel" aria-label="다음 파트에서 확인할 내용">
+<span data-info="part2-NODE-1" data-label="행동과 조작"><span class="v106-node-copy">행동과 조작 대상을 구별하고</span></span>
+<span data-info="part2-NODE-2" data-label="입력과 결과">누른 입력과 실제 결과를 비교하고</span>
+<span data-info="part2-NODE-3" data-label="스왑포인트">공격마다 다른 스왑포인트를 비교했습니다</span>
+</h2>
+<div class="ako-splash-rule"></div>
+<p class="ako-splash-scope">교대 뒤 남는 행동, 미리 누른 입력과 회피의 결과, 공격마다 다른 스왑포인트를 비교합니다.</p>
+</div></div>
+<div class="ako-splash-footer"><i></i><b>본문 03–06</b><i></i></div>
+</section></div>
+<div class="v106-page-wrap" id="p03"><section class="v106-page v106-role-body" data-info="p03-PAGE" data-page-id="p03" aria-label="진행되는 행동과 지금 조작하는 대상"><div class="v106-doc-header" data-info="p03-NAV"><span>명조 전투 조작 분석</span><nav aria-label="문서 이동"><a data-info="p03-TEXT-01" href="#contents">↩ 목차</a><span>03 / 11</span></nav></div><header class="v106-page-header" data-info="p03-PAGE-HEADER-172"><small>PART 2 · 본문 03</small><h2 data-info="p03-TEXT-02">진행되는 행동과 지금 조작하는 대상</h2></header><div class="v106-claim" data-info="p03-CLAIM"><strong>교대 뒤 앞 공격이 남는 동안에도 조작 대상은 바뀌었습니다. 둘을 구별해 같은 시간 흐름에 놓았습니다.</strong></div><div class="v106-page-body" data-info="p03-PAGE-BODY-173"><div class="v106-correspondence" data-info="p03-CORRESPONDENCE-89"><div class="v106-narrative v106-narrative-readable" data-info="p03-NARRATIVE-88"><small class="v106-section-tab" data-info="p03-SECTION-TAB-79">진행과 조작 대상</small><section class="v106-prose-section" data-info="p03-PROSE-SECTION-83"><div class="v106-depth-summary" data-info="p03-DEPTH-SUMMARY-81"><div class="v106-heading-copy" data-info="p03-HEADING-COPY-80"><h3 data-info="p03-TEXT-03">앞 캐릭터의 마무리와 <br>다음 캐릭터의 조작이 겹쳤습니다.</h3></div></div><div class="v106-depth-detail" data-info="p03-DEPTH-DETAIL-82"><p data-info="p03-TEXT-04">공격이 계속 이어지는 기준인 스왑포인트를 지난 뒤 교대하면, A가 마무리하는 동안 B를 <span class="v106-keep">조작할 수 있었습니다.</span> <br>행동이 진행되는 구간과 조작하는 대상을 <span class="v106-keep">분리해 표시했습니다.</span></p></div></section><section class="v106-prose-section" data-info="p03-PROSE-SECTION-87"><div class="v106-depth-summary" data-info="p03-DEPTH-SUMMARY-85"><div class="v106-heading-copy" data-info="p03-HEADING-COPY-84"><h3 data-info="p03-TEXT-05">에코도 행동과 조작 대상을 <br>구별해 표시했습니다.</h3></div></div><div class="v106-depth-detail" data-info="p03-DEPTH-DETAIL-86"><p data-info="p03-TEXT-06">에코는 전투 중 사용하는 능력입니다. 소환형은 별도로 나타나 행동하고, 변신형은 캐릭터가 변신해 행동합니다. <br>행동은 각각의 막대로, 지금 조작하는 대상은 <span class="v106-keep">★로 표시했습니다.</span></p></div></section></div><figure class="v106-diagram-unit" data-info="SVG-01"><div class="v106-proof-header" data-info="p03-PROOF-HEADER-77"><span class="v106-evidence-kind" data-info="p03-EVIDENCE-KIND-76">설명 도표</span></div><div class="v106-chart-visual" data-info="p03-CHART-VISUAL-78"><svg aria-label="원 도표: 행동의 진행과 조작 대상" class="v106-original-chart" data-info="p03-DIAGRAM" height="100%" preserveaspectratio="xMidYMid meet" role="img" viewbox="0 -7.06 720 413.06" width="100%" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<marker id="p03-original-01-jumpArrow" markerheight="7" markerwidth="10" orient="auto" refx="9" refy="3.5">
+<polygon fill="#d93025" points="0 0, 10 3.5, 0 7"></polygon>
+</marker>
+<marker id="p03-original-01-timeArrow" markerheight="7" markerwidth="10" orient="auto" refx="9" refy="3.5">
+<polygon fill="#888" points="0 0, 10 3.5, 0 7"></polygon>
+</marker>
+</defs>
+<line marker-end="url(#p03-original-01-timeArrow)" stroke="#aaa" stroke-dasharray="2,2" stroke-width="2" x1="120" x2="690" y1="15" y2="15"></line>
+<text fill="#888" font-size="14" font-weight="900" text-anchor="middle" x="405" y="10">시간 흐름</text>
+<line stroke="#eee" stroke-width="2" x1="120" x2="700" y1="60" y2="60"></line>
+<line stroke="#eee" stroke-width="2" x1="120" x2="700" y1="140" y2="140"></line>
+<line stroke="#eee" stroke-width="2" x1="120" x2="700" y1="220" y2="220"></line>
+<line stroke="#eee" stroke-width="2" x1="120" x2="700" y1="300" y2="300"></line>
+<text fill="#6b21a8" font-size="14" font-weight="900" text-anchor="end" x="100" y="65">캐릭터 A</text>
+<text fill="#059669" font-size="14" font-weight="900" text-anchor="end" x="100" y="145">소환형 에코</text>
+<text fill="#2563eb" font-size="14" font-weight="900" text-anchor="end" x="100" y="225">캐릭터 B</text>
+<text fill="#d97706" font-size="14" font-weight="900" text-anchor="end" x="100" y="305">변신형 에코</text>
+<rect fill="#f3e8ff" height="30" rx="4" stroke="#6b21a8" stroke-dasharray="4,2" stroke-width="1.5" width="560" x="130" y="45"></rect>
+<text fill="#6b21a8" font-size="14" font-weight="800" x="250" y="64">교대 뒤에도 이어지는 A의 공격</text>
+<rect fill="#6b21a8" height="30" rx="4" width="110" x="130" y="45"></rect>
+<text fill="#fff" font-size="14" font-weight="900" text-anchor="middle" x="185" y="65">★ 조작</text>
+<rect fill="#059669" height="30" rx="4" width="180" x="180" y="125"></rect>
+<text fill="#fff" font-size="14" font-weight="800" text-anchor="middle" x="270" y="145">소환 · 캐릭터 조작 유지</text>
+<line stroke="#059669" stroke-dasharray="2,2" stroke-width="2" x1="180" x2="180" y1="75" y2="125"></line>
+<rect fill="#2563eb" height="30" rx="4" width="150" x="240" y="205"></rect>
+<text fill="#fff" font-size="14" font-weight="900" text-anchor="middle" x="315" y="225">★ 조작 (교대)</text>
+<path d="M 240 75 L 240 200" fill="none" marker-end="url(#p03-original-01-jumpArrow)" stroke="#d93025" stroke-width="2.5"></path>
+<text fill="#d93025" font-size="14" font-weight="800" x="248" y="110">조작 대상 변경 ①</text>
+<polygon fill="#d93025" points="383, 197 397, 197 390, 205"></polygon>
+<text fill="#d93025" font-size="14" font-weight="900" text-anchor="middle" x="390" y="190">다음 행동 전환 ▽</text>
+<rect fill="#d97706" height="30" rx="4" width="160" x="390" y="285"></rect>
+<text fill="#fff" font-size="14" font-weight="900" text-anchor="middle" x="470" y="305">★ 조작 (변신)</text>
+<path d="M 390 235 L 390 280" fill="none" marker-end="url(#p03-original-01-jumpArrow)" stroke="#d93025" stroke-width="2.5"></path>
+<text fill="#d93025" font-size="14" font-weight="800" x="398" y="263">조작 대상 변경 ②</text>
+<rect fill="#6b21a8" height="30" rx="4" width="140" x="550" y="45"></rect>
+<text fill="#fff" font-size="14" font-weight="900" text-anchor="middle" x="620" y="65">★ 조작 (복귀)</text>
+<path d="M 550 285 L 550 80" fill="none" marker-end="url(#p03-original-01-jumpArrow)" stroke="#d93025" stroke-width="2.5"></path>
+<text fill="#d93025" font-size="14" font-weight="800" x="558" y="190">조작 대상 변경 ③</text>
+</svg><span class="v106-image-caption">행동의 진행과 조작 대상</span><button aria-label="관계 도표 전체 확대" class="v106-zoom" data-info="SVG-01-OPEN" data-media-caption="행동의 진행과 조작 대상" data-media-kind="svg" data-media-title="행동의 진행과 조작 대상" data-svg-info="p03-DIAGRAM" type="button" data-media-context="막대 = 행동 구간 · ★ = 조작 대상. 에코는 전투 중 사용하는 능력이며, 소환형은 별도로 나타나고 변신형은 변신해 행동합니다." aria-haspopup="dialog" aria-controls="media-modal" aria-expanded="false">확대</button></div><p class="v106-chart-notes" data-info="p03-LEGEND">막대 = 행동 구간 · ★ = 현재 조작 대상</p></figure></div></div><footer class="v106-page-footer"><span>명조 전투 조작 분석 · 김지홍</span><span>03 / 11</span></footer></section></div>
+<div class="v106-page-wrap" id="p04"><section class="v106-page v106-role-body" data-info="p04-PAGE" data-page-id="p04" aria-label="미리 누른 버튼과 실제 다음 행동"><div class="v106-doc-header" data-info="p04-NAV"><span>명조 전투 조작 분석</span><nav aria-label="문서 이동"><a data-info="p04-TEXT-01" href="#contents">↩ 목차</a><span>04 / 11</span></nav></div><header class="v106-page-header" data-info="p04-PAGE-HEADER-174"><small>PART 2 · 본문 04</small><h2 data-info="p04-TEXT-02">미리 누른 버튼과 실제 다음 행동</h2></header><div class="v106-claim" data-info="p04-CLAIM"><strong>이 사례에서는 먼저 누른 스킬 대신 마지막 일반 공격이 이어졌습니다. 입력과 결과를 나누어 적었습니다.</strong></div><div class="v106-page-body" data-info="p04-PAGE-BODY-175"><div class="v106-input-page" data-info="p04-INPUT-PAGE-100" data-relation="누른 입력과 실제 후속 행동의 대조"><div class="v106-narrative" data-info="p04-CASE-LEAD"><small class="v106-section-tab">입력과 결과의 대조</small><section class="v106-prose-section" data-info="p04-EXPLANATION-OBSERVATION"><div class="v106-depth-summary"><div class="v106-heading-copy"><h3 data-info="p04-EXPLANATION-OBSERVATION-HEADING">이 사례에서는 미리 누른 <br>세 입력이 모두 <br>이어지지는 않았습니다.</h3></div></div><div class="v106-depth-detail"><p data-info="p04-EXPLANATION-OBSERVATION-COPY">앞 동작이 진행되는 동안 공명 스킬을 두 번 누른 뒤 <span class="v106-keep">일반 공격을</span> 눌렀습니다. <br>이 장면에서는 먼저 누른 두 스킬이 차례로 나오지 않고, 마지막 일반 공격이 다음 <span class="v106-keep">행동으로 이어졌습니다.</span></p></div></section><section class="v106-prose-section" data-info="p04-EXPLANATION-INTERPRETATION"><div class="v106-depth-summary"><div class="v106-heading-copy"><h3 data-info="p04-EXPLANATION-INTERPRETATION-HEADING">누른 시점과 다음 행동이 나온 시점을 구별했습니다.</h3></div></div><div class="v106-depth-detail"><p data-info="p04-EXPLANATION-INTERPRETATION-COPY">버튼을 눌렀을 때는 앞 동작이 진행 중이었고, 다음 행동으로 전환되는 지점에서 일반 공격이 이어졌습니다. <br>입력 순서와 실제 이어진 행동을 같은 시간 흐름에 <span class="v106-keep">나누어 표시했습니다.</span></p></div></section></div><div class="v106-input-evidence" data-info="p04-INPUT-EVIDENCE"><figure class="v106-input-source" data-info="p04-INPUT-SOURCE-99"><div class="v106-proof-header" data-info="p04-PROOF-HEADER-97"><span class="v106-evidence-kind" data-info="p04-EVIDENCE-KIND-96">설명 도표</span></div><div class="v106-chart-visual" data-info="p04-CHART-VISUAL-98"><svg aria-label="설명 도표: 누른 입력과 실제 다음 행동" class="v106-original-chart" data-info="p04-DIAGRAM" height="100%" preserveaspectratio="xMidYMid meet" role="img" viewbox="-26.43 0 546.43 284" width="100%" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<marker id="p04-original-02-arrow" markerheight="6" markerwidth="8" orient="auto" refx="7" refy="3">
+<polygon fill="#888" points="0 0, 8 3, 0 6"></polygon>
+</marker>
+</defs>
+<text fill="#888" font-size="14" font-weight="800" text-anchor="end" x="70" y="35">사용자 조작 입력</text>
+<line stroke="#eee" stroke-width="2" x1="85" x2="500" y1="30" y2="30"></line>
+<rect fill="#fdf2f2" height="28" rx="4" stroke="#d93025" stroke-width="1.5" width="80" x="120" y="15"></rect>
+<text fill="#d93025" font-size="14" font-weight="800" text-anchor="middle" x="160" y="34">공명 스킬</text>
+<path d="M 160 45 L 160 110" fill="none" marker-end="url(#p04-original-02-arrow)" stroke="#ccc" stroke-dasharray="3,3" stroke-width="2"></path>
+<text fill="#aaa" font-size="14" font-weight="700" x="175" y="80">앞서 누른 입력 대신</text>
+<rect fill="#fdf2f2" height="28" rx="4" stroke="#d93025" stroke-width="1.5" width="80" x="230" y="15"></rect>
+<text fill="#d93025" font-size="14" font-weight="800" text-anchor="middle" x="270" y="34">공명 스킬</text>
+<path d="M 270 45 L 270 110" fill="none" marker-end="url(#p04-original-02-arrow)" stroke="#ccc" stroke-dasharray="3,3" stroke-width="2"></path>
+<rect fill="#ecf2ff" height="28" rx="4" stroke="#2563eb" stroke-width="1.5" width="80" x="340" y="15"></rect>
+<text fill="#2563eb" font-size="14" font-weight="800" text-anchor="middle" x="380" y="34">일반 공격</text>
+<path d="M 380 45 L 380 110" fill="none" marker-end="url(#p04-original-02-arrow)" stroke="#ccc" stroke-dasharray="3,3" stroke-width="2"></path>
+<text fill="#888" font-size="14" font-weight="800" text-anchor="end" x="70" y="155">미리 누른 입력</text>
+<rect fill="rgba(37, 99, 235, 0.05)" height="46" rx="6" stroke="#2563eb" stroke-dasharray="4,2" stroke-width="1" width="180" x="290" y="130"></rect>
+<text fill="#2563eb" font-size="14" font-weight="700" text-anchor="middle" x="380" y="125">사전 입력 유효 구간</text>
+<rect fill="#fff" height="36" rx="4" stroke="#111" stroke-width="2" width="100" x="330" y="135"></rect>
+<text fill="#111" font-size="14" font-weight="900" text-anchor="middle" x="380" y="158">다음 입력</text>
+<rect fill="#ecf2ff" height="26" rx="2" width="90" x="335" y="140"></rect>
+<text fill="#2563eb" font-size="14" font-weight="800" text-anchor="middle" x="380" y="157">일반 공격 (최종)</text>
+<text fill="#888" font-size="14" font-weight="800" text-anchor="end" x="70" y="245">현재 동작</text>
+<rect fill="#e5e7eb" height="26" rx="4" width="415" x="85" y="230"></rect>
+<text fill="#666" font-size="14" font-weight="800" text-anchor="middle" x="210" y="248">현재 동작 재생 구간</text>
+<polygon fill="#d93025" points="373, 222 387, 222 380, 230"></polygon>
+<line stroke="#111" stroke-dasharray="2,2" stroke-width="2" x1="380" x2="380" y1="171" y2="225"></line>
+<text fill="#d93025" font-size="14" font-weight="900" text-anchor="middle" x="380" y="215">다음 행동으로 전환 ▽</text>
+<rect fill="#2563eb" height="26" rx="4" width="120" x="380" y="230"></rect>
+<text fill="#fff" font-size="14" font-weight="900" text-anchor="middle" x="440" y="248">다음 행동이 이어짐</text>
+</svg><span class="v106-image-caption" data-info="p04-CASE-CAPTION">누른 입력과 실제 다음 행동</span><button aria-label="누른 입력과 실제 다음 행동 확대" class="v106-zoom" data-hover-preview="true" data-info="SVG-02-OPEN" data-media-caption="누른 입력과 실제 다음 행동" data-media-kind="svg" data-media-title="누른 입력과 실제 다음 행동" data-svg-info="p04-DIAGRAM" type="button" data-media-context="이 사례에서는 공명 스킬 두 번 뒤 일반 공격을 눌렀고, 마지막 일반 공격이 이어졌습니다. 위에는 누른 순서, 아래에는 실제 다음 행동을 두었습니다." aria-haspopup="dialog" aria-controls="media-modal" aria-expanded="false">확대</button></div></figure><aside class="v106-detail-note" data-info="p04-INPUT-TYPES-CONTEXT"><span class="v106-evidence-kind" data-info="p04-EVIDENCE-KIND-92">살펴본 입력의 구분</span><p data-info="p04-TYPE-CINEMATIC"><strong>공명 해방의 연출: </strong><br>연출 중 멈추는 화면과 조작</p><p data-info="p04-TYPE-IMMEDIATE"><strong>회피·점프: </strong><br>먼저 화면에 나오는 행동</p><p data-info="p04-TYPE-PREINPUT"><strong>일반 공격·공명 스킬: </strong><br>미리 눌러 두는 행동</p><button aria-label="입력 종류 구분 원도표 확대" class="v106-zoom v106-reference-open" data-info="p04-CONTROL-PRIORITY" data-media-caption="살펴본 입력의 구분" data-media-kind="svg" data-media-title="살펴본 입력의 구분" data-svg-info="p04-DIAGRAM-PRIORITY" type="button" data-media-context="이 문서에서 살펴본 조작을 화면이 멈추는 연출, 먼저 보이는 회피·점프, 미리 눌러 두는 공격·스킬로 구분했습니다." aria-haspopup="dialog" aria-controls="media-modal" aria-expanded="false">원도표 확대</button></aside></div></div></div><footer class="v106-page-footer"><span>명조 전투 조작 분석 · 김지홍</span><span>04 / 11</span></footer></section></div>
+<div class="v106-page-wrap" id="p05"><section class="v106-page v106-role-body" data-info="p05-PAGE" data-page-id="p05" aria-label="회피 동작과 앞서 누른 입력"><div class="v106-doc-header" data-info="p05-NAV"><span>명조 전투 조작 분석</span><nav aria-label="문서 이동"><a data-info="p05-CONTENTS" href="#contents">↩ 목차</a><span>05 / 11</span></nav></div><header class="v106-page-header" data-info="p05-HEADER"><small>PART 2 · 본문 05</small><h2 data-info="p05-TITLE">회피 동작과 앞서 누른 입력</h2></header><div class="v106-claim" data-info="p05-CLAIM"><strong>회피 뒤 보이는 동작과, 미리 누른 스킬이 실제로 나왔는지를 나누어 보았습니다.</strong></div><div class="v106-page-body" data-info="p05-BODY"><div class="v106-correspondence" data-info="p05-CORRESPONDENCE"><div class="v106-narrative" data-info="p05-NARRATIVE"><small class="v106-section-tab">회피 장면의 관찰</small><section class="v106-prose-section" data-info="p05-OBSERVATION-VISIBLE"><div class="v106-depth-summary"><div><small class="v106-evidence-kind">보이는 동작</small><h3>화면에서 공격 동작 위에 <br>회피 동작이 보였습니다.</h3></div></div><div class="v106-depth-detail"><p>공격 도중 회피를 입력했을 때 화면에는 회피 동작이 보였습니다. 공격 동작 위에 나타난 회피 동작과, 그 뒤 실제로 나온 행동을 별개로 살폈습니다.</p></div></section><section class="v106-prose-section" data-info="p05-OBSERVATION-RESULT"><div class="v106-depth-summary"><div><small class="v106-evidence-kind">실제 다음 행동</small><h3>미리 누른 공명 스킬은 <br>나오지 않았습니다.</h3></div></div><div class="v106-depth-detail"><p>공명 스킬을 미리 누른 뒤 회피한 이 사례에서는 스킬이 나오지 않았습니다. 앞선 사례의 일반 공격 결과와 대조하며, 화면에 보이는 회피와 실제 다음 행동을 구별했습니다.</p></div></section></div><figure class="v106-diagram-unit" data-info="SVG-03"><div class="v106-proof-header"><span class="v106-evidence-kind">설명 도표</span></div><div class="v106-chart-visual"><svg class="v106-original-chart" data-info="p05-DIAGRAM" xmlns="http://www.w3.org/2000/svg" viewBox="-18 0 698 560" role="img" aria-labelledby="p05-read-title p05-read-desc" font-family="Noto Sans KR, Malgun Gothic, sans-serif">
+<title id="p05-read-title">회피 입력 전후의 보이는 동작과 선입력 결과</title><desc id="p05-read-desc">공격 중 공명 스킬을 미리 누른 뒤 회피한 같은 사례입니다. 위 행은 화면에서 공격 동작 위에 회피 동작이 보인 관찰, 아래 행은 미리 누른 공명 스킬이 나오지 않은 관찰입니다. 두 행은 같은 회피 입력 시점을 공유하며 왼쪽 두 설명 행과 대응합니다.</desc>
+<defs><marker id="p05-read-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#888"/></marker></defs>
+<text x="80" y="50" font-size="14" font-weight="800" fill="#777" text-anchor="end">누른 입력</text><line x1="100" y1="44" x2="650" y2="44" stroke="#e5e7eb" stroke-width="2"/>
+<rect x="135" y="22" width="150" height="44" rx="4" fill="#fdf2f2" stroke="#d93025" stroke-width="1.5"/><text x="210" y="50" font-size="18" font-weight="800" fill="#d93025" text-anchor="middle">스킬 선입력</text>
+<rect x="300" y="22" width="100" height="44" rx="4" fill="#d93025"/><text x="350" y="50" font-size="18" font-weight="900" fill="#fff" text-anchor="middle">회피 입력</text>
+<line x1="350" y1="72" x2="350" y2="505" stroke="#d93025" stroke-width="2" stroke-dasharray="5,4"/>
+<text x="430" y="91" font-size="14" font-weight="800" fill="#d93025">같은 회피 입력 시점</text>
+<text x="80" y="150" font-size="14" font-weight="800" fill="#777" text-anchor="end">보이는 동작</text>
+<rect x="100" y="124" width="250" height="48" rx="4" fill="#e5e7eb" stroke="#cbd5e1" stroke-width="1.5"/><text x="225" y="155" font-size="18" font-weight="800" fill="#666" text-anchor="middle">공격 애니메이션</text>
+<rect x="350" y="124" width="280" height="48" rx="4" fill="#d93025"/><text x="490" y="155" font-size="18" font-weight="900" fill="#fff" text-anchor="middle">회피 애니메이션</text>
+<line x1="100" y1="205" x2="650" y2="205" stroke="#888" stroke-width="1.5" marker-end="url(#p05-read-arrow)"/><text x="225" y="231" font-size="14" font-weight="800" fill="#777" text-anchor="middle">회피 입력 전</text><text x="490" y="231" font-size="14" font-weight="800" fill="#777" text-anchor="middle">회피 입력 후</text>
+<line x1="0" y1="290" x2="670" y2="290" stroke="#d9dce1"/>
+<text x="80" y="450" font-size="14" font-weight="800" fill="#777" text-anchor="end">실행 여부</text>
+<rect x="125" y="424" width="160" height="48" rx="4" fill="#fff" stroke="#111" stroke-width="2"/><text x="205" y="455" font-size="18" font-weight="800" fill="#d93025" text-anchor="middle">앞서 누른 입력</text>
+<path d="M335 432 L365 466 M335 466 L365 432" stroke="#d93025" stroke-width="4"/><text x="475" y="455" font-size="18" font-weight="900" fill="#d93025" text-anchor="middle">스킬 미실행</text>
+<line x1="100" y1="512" x2="650" y2="512" stroke="#888" stroke-width="1.5" marker-end="url(#p05-read-arrow)"/><text x="225" y="538" font-size="14" font-weight="800" fill="#777" text-anchor="middle">회피 입력 전</text><text x="490" y="538" font-size="14" font-weight="800" fill="#777" text-anchor="middle">회피 입력 후</text></svg><button type="button" class="v106-zoom" data-info="p05-CONTROL-DIAGRAM" aria-label="회피 입력과 관찰한 결과 도표 확대" data-media-kind="svg" data-svg-info="p05-DIAGRAM" data-media-title="회피 입력과 관찰한 결과" data-media-caption="회피 입력과 관찰한 결과" data-media-context="공명 스킬을 미리 누른 뒤 회피한 이 사례의 입력, 보이는 동작, 실제 다음 행동을 구별한 도표입니다." aria-haspopup="dialog" aria-controls="media-modal" aria-expanded="false">확대</button></div><figcaption class="v106-chart-notes">공격 중 공명 스킬을 미리 누른 뒤 회피한 사례입니다.</figcaption></figure></div></div><footer class="v106-page-footer"><span>명조 전투 조작 분석 · 김지홍</span><span>05 / 11</span></footer></section></div>
+<div class="v106-page-wrap" id="p06"><section class="v106-page v106-role-body" data-info="p06-PAGE" data-page-id="p06" aria-label="공격마다 다른 스왑포인트의 배치"><div class="v106-doc-header" data-info="p06-NAV"><span>명조 전투 조작 분석</span><nav aria-label="문서 이동"><a data-info="p06-TEXT-01" href="#contents">↩ 목차</a><span>06 / 11</span></nav></div><header class="v106-page-header" data-info="p06-PAGE-HEADER-178"><small>PART 2 · 본문 06</small><h2 data-info="p06-TEXT-02">공격마다 다른 스왑포인트의 배치</h2></header><div class="v106-claim" data-info="p06-CLAIM"><strong>교대 입력과 앞 공격이 남는 기준인 스왑포인트를 구별해, 타격·다음 행동 전환과 비교했습니다.</strong></div><div class="v106-page-body" data-info="p06-PAGE-BODY-179"><div class="v106-observation-layout" data-info="p06-COMPARISON"><div class="v106-narrative" data-info="p06-NARRATIVE"><small class="v106-section-tab">배치별로 본 차이</small><section class="v106-prose-section" data-info="p06-EXPLANATION-SAME-POINT"><div class="v106-depth-summary"><div class="v106-heading-copy"><small class="v106-evidence-kind">비교 예시 A</small><h3 data-info="p06-EXPLANATION-SAME-POINT-HEADING">타격과 일치한 스왑포인트</h3></div></div><div class="v106-depth-detail"><p data-info="p06-EXPLANATION-SAME-POINT-COPY">위 예시는 타격과 스왑포인트를 같은 지점에 두고, 같은 캐릭터의 <span class="v106-keep">다음 행동 전환은</span> 뒤에 두었습니다. <br>타격과 <span class="v106-keep">다음 행동 전환을</span> <span class="v106-keep">구별해 읽었습니다.</span></p></div></section><section class="v106-prose-section" data-info="p06-EXPLANATION-EARLIER-POINT"><div class="v106-depth-summary"><div class="v106-heading-copy"><small class="v106-evidence-kind">비교 예시 B</small><h3 data-info="p06-EXPLANATION-EARLIER-POINT-HEADING">타격보다 앞선 스왑포인트</h3></div></div><div class="v106-depth-detail"><p data-info="p06-EXPLANATION-EARLIER-POINT-COPY">아래 예시는 스왑포인트 뒤에 타격을 두었습니다. 그 사이에 교대해도 앞 타격이 이어지는 관계입니다. <br>스왑포인트보다 일찍 교대하면 후속 동작이나 타격을 놓칠 수 있다는 차이를, 공격별 교대 시점을 살펴볼 <span class="v106-keep">이유로 보았습니다.</span></p></div></section></div><figure class="v106-diagram-unit v106-timeline-comparison" data-info="SVG-04"><div class="v106-proof-header" data-info="p06-PROOF-HEADER-113"><span class="v106-evidence-kind" data-info="p06-EVIDENCE-KIND-112">설명 도표</span></div><div class="v106-pin-key" data-info="p06-PIN-KEY" aria-label="스왑·타격·캔슬의 뜻"><div class="v106-pin-key-item" data-info="p06-PIN-SWAP"><svg class="v106-pin-key-glyph" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><rect fill="none" height="5.5" rx="0.5" stroke="currentColor" stroke-width="1.7" width="16" x="1.5" y="3"></rect><rect fill="none" height="5.5" rx="0.5" stroke="currentColor" stroke-width="1.7" width="16" x="6.5" y="15.5"></rect><path d="M7 8.5l5.8 7M9.7 14.8l3.1.7-.2-3.1" fill="none" stroke="currentColor" stroke-width="1.8"></path></svg><strong>스왑</strong><p>교대 뒤에도 이미 시작한 공격의 남은 동작과 타격이 이어지는 기준입니다.</p></div><div class="v106-pin-key-item" data-info="p06-PIN-HIT"><svg class="v106-pin-key-glyph" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M6 1.3L8.5 9l-1 4.5h-3L3.5 9Z" fill="none" stroke="currentColor" stroke-width="1.6"></path><rect fill="none" height="3.3" stroke="currentColor" stroke-width="1.6" width="9.6" x="1.2" y="13.5"></rect><path d="M5.1 16.8V22h1.8v-5.2" fill="none" stroke="currentColor" stroke-width="1.6"></path><path d="M11.8 4h10.8M11.8 20h10.8" fill="none" stroke="currentColor" stroke-dasharray="2.6 2.1" stroke-width="1.5"></path></svg><strong>타격</strong><p>판정이 시작되는 시점입니다. 판정은 여러 프레임 이어질 수 있습니다.</p></div><div class="v106-pin-key-item" data-info="p06-PIN-CANCEL"><svg class="v106-pin-key-glyph" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><rect fill="none" height="6" rx="0.5" stroke="currentColor" stroke-width="1.6" width="16" x="1.5" y="9"></rect><rect fill="none" height="12" rx="0.5" stroke="currentColor" stroke-width="1.6" width="15" x="7.5" y="6"></rect><path d="M6 12h11m-3.2-3.2L17 12l-3.2 3.2" fill="none" stroke="currentColor" stroke-width="1.8"></path></svg><strong>캔슬</strong><p>같은 캐릭터의 후속 공격으로 연계할 수 있는 기준입니다.</p></div><p class="v106-pin-key-note" data-info="p06-LEGEND">스왑 표식은 실제 교대 입력과 구별</p></div><div class="v106-chart-visual" data-info="p06-CHART-VISUAL-114"><svg aria-label="원 도표: 타격·스왑·다음 행동의 배치 비교" class="v106-original-chart" data-info="p06-DIAGRAM" height="100%" preserveaspectratio="xMidYMid meet" role="img" viewbox="-4 -5.13 1008 291.13" width="100%" xmlns="http://www.w3.org/2000/svg">
+<line stroke="#f0f0f0" stroke-width="2" x1="0" x2="0" y1="10" y2="250"></line>
+<line stroke="#f0f0f0" stroke-dasharray="4,4" stroke-width="2" x1="250" x2="250" y1="10" y2="250"></line>
+<line stroke="#f0f0f0" stroke-dasharray="4,4" stroke-width="2" x1="450" x2="450" y1="10" y2="250"></line>
+<line stroke="#f0f0f0" stroke-dasharray="4,4" stroke-width="2" x1="550" x2="550" y1="10" y2="250"></line>
+<line stroke="#f0f0f0" stroke-dasharray="4,4" stroke-width="2" x1="750" x2="750" y1="10" y2="250"></line>
+<line stroke="#f0f0f0" stroke-width="2" x1="1000" x2="1000" y1="10" y2="250"></line>
+<g transform="translate(0, 0)">
+<text fill="#2563eb" font-size="15.0" font-weight="800" x="0" y="15">예시 A. 타격과 스왑포인트가 같은 배치</text>
+<rect fill="none" height="24" rx="4" stroke="#ddd" stroke-dasharray="6,4" stroke-width="2" width="1000" x="0" y="35"></rect>
+<text fill="#aaa" font-size="14" font-weight="700" text-anchor="end" x="940" y="24">설명용 전체 60프레임</text>
+<rect fill="#2563eb" height="20" opacity="0.9" rx="3" width="450" x="0" y="37"></rect>
+<rect fill="#eff6ff" height="20" rx="3" stroke="#2563eb" stroke-dasharray="6,4" stroke-width="2" width="550" x="450" y="37"></rect>
+<text fill="#2563eb" font-size="14" font-weight="800" text-anchor="middle" x="600" y="51">교대 뒤에도 이어지는 공격</text>
+<line stroke="#111" stroke-width="2.5" x1="450" x2="450" y1="25" y2="65"></line>
+<svg class="v106-diagram-pin" data-pin-kind="swap" data-time-anchor="450" aria-hidden="true" x="438" y="0" width="24" height="24" viewBox="0 0 24 24" color="#111"><rect fill="none" height="5.5" rx="0.5" stroke="currentColor" stroke-width="1.7" width="16" x="1.5" y="3"></rect><rect fill="none" height="5.5" rx="0.5" stroke="currentColor" stroke-width="1.7" width="16" x="6.5" y="15.5"></rect><path d="M7 8.5l5.8 7M9.7 14.8l3.1.7-.2-3.1" fill="none" stroke="currentColor" stroke-width="1.8"></path></svg><svg class="v106-diagram-pin" data-pin-kind="hit" data-time-anchor="450" aria-hidden="true" x="438" y="65" width="24" height="24" viewBox="0 0 24 24" color="#111"><path d="M6 1.3L8.5 9l-1 4.5h-3L3.5 9Z" fill="none" stroke="currentColor" stroke-width="1.6"></path><rect fill="none" height="3.3" stroke="currentColor" stroke-width="1.6" width="9.6" x="1.2" y="13.5"></rect><path d="M5.1 16.8V22h1.8v-5.2" fill="none" stroke="currentColor" stroke-width="1.6"></path><path d="M11.8 4h10.8M11.8 20h10.8" fill="none" stroke="currentColor" stroke-dasharray="2.6 2.1" stroke-width="1.5"></path></svg><text fill="#111" font-size="14" font-weight="900" text-anchor="middle" x="450" y="104">스왑 · 타격 (27프레임)</text>
+<path d="M750,25 l6,5 l-12,10 l12,10 l-12,10 l6,5" fill="none" stroke="#888" stroke-width="2.5"></path>
+<text fill="#888" font-size="14" font-weight="700" text-anchor="middle" x="750" y="80">
+<tspan dy="0" x="750">같은 캐릭터로 이어갈 때</tspan>
+<tspan dy="16" x="750">다음 동작으로 전환 (45프레임)</tspan>
+</text>
+</g>
+<g transform="translate(0, 120)">
+<text fill="#d93025" font-size="15.0" font-weight="800" x="0" y="15">예시 B. 타격보다 앞선 스왑포인트</text>
+<rect fill="none" height="24" rx="4" stroke="#ddd" stroke-dasharray="6,4" stroke-width="2" width="1000" x="0" y="35"></rect>
+<text fill="#aaa" font-size="14" font-weight="700" text-anchor="end" x="940" y="24">설명용 전체 60프레임</text>
+<rect fill="#d93025" height="20" opacity="0.9" rx="3" width="250" x="0" y="37"></rect>
+<rect fill="#fffafa" height="20" rx="3" stroke="#d93025" stroke-dasharray="6,4" stroke-width="2" width="750" x="250" y="37"></rect>
+<text fill="#d93025" font-size="14" font-weight="800" text-anchor="middle" x="400" y="51">교대 뒤에도 이어지는 공격</text>
+<line stroke="#d93025" stroke-width="2.5" x1="250" x2="250" y1="25" y2="65"></line>
+<svg class="v106-diagram-pin" data-pin-kind="swap" data-time-anchor="250" aria-hidden="true" x="238" y="65" width="24" height="24" viewBox="0 0 24 24" color="#d93025"><rect fill="none" height="5.5" rx="0.5" stroke="currentColor" stroke-width="1.7" width="16" x="1.5" y="3"></rect><rect fill="none" height="5.5" rx="0.5" stroke="currentColor" stroke-width="1.7" width="16" x="6.5" y="15.5"></rect><path d="M7 8.5l5.8 7M9.7 14.8l3.1.7-.2-3.1" fill="none" stroke="currentColor" stroke-width="1.8"></path></svg><text fill="#d93025" font-size="14" font-weight="900" text-anchor="middle" x="250" y="104">스왑포인트 (15프레임)</text>
+<line stroke="#111" stroke-width="2.5" x1="550" x2="550" y1="25" y2="65"></line>
+<svg class="v106-diagram-pin" data-pin-kind="hit" data-time-anchor="550" aria-hidden="true" x="538" y="65" width="24" height="24" viewBox="0 0 24 24" color="#111"><path d="M6 1.3L8.5 9l-1 4.5h-3L3.5 9Z" fill="none" stroke="currentColor" stroke-width="1.6"></path><rect fill="none" height="3.3" stroke="currentColor" stroke-width="1.6" width="9.6" x="1.2" y="13.5"></rect><path d="M5.1 16.8V22h1.8v-5.2" fill="none" stroke="currentColor" stroke-width="1.6"></path><path d="M11.8 4h10.8M11.8 20h10.8" fill="none" stroke="currentColor" stroke-dasharray="2.6 2.1" stroke-width="1.5"></path></svg><text fill="#111" font-size="14" font-weight="900" text-anchor="middle" x="550" y="104">타격 시작 (33프레임)</text>
+<path d="M750,25 l6,5 l-12,10 l12,10 l-12,10 l6,5" fill="none" stroke="#888" stroke-width="2.5"></path>
+<text fill="#888" font-size="14" font-weight="700" text-anchor="middle" x="750" y="80">
+<tspan dy="0" x="750">같은 캐릭터로 이어갈 때</tspan>
+<tspan dy="16" x="750">다음 동작으로 전환 (45프레임)</tspan>
+</text>
+</g>
+</svg><span class="v106-image-caption">타격·스왑·다음 행동의 배치 비교</span><button aria-label="관계 도표 전체 확대" class="v106-zoom" data-info="SVG-04-OPEN" data-media-caption="타격·스왑·다음 행동의 배치 비교" data-media-kind="svg" data-media-title="타격·스왑·다음 행동의 배치 비교" data-svg-info="p06-DIAGRAM" type="button" data-media-context="전체 60f에 놓은 설명용 값입니다. 타격 표시는 전체 타격 지속 구간을 뜻하지 않습니다. 다음 행동은 같은 캐릭터의 다음 행동 전환이며, 스왑 표식은 실제 교대 입력과 구별합니다." aria-haspopup="dialog" aria-controls="media-modal" aria-expanded="false">확대</button></div><span class="v106-flow-condition" data-note-label="설명 범위">전체 60f에 놓은 설명용 값 · 타격 표시는 전체 타격 지속 구간을 뜻하지 않음</span></figure></div></div><footer class="v106-page-footer"><span>명조 전투 조작 분석 · 김지홍</span><span>06 / 11</span></footer></section></div>
+<div class="v106-page-wrap" id="part3"><section class="v106-page v106-role-part pr-guide-page ako-splash-page" data-page-id="part3" data-info="part3-PAGE" aria-label="PART 3 표현과 전투 선택에 대한 고찰">
+<header class="ako-splash-top"><span>명조 전투 조작 분석</span><div class="ako-splash-line"></div><a class="ako-splash-toc" href="#contents">목차</a></header>
+<div class="ako-splash-stage"><div class="ako-splash-copy">
+<div class="ako-splash-part">PART 03 · 표현과 전투 선택에 대한 고찰</div>
+<h2 class="ako-splash-main ako-splash-parallel" aria-label="다음 파트에서 확인할 내용">
+<span data-info="part3-NODE-1" data-label="장리">남는 동작에서 캐릭터의 표현을 읽고</span>
+<span data-info="part3-NODE-2" data-label="앙코">늦게 이어지는 타격과 다음 행동을 살피고</span>
+<span data-info="part3-NODE-3" data-label="자원·강화 효과">자원과 강화 효과에 따른 선택을 살폈습니다</span>
+</h2>
+<div class="ako-splash-rule"></div>
+<p class="ako-splash-scope">장리와 앙코의 동작을 표현과 다음 행동의 선택으로 읽고, 자원과 강화 효과에 따른 선택도 살펴봅니다.</p>
+</div></div>
+<div class="ako-splash-footer"><i></i><b>본문 07–09</b><i></i></div>
+</section></div>
+<div class="v106-page-wrap" id="p07"><section class="v106-page v106-role-body" data-info="p07-PAGE" data-page-id="p07" aria-label="장리의 마무리를 보며 전투 이어가기"><div class="v106-doc-header" data-info="p07-NAV"><span>명조 전투 조작 분석</span><nav aria-label="문서 이동"><a data-info="p07-TEXT-01" href="#contents">↩ 목차</a><span>07 / 11</span></nav></div><header class="v106-page-header" data-info="p07-PAGE-HEADER-180"><small>PART 3 · 본문 07</small><h2 data-info="p07-TEXT-02">장리의 마무리를 보며 전투 이어가기</h2></header><div class="v106-claim" data-info="p07-CLAIM"><strong>장리의 마무리를 감상하면서도 다음 캐릭터를 조작할 수 있다는 점에 주목했습니다.</strong></div><div class="v106-page-body" data-info="p07-PAGE-BODY-181"><div class="v106-observation-layout" data-info="p07-OBSERVATION-LAYOUT-128"><div class="v106-observation-detail" data-info="p07-OBSERVATION-DETAIL-127"><section class="v106-observation-copy v106-observation-balanced" data-info="p07-OBSERVATION-COPY-122"><section class="v106-prose-section" data-info="p07-EXPLANATION-PAIR"><div class="v106-depth-summary"><h3 data-info="p07-TEXT-03">교대 뒤에도 장리의 <br>우산 마무리가 <br>화면에 남았습니다.</h3></div><div class="v106-depth-detail"><p data-info="p07-TEXT-04">다음 캐릭터를 조작하는 동안에도 앞 캐릭터의 표현을 볼 수 있었습니다. <br>공격이 남는 관계를 <span class="v106-keep">전투 진행뿐 아니라</span> 캐릭터의 마무리를 감상하는 경험으로도 읽었습니다.</p></div></section></section><figure class="v106-proof" data-evidence-role="대표 근거" data-info="p07-PROOF-126"><span class="ap-proof-mark" data-info="p07-PROOF-126-WARM-MARK">대표 근거</span><div class="v106-proof-header" data-info="p07-PROOF-HEADER-124"><span class="v106-evidence-kind" data-info="p07-EVIDENCE-KIND-123">실제 게임 영상</span></div><div class="v106-media-visual" data-info="p07-MEDIA-VISUAL-125"><video aria-label="장리 일반 공격" controls="" data-info="p07-MEDIA" playsinline="" preload="auto" src="assets/video/changli.mp4"></video><span class="v106-image-caption" data-info="p07-MEDIA-ID">장리 일반 공격</span><button aria-label="장리 일반 공격 확대" class="v106-zoom" data-info="p07-CONTROL-01" data-media-caption="장리 일반 공격" data-media-kind="video" data-media-src="assets/video/changli.mp4" data-media-title="장리 일반 공격" type="button" data-media-context="장리의 우산 마무리와, 교대 뒤 다음 캐릭터의 행동을 함께 봅니다." aria-haspopup="dialog" aria-controls="media-modal" aria-expanded="false">확대</button></div></figure></div><figure class="v106-diagram-unit" data-info="p07-DIAGRAM-UNIT-121"><div class="v106-proof-header" data-info="p07-PROOF-HEADER-119"><span class="v106-evidence-kind" data-info="p07-EVIDENCE-KIND-118">설명 도표</span></div><div class="v106-chart-visual" data-info="p07-CHART-VISUAL-120"><svg aria-label="원 도표: 교대 전후의 연출 비교" class="v106-original-chart" data-info="p07-DIAGRAM" height="100%" preserveaspectratio="xMidYMid meet" role="img" viewbox="-4 -4.12 1004 322.15" width="100%" xmlns="http://www.w3.org/2000/svg">
+<g transform="translate(0, 0)">
+<text fill="#666" font-size="14" font-weight="800" x="0" y="15">비교 예시: 교대 뒤 앞 동작이 남지 않음</text>
+<line stroke="#ddd" stroke-width="2" x1="0" x2="980" y1="40" y2="40"></line>
+<rect fill="#64748b" height="30" rx="4" width="250" x="0" y="25"></rect>
+<text fill="#fff" font-size="14" font-weight="800" text-anchor="middle" x="125" y="45">캐릭터 A (현재 조작)</text>
+<line stroke="#111" stroke-dasharray="4,2" stroke-width="2.5" x1="250" x2="250" y1="10" y2="70"></line>
+<text fill="#111" font-size="14" font-weight="900" text-anchor="middle" x="250" y="85">교대 시점</text>
+<rect fill="#3b82f6" height="30" rx="4" width="700" x="250" y="25"></rect>
+<text fill="#fff" font-size="14" font-weight="800" text-anchor="middle" x="600" y="45">캐릭터 B (교대 후 조작)</text>
+<rect fill="none" height="30" rx="4" stroke="#ef4444" stroke-dasharray="4,4" stroke-width="2" width="220" x="250" y="25"></rect>
+<path d="M 260,30 L 460,50 M 460,30 L 260,50" opacity="0.6" stroke="#ef4444" stroke-width="2"></path>
+<text fill="#ef4444" font-size="14" font-weight="800" text-anchor="middle" x="360" y="15">교대 뒤 앞 동작이 보이지 않음</text>
+</g>
+<g transform="translate(0, 100)">
+<text fill="#d93025" font-size="14" font-weight="800" x="0" y="15">명조에서 본 교대 뒤 동작과 타격</text>
+<line stroke="#ddd" stroke-width="2" x1="0" x2="980" y1="40" y2="40"></line>
+<rect fill="#64748b" height="30" rx="4" width="250" x="0" y="25"></rect>
+<text fill="#fff" font-size="14" font-weight="800" text-anchor="middle" x="125" y="45">캐릭터 A (현재 조작)</text>
+<line stroke="#475569" stroke-dasharray="4,2" stroke-width="2" x1="150" x2="150" y1="55" y2="70"></line>
+<circle cx="150" cy="55" fill="#475569" r="4"></circle>
+<svg class="v106-diagram-pin" data-pin-kind="swap" data-time-anchor="150" aria-hidden="true" x="138" y="61" width="24" height="24" viewBox="0 0 24 24" color="#475569"><rect fill="none" height="5.5" rx="0.5" stroke="currentColor" stroke-width="1.7" width="16" x="1.5" y="3"></rect><rect fill="none" height="5.5" rx="0.5" stroke="currentColor" stroke-width="1.7" width="16" x="6.5" y="15.5"></rect><path d="M7 8.5l5.8 7M9.7 14.8l3.1.7-.2-3.1" fill="none" stroke="currentColor" stroke-width="1.8"></path></svg><text fill="#475569" font-size="14" font-weight="800" text-anchor="middle" x="150" y="100">스왑포인트</text>
+<line stroke="#111" stroke-width="2.5" x1="250" x2="250" y1="55" y2="100"></line>
+<text fill="#111" font-size="14" font-weight="900" text-anchor="middle" x="250" y="115">🎮 사용자 교대 입력</text>
+<line stroke="#d93025" stroke-width="2.5" x1="250" x2="250" y1="120" y2="130"></line>
+<polygon fill="#d93025" points="244,130 256,130 250,140"></polygon>
+<rect fill="#cbd5e1" height="30" rx="4" stroke="#64748b" stroke-width="2" width="350" x="250" y="25"></rect>
+<text fill="#475569" font-size="14" font-weight="800" text-anchor="middle" x="425" y="45">교대 뒤에도 남는 앞 동작</text>
+<line stroke="#111" stroke-width="2" x1="425" x2="425" y1="55" y2="70"></line>
+<svg class="v106-diagram-pin" data-pin-kind="hit" data-time-anchor="425" aria-hidden="true" x="413" y="61" width="24" height="24" viewBox="0 0 24 24" color="#111"><path d="M6 1.3L8.5 9l-1 4.5h-3L3.5 9Z" fill="none" stroke="currentColor" stroke-width="1.6"></path><rect fill="none" height="3.3" stroke="currentColor" stroke-width="1.6" width="9.6" x="1.2" y="13.5"></rect><path d="M5.1 16.8V22h1.8v-5.2" fill="none" stroke="currentColor" stroke-width="1.6"></path><path d="M11.8 4h10.8M11.8 20h10.8" fill="none" stroke="currentColor" stroke-dasharray="2.6 2.1" stroke-width="1.5"></path></svg><text fill="#111" font-size="14" font-weight="900" text-anchor="middle" x="425" y="100">교대 뒤에도 남는 타격(시작)</text>
+<line stroke="#ddd" stroke-width="2" x1="250" x2="980" y1="140" y2="140"></line>
+<rect fill="#d93025" height="30" rx="4" width="730" x="250" y="125"></rect>
+<text fill="#fff" font-size="14" font-weight="800" text-anchor="middle" x="615" y="145">캐릭터 B (교대 후 조작)</text>
+<rect fill="rgba(217,48,37,0.05)" height="150" stroke="#d93025" stroke-dasharray="4,4" stroke-width="1.5" width="350" x="250" y="15"></rect>
+<text fill="#d93025" font-size="14" font-weight="800" text-anchor="middle" x="425" y="185">두 캐릭터의 행동이 함께 보이는 구간</text>
+</g>
+</svg><span class="v106-image-caption">교대 전후의 연출 비교</span><button aria-label="관계 도표 전체 확대" class="v106-zoom" data-info="SVG-05-OPEN" data-media-caption="교대 전후의 연출 비교" data-media-kind="svg" data-media-title="교대 전후의 연출 비교" data-svg-info="p07-DIAGRAM" type="button" data-media-context="장리의 마무리가 남는 관계를 설명한 비교 그림입니다. 겹치는 부분을 설명하며 동작의 정확한 시작·종료 시각은 표시하지 않습니다." aria-haspopup="dialog" aria-controls="media-modal" aria-expanded="false">확대</button></div><span class="v106-flow-condition" data-note-label="표시 범위">겹치는 부분을 설명한 그림 · 동작의 정확한 시작·종료 시각은 표시하지 않음</span></figure></div></div><footer class="v106-page-footer"><span>명조 전투 조작 분석 · 김지홍</span><span>07 / 11</span></footer></section></div>
+<div class="v106-page-wrap" id="p08"><section class="v106-page v106-role-body" data-info="p08-PAGE" data-page-id="p08" aria-label="앙코의 공격과 다른 행동 맞물리기"><div class="v106-doc-header" data-info="p08-NAV"><span>명조 전투 조작 분석</span><nav aria-label="문서 이동"><a data-info="p08-TEXT-01" href="#contents">↩ 목차</a><span>08 / 11</span></nav></div><header class="v106-page-header" data-info="p08-PAGE-HEADER-182"><small>PART 3 · 본문 08</small><h2 data-info="p08-TEXT-02">앙코의 공격과 다른 행동 맞물리기</h2></header><div class="v106-claim" data-info="p08-CLAIM"><strong>앞 타격을 기다리는 동안 다음 행동을 고르는 선택에서, 전투 흐름을 직접 잇는 재미와 성취감을 생각했습니다.</strong></div><div class="v106-page-body" data-info="p08-PAGE-BODY-183"><div class="v106-observation-layout" data-info="p08-OBSERVATION-LAYOUT-139"><div class="v106-observation-detail" data-info="p08-OBSERVATION-DETAIL-138"><section class="v106-observation-copy v106-observation-copy-readable" data-info="p08-OBSERVATION-COPY-133"><section class="v106-prose-section" data-info="p08-EXPLANATION-PAIR"><div class="v106-depth-summary"><h3 data-info="p08-TEXT-03">공격의 피해량·시간뿐 아니라, <br>그동안 할 행동도 <br>선택할 수 있었습니다.</h3></div><div class="v106-depth-detail"><p data-info="p08-TEXT-04">도표 위의 A·B는 피해량과 걸리는 시간이 다른 공격 대안입니다. <br>앙코의 이 강공격은 특수 공격 자원인 <span class="v106-keep">공명 회로를</span> 쓰며, 공격이 남는 기준을 지난 뒤 타격이 나옵니다. <br>그 기준을 지나 교대해, 타격을 기다리는 동안 다음 캐릭터의 행동을 고르는 <span class="v106-keep">선택을 살폈습니다.</span></p></div></section></section><figure class="v106-proof" data-evidence-role="대표 근거" data-info="p08-PROOF-137"><span class="ap-proof-mark" data-info="p08-PROOF-137-WARM-MARK">대표 근거</span><div class="v106-proof-header" data-info="p08-PROOF-HEADER-135"><span class="v106-evidence-kind" data-info="p08-EVIDENCE-KIND-134">실제 게임 영상</span></div><div class="v106-media-visual" data-info="p08-MEDIA-VISUAL-136"><video aria-label="앙코 강공격" controls="" data-info="p08-MEDIA" playsinline="" preload="auto" src="assets/video/encore.mp4"></video><span class="v106-image-caption" data-info="p08-MEDIA-ID">앙코 강공격</span><button aria-label="앙코 강공격 확대" class="v106-zoom" data-info="p08-CONTROL-01" data-media-caption="앙코 강공격" data-media-kind="video" data-media-src="assets/video/encore.mp4" data-media-title="앙코 강공격" type="button" data-media-context="앙코의 공격이 남는 동안, 교대 뒤 다음 캐릭터의 행동을 함께 봅니다." aria-haspopup="dialog" aria-controls="media-modal" aria-expanded="false">확대</button></div></figure></div><figure class="v106-diagram-unit" data-info="p08-DIAGRAM-UNIT-132"><div class="v106-proof-header v106-proof-header-context" data-info="p08-PROOF-HEADER-130"><span class="v106-evidence-kind" data-info="p08-EVIDENCE-KIND-129">설명 도표</span><p>위 A·B는 비교를 위한 공격 대안입니다. 아래 앙코의 타격과 다음 행동의 겹침을 중심으로 보았습니다.</p></div><div class="v106-chart-visual" data-info="p08-CHART-VISUAL-131"><svg aria-label="원 도표: 교대 전후의 전투 선택 비교" class="v106-original-chart" data-info="p08-DIAGRAM" height="100%" preserveaspectratio="xMidYMid meet" role="img" viewbox="-4 -4.12 1004 350.12" width="100%" xmlns="http://www.w3.org/2000/svg">
+<!-- 1. 타 액션 게임의 양자택일 구조 -->
+<g class="v106-background-comparison" transform="translate(0, 0)">
+<text fill="#666" font-size="15" font-weight="800" x="0" y="15">비교 예시: 서로 다른 공격 중 선택</text>
+<rect fill="#eff6ff" height="35" rx="6" stroke="#2563eb" stroke-width="2" width="400" x="0" y="30"></rect>
+<text fill="#2563eb" font-size="15" font-weight="800" text-anchor="middle" x="200" y="52">A. 피해량은 낮으나 후딜레이가 짧은 안전한 공격</text>
+<text fill="#888" font-size="16.0" font-weight="900" text-anchor="middle" x="450" y="52">상대적 구조</text>
+<rect fill="#fdf2f2" height="35" rx="6" stroke="#ef4444" stroke-width="2" width="480" x="500" y="30"></rect>
+<text fill="#ef4444" font-size="15" font-weight="800" text-anchor="middle" x="740" y="52">B. 피해량이 높으나 시전 시간이 긴 위험한 공격</text>
+<text fill="#666" font-size="15" font-weight="700" text-anchor="middle" x="450" y="90">▶ 공격의 피해량과 걸리는 시간을 비교해 선택</text>
+</g>
+<!-- 2. 명조의 판정 배치 기반 전술 구조 -->
+<g transform="translate(0, 110)">
+<text fill="#d93025" font-size="15" font-weight="800" x="0" y="15">명조에서 본 공격을 남기고 다른 행동을 잇는 선택</text>
+<line stroke="#ddd" stroke-width="2" x1="0" x2="980" y1="25" y2="25"></line>
+<!-- 캐릭터 A 큐 래퍼 -->
+<rect fill="#64748b" height="30" opacity="0.3" rx="4" width="800" x="0" y="35"></rect>
+<text fill="#111" font-size="15" font-weight="800" text-anchor="middle" x="80" y="55">앙코</text>
+<!-- 무방비 구간 (오프필드 이관) -->
+<rect fill="#cbd5e1" height="30" rx="4" stroke="#64748b" stroke-width="2" width="260" x="240" y="35"></rect>
+<text fill="#475569" font-size="15" font-weight="800" text-anchor="middle" x="370" y="55">앞 캐릭터의 동작이 남는 구간</text>
+<!-- 시스템 판정 1: 스왑 포인트 (큐 바 아래에 배치) -->
+<line stroke="#2563eb" stroke-width="2.5" x1="160" x2="160" y1="65" y2="80"></line>
+
+<svg class="v106-diagram-pin" data-pin-kind="swap" data-time-anchor="160" aria-hidden="true" x="148" y="66" width="24" height="24" viewBox="0 0 24 24" color="#2563eb"><rect fill="none" height="5.5" rx="0.5" stroke="currentColor" stroke-width="1.7" width="16" x="1.5" y="3"></rect><rect fill="none" height="5.5" rx="0.5" stroke="currentColor" stroke-width="1.7" width="16" x="6.5" y="15.5"></rect><path d="M7 8.5l5.8 7M9.7 14.8l3.1.7-.2-3.1" fill="none" stroke="currentColor" stroke-width="1.8"></path></svg><text fill="#2563eb" font-size="15" font-weight="900" text-anchor="middle" x="160" y="110">스왑포인트</text>
+<!-- 시스템 판정 2: 타격 포인트 (큐 바 아래에 배치) -->
+<line stroke="#d93025" stroke-width="3" x1="500" x2="500" y1="65" y2="80"></line>
+
+<svg class="v106-diagram-pin" data-pin-kind="hit" data-time-anchor="500" aria-hidden="true" x="488" y="66" width="24" height="24" viewBox="0 0 24 24" color="#d93025"><path d="M6 1.3L8.5 9l-1 4.5h-3L3.5 9Z" fill="none" stroke="currentColor" stroke-width="1.6"></path><rect fill="none" height="3.3" stroke="currentColor" stroke-width="1.6" width="9.6" x="1.2" y="13.5"></rect><path d="M5.1 16.8V22h1.8v-5.2" fill="none" stroke="currentColor" stroke-width="1.6"></path><path d="M11.8 4h10.8M11.8 20h10.8" fill="none" stroke="currentColor" stroke-dasharray="2.6 2.1" stroke-width="1.5"></path></svg><text fill="#d93025" font-size="15" font-weight="900" text-anchor="middle" x="500" y="110">타격 판정 시작</text>
+<!-- 시스템 판정 3: 캔슬 포인트 (큐 바 아래에 배치) -->
+<line stroke="#888" stroke-width="2" x1="750" x2="750" y1="65" y2="80"></line>
+<circle cx="750" cy="80" fill="#888" r="4"></circle>
+<text fill="#888" font-size="15" font-weight="800" text-anchor="middle" x="750" y="100">🔄 다음 행동 전환</text>
+<!-- 플레이어 교대 선언 및 큐 점프 (화살표) -->
+<line stroke="#111" stroke-dasharray="4,2" stroke-width="3" x1="240" x2="240" y1="65" y2="125"></line>
+<polygon fill="#111" points="234,122 246,122 240,130"></polygon>
+<text fill="#111" font-size="15" font-weight="800" text-anchor="start" x="255" y="115">🎮 사용자의 교대 입력</text>
+<!-- 캐릭터 B 큐 (화살표 도착 지점에 완벽 연결) -->
+<line stroke="#ddd" stroke-width="2" x1="240" x2="980" y1="145" y2="145"></line>
+<rect fill="#d93025" height="30" rx="4" width="740" x="240" y="130"></rect>
+<text fill="#fff" font-size="15" font-weight="800" text-anchor="middle" x="610" y="150">다음 캐릭터로 전투 이어가기</text>
+<!-- 피해량 누적 효과 하이라이트 박스 -->
+<rect fill="rgba(217,48,37,0.08)" height="150" stroke="#d93025" stroke-dasharray="6,4" stroke-width="2" width="160" x="420" y="25"></rect>
+<text fill="#d93025" font-size="15" font-weight="900" text-anchor="middle" x="500" y="195">앞 공격의 타격과 다음 캐릭터의 행동 맞물리기</text>
+</g>
+</svg><span class="v106-image-caption">교대 전후의 전투 선택 비교</span><button aria-label="관계 도표 전체 확대" class="v106-zoom" data-info="SVG-06-OPEN" data-media-caption="교대 전후의 전투 선택 비교" data-media-kind="svg" data-media-title="교대 전후의 전투 선택 비교" data-svg-info="p08-DIAGRAM" type="button" data-media-context="위 A·B는 공격 대안이며, 아래는 앙코의 강공격입니다. 겹치는 부분을 설명한 그림이며 정확한 시작·종료 시각은 표시하지 않습니다." aria-haspopup="dialog" aria-controls="media-modal" aria-expanded="false">확대</button></div><span class="v106-flow-condition" data-note-label="표시 범위">겹침 설명이며 정확한 시작·종료 시각은 표시하지 않음</span></figure></div></div><footer class="v106-page-footer"><span>명조 전투 조작 분석 · 김지홍</span><span>08 / 11</span></footer></section></div>
+<div class="v106-page-wrap" id="p09"><section class="v106-page v106-role-body" data-info="p09-PAGE" data-page-id="p09" aria-label="교대할 이유와 현재 캐릭터로 이어갈 이유"><div class="v106-doc-header" data-info="p09-NAV"><span>명조 전투 조작 분석</span><nav aria-label="문서 이동"><a data-info="p09-CONTENTS" href="#contents">↩ 목차</a><span>09 / 11</span></nav></div><header class="v106-page-header" data-info="p09-HEADER"><small>PART 3 · 본문 09</small><h2 data-info="p09-TITLE">교대할 이유와 현재 캐릭터로 이어갈 이유</h2></header><div class="v106-claim" data-info="p09-CLAIM"><strong>자원 준비와 강화 효과 유지에 따라, 교대할 이유와 현재 캐릭터로 이어갈 이유를 나누어 보았습니다.</strong></div><div class="v106-page-body" data-info="p09-BODY"><div class="v106-choice-layout" data-info="p09-COMPARISON" data-relation="서로 다른 조건에 따른 두 전투 선택"><section class="v106-choice" data-info="p09-CHOICE-1"><small class="v106-section-tab">다음 공격 준비</small><div class="v106-prose-section" data-info="p09-CHOICE-1-EXPLANATION-PAIR"><div class="v106-depth-summary"><h3>일반 공격 후반에 <br>자원을 얻는 경우에는<br>교대로 다음 공격 <br>준비를 앞당깁니다</h3></div><div class="v106-depth-detail"><p data-info="p09-CHOICE-1-REASON">공명 회로는 특수 공격을 준비하는 캐릭터 자원입니다. <br>일반 공격 후반에 자원을 얻고 교대 뒤 3타부터 이어지는 경우에는, 1~2타를 생략해 자원을 얻는 구간에 먼저 진입합니다. 이 차이를 다음 공격 준비를 앞당기는 이유로 보았습니다.</p></div></div><div class="v106-choice-detail"><div class="v106-choice-symbols"><img alt="원 도표: 공명 회로" class="v106-original-symbol" data-info="p09-DIAGRAM-1" src="assets/original-diagrams/p09-original-01.svg"><p data-info="p09-CHOICE-1-MATERIAL-TITLE">공명 회로 준비</p></div><ol class="v106-choice-steps" data-info="p09-SEQUENCE-1"><li><small class="v106-step-marker" data-info="p09-PROCESS-1-1"><span class="v106-step-no">01</span><span class="v106-step-kind">교대</span></small><span>교대 뒤 일반 공격 3타부터 이어지는 경우<br>(1~2타 생략)</span></li><li><small class="v106-step-marker" data-info="p09-PROCESS-1-2"><span class="v106-step-no">02</span><span class="v106-step-kind">자원 획득</span></small><span>자원을 얻는 후반 행동에 진입</span></li><li><small class="v106-step-marker" data-info="p09-PROCESS-1-3"><span class="v106-step-no">03</span><span class="v106-step-kind">특수 공격</span></small><span>공명 회로를 준비해 특수 공격</span></li><li><small class="v106-step-marker" data-info="p09-PROCESS-1-4"><span class="v106-step-no">04</span><span class="v106-step-kind">다음 교대</span></small><span>그 공격의 스왑포인트를 지난 뒤 다음 교대</span></li></ol></div></section><section class="v106-choice" data-info="p09-CHOICE-2"><small class="v106-section-tab">강화 효과 유지</small><div class="v106-prose-section" data-info="p09-CHOICE-2-EXPLANATION-PAIR"><div class="v106-depth-summary"><h3>다시 교대하면 강화 효과가 <br>사라지는 경우에는<br>효과를 받은 캐릭터로 <br>행동을 이어갑니다</h3></div><div class="v106-depth-detail"><p data-info="p09-CHOICE-2-REASON">협주 게이지는 교대로 이어질 강화 효과를 준비하는 자원입니다. <br>효과를 받은 뒤 다시 교대하면 그 효과가 사라지는 경우에는, 다음 교대보다 효과를 받은 캐릭터로 행동을 이어가는 <span class="v106-keep">쪽을 살폈습니다.</span></p></div></div><div class="v106-choice-detail"><div class="v106-choice-symbols"><img alt="원 도표: 협주 게이지" class="v106-original-symbol" data-info="p09-DIAGRAM-2" src="assets/original-diagrams/p09-original-02.svg"><img alt="원 도표: 강화 효과" class="v106-original-symbol" data-info="p09-DIAGRAM-3" src="assets/original-diagrams/p09-original-03.svg"><p data-info="p09-CHOICE-2-MATERIAL-TITLE">협주 게이지와 강화 효과</p></div><ol class="v106-choice-steps" data-info="p09-SEQUENCE-2"><li><small class="v106-step-marker" data-info="p09-PROCESS-2-1"><span class="v106-step-no">01</span><span class="v106-step-kind">자원 준비</span></small><span>협주 게이지 준비</span></li><li><small class="v106-step-marker" data-info="p09-PROCESS-2-2"><span class="v106-step-no">02</span><span class="v106-step-kind">강화 효과</span></small><span>교대로 강화 효과를 받음</span></li><li><small class="v106-step-marker" data-info="p09-PROCESS-2-3"><span class="v106-step-no">03</span><span class="v106-step-kind">행동 유지</span></small><span><span data-info="p09-RESULT-03">효과를 받은 캐릭터로 행동을 이어감</span></span></li></ol></div></section></div></div><footer class="v106-page-footer"><span>명조 전투 조작 분석 · 김지홍</span><span>09 / 11</span></footer></section></div>
+<div class="v106-page-wrap" id="part4"><section class="v106-page v106-role-part pr-guide-page ako-splash-page" data-page-id="part4" data-info="part4-PAGE" aria-label="PART 4 함께 검토할 설명과 도구">
+<header class="ako-splash-top"><span>명조 전투 조작 분석</span><div class="ako-splash-line"></div><a class="ako-splash-toc" href="#contents">목차</a></header>
+<div class="ako-splash-stage"><div class="ako-splash-copy">
+<div class="ako-splash-part">PART 04 · 함께 검토할 설명과 도구</div>
+<h2 class="ako-splash-main ako-splash-parallel" aria-label="다음 파트에서 확인할 내용">
+<span data-info="part4-NODE-1" data-label="영상">관찰한 장면을 영상으로 보여주고</span>
+<span data-info="part4-NODE-2" data-label="관계 도표">같은 시간축에서 관계를 비교하고</span>
+<span data-info="part4-NODE-3" data-label="시뮬레이터">입력에 따른 변화를 직접 살펴보게 했습니다</span>
+</h2>
+<div class="ako-splash-rule"></div>
+<p class="ako-splash-scope">상대가 그림을 연결해 움직임을 상상할 부담을 줄이고자, 한 화면에서 입력과 결과를 비교하게 했습니다.</p>
+</div></div>
+<div class="ako-splash-footer"><i></i><b>본문 10–11</b><i></i></div>
+</section></div>
+<div class="v106-page-wrap" id="p10">
+<section class="v106-page v106-role-body" data-info="p10-PAGE" data-page-id="p10" aria-label="관계를 함께 살펴볼 설명 방법">
+<div class="v106-doc-header" data-info="p10-NAV"><span>명조 전투 조작 분석</span><nav aria-label="문서 이동"><a data-info="p10-CONTENTS" href="#contents">↩ 목차</a><span>10 / 11</span></nav></div>
+<header class="v106-page-header" data-info="p10-HEADER"><small>PART 4 · 본문 10</small><h2 data-info="p10-TITLE">관계를 함께 살펴볼 설명 방법</h2></header>
+<div class="v106-claim" data-info="p10-CLAIM"><strong>상대가 입력과 결과의 관계를 함께 살펴볼 수 있도록, 영상·도표와 직접 조작하는 도구로 구체화했습니다.</strong></div>
+<div class="v106-page-body" data-info="p10-BODY">
+<div class="v106-explanation-process" data-info="p10-PROCESS" data-relation="두 설명 방식의 요약·상세·대표 자료가 같은 행에서 대응">
+
+<section class="v106-explanation-row" data-info="p10-SAME-SCENE"><div class="v106-prose-section">
+<div class="v106-depth-summary"><h3>영상과 도표로 <br>같은 장면과 관계를 보여 주었습니다.</h3></div>
+<div class="v106-depth-detail">
+<p>영상은 교대와 회피, 장리의 마무리와 앙코의 늦은 타격을 실제 모습으로 보여 줍니다. <br>도표는 각 캐릭터의 행동, 지금 조작하는 대상, 누른 입력과 실제 다음 행동을 같은 시간 기준에 놓아 비교하게 했습니다.</p>
+<p class="v106-chart-notes">막대 = 행동 구간 · ★ = 현재 조작 대상</p>
+
+</div>
+</div><figure class="v106-explanation-visual" data-info="p10-RELATION-PROOF" aria-label="원 관계 도표에서 교대 뒤 A의 행동과 B의 조작이 함께 남는 부분을 발췌">
+<svg class="v106-explanation-source" data-info="p10-RELATION-EXCERPT" data-source-excerpt="원 도표의 A 행동·B 조작·첫 조작 대상 변경 표시만 좌표와 문구 그대로 발췌" xmlns="http://www.w3.org/2000/svg" viewBox="0 -7.06 720 277.06" role="img" aria-label="교대 뒤에도 A의 공격이 이어지는 동안 B를 조작하는 원 도표 발췌">
+<defs>
+<marker id="p10-excerpt-jumpArrow" markerHeight="7" markerWidth="10" orient="auto" refX="9" refY="3.5"><polygon fill="#d93025" points="0 0, 10 3.5, 0 7"></polygon></marker>
+<marker id="p10-excerpt-timeArrow" markerHeight="7" markerWidth="10" orient="auto" refX="9" refY="3.5"><polygon fill="#888" points="0 0, 10 3.5, 0 7"></polygon></marker>
+</defs>
+<line marker-end="url(#p10-excerpt-timeArrow)" stroke="#aaa" stroke-dasharray="2,2" stroke-width="2" x1="120" x2="690" y1="15" y2="15"></line>
+<text fill="#888" font-size="14" font-weight="900" text-anchor="middle" x="405" y="10">시간 흐름</text>
+<line stroke="#eee" stroke-width="2" x1="120" x2="700" y1="60" y2="60"></line>
+<line stroke="#eee" stroke-width="2" x1="120" x2="700" y1="220" y2="220"></line>
+<text fill="#6b21a8" font-size="14" font-weight="900" text-anchor="end" x="100" y="65">캐릭터 A</text>
+<text fill="#2563eb" font-size="14" font-weight="900" text-anchor="end" x="100" y="225">캐릭터 B</text>
+<rect fill="#f3e8ff" height="30" rx="4" stroke="#6b21a8" stroke-dasharray="4,2" stroke-width="1.5" width="560" x="130" y="45"></rect>
+<text fill="#6b21a8" font-size="14" font-weight="800" x="250" y="64">교대 뒤에도 이어지는 A의 공격</text>
+<rect fill="#6b21a8" height="30" rx="4" width="110" x="130" y="45"></rect>
+<text fill="#fff" font-size="14" font-weight="900" text-anchor="middle" x="185" y="65">★ 조작</text>
+<rect fill="#2563eb" height="30" rx="4" width="150" x="240" y="205"></rect>
+<text fill="#fff" font-size="14" font-weight="900" text-anchor="middle" x="315" y="225">★ 조작 (교대)</text>
+<path d="M 240 75 L 240 200" fill="none" marker-end="url(#p10-excerpt-jumpArrow)" stroke="#d93025" stroke-width="2.5"></path>
+<text fill="#d93025" font-size="14" font-weight="800" x="248" y="110">조작 대상 변경 ①</text>
+</svg>
+<figcaption class="v106-image-caption">관계 도표 발췌</figcaption>
+<button aria-label="원 관계 도표 전체 확대" class="v106-zoom" data-info="p10-RELATION-OPEN" data-media-caption="행동의 진행과 조작 대상" data-media-kind="svg" data-media-title="행동의 진행과 조작 대상 · 전체 원 도표" data-svg-info="p03-DIAGRAM" data-media-context="기본 화면은 원 도표의 A 행동과 B 조작 관계를 발췌했습니다. 전체 원 도표에서 에코와 이후 조작 대상의 변경도 함께 살펴볼 수 있습니다." aria-haspopup="dialog" aria-controls="media-modal" aria-expanded="false" type="button">확대</button>
+</figure>
+</section>
+<section class="v106-explanation-row" data-info="p10-DIRECT-COMPARISON"><div class="v106-prose-section">
+<div class="v106-depth-summary"><h3>입력에 따른 변화를 <br>직접 비교할 수 있게 구성했습니다.</h3></div>
+<div class="v106-depth-detail">
+<p>다른 버튼을 눌렀을 때를 살펴보려면, 상대가 그림의 표시를 다시 연결해 움직임을 상상해야 할 수 있다고 생각했습니다. <br><span class="v106-keep">행동 진행·</span><span class="v106-keep">조작 대상·</span><span class="v106-keep">미리 누른 입력을</span> 한 화면에 두고, 도구 안의 설명용 진행률을 보며 입력에 따른 변화를 직접 <span class="v106-keep">비교하게 구성했습니다.</span></p>
+
+
+</div>
+</div><figure class="v106-explanation-visual v106-explanation-visual-captioned" data-info="p10-TOOL-PROOF" aria-label="원도구의 행동 진행·조작 대상·미리 누른 입력·조작부 비교 화면">
+<svg class="v106-explanation-source" data-info="p10-TOOL-EXCERPT" xmlns="http://www.w3.org/2000/svg" viewBox="90 145 1250 420" role="img" aria-label="캐릭터1의 행동과 캐릭터2의 조작 상태, 미리 누른 입력과 조작부가 함께 보이는 비교 화면">
+<image href="assets/images/tool-swap-example.png" width="1430" height="638"></image>
+</svg>
+<figcaption class="v106-image-caption">행동 진행·조작 대상·입력 비교 화면</figcaption>
+<button class="v106-zoom" data-info="p10-TOOL-OPEN" data-media-kind="svg" data-svg-info="p10-TOOL-EXCERPT" data-media-title="행동 진행·조작 대상·입력 비교 화면" data-media-caption="행동 진행·조작 대상·입력 비교 화면" data-media-context="교대 뒤에도 캐릭터 1의 행동이 이어지는 동안 캐릭터 2를 조작하는 도구의 비교 예시입니다. 막대의 60%는 이 도구에서 다음 행동을 잇기 위해 둔 기준입니다." aria-label="교대 뒤 행동과 조작 대상 비교 화면 확대" aria-haspopup="dialog" aria-controls="media-modal" aria-expanded="false" type="button">확대</button>
+</figure>
+</section>
+</div>
+</div>
+<footer class="v106-page-footer"><span>명조 전투 조작 분석 · 김지홍</span><span>10 / 11</span></footer>
+</section>
+</div>
+<div class="v106-page-wrap" id="p12"><section class="v106-page v106-role-body v106-tool-page" data-info="p12-PAGE" data-page-id="p12" aria-label="교대·입력 관계를 직접 살펴보는 도구"><div class="v106-doc-header" data-info="p12-NAV"><span>명조 전투 조작 분석</span><nav aria-label="문서 이동"><a data-info="p12-TEXT-01" href="#contents">↩ 목차</a><span>11 / 11</span></nav></div><header class="v106-page-header" data-info="p12-PAGE-HEADER-188"><small>PART 4 · 본문 11</small><h2 data-info="p12-TEXT-02">교대·입력 관계를 직접 살펴보는 도구</h2><button class="v106-tool-help-open" id="comparison-help-open" data-info="p12-HELP-OPEN" aria-controls="comparison-simulator" aria-expanded="false" type="button">조작법</button></header><div class="v106-page-body" data-info="p12-PAGE-BODY-189"><figure class="v106-simulator-figure" data-info="p12-SIMULATOR-FIGURE-162"><figcaption class="v106-simulator-caption" data-info="p12-TEXT-03"><a class="v106-tool-print-link" data-info="p12-PRINT-LINK" href="simulator.html" target="_blank" rel="noopener">시뮬레이터 직접 열기 ↗</a></figcaption><div class="v106-simulator-surface" data-info="p12-SIMULATOR-SURFACE-161"><svg xmlns="http://www.w3.org/2000/svg" class="v106-tool-example" data-info="p12-TOOL-PRINT" role="img" aria-label="원도구의 두 캐릭터 비교 영역 발췌 · 캐릭터 1은 계속 행동 중, 캐릭터 2는 조작 중" viewBox="96 148 648 290" preserveAspectRatio="xMidYMid meet"><title>원도구의 두 캐릭터 비교 영역 발췌</title><defs><clipPath id="p12-tool-crop"><rect x="96" y="148" width="648" height="290"/></clipPath></defs><image clip-path="url(#p12-tool-crop)" href="assets/images/tool-swap-example.png" width="1430" height="638"/></svg><iframe class="v106-live-simulator" height="638" id="comparison-simulator" src="simulator.html" title="교대·입력 비교 설명 도구" width="1430"></iframe></div></figure></div><footer class="v106-page-footer"><span>명조 전투 조작 분석 · 김지홍</span><span>11 / 11</span></footer></section></div>
+<div class="v106-page-wrap" id="end"><section class="v106-page v106-role-end" data-info="end-PAGE" data-page-id="end" aria-label="작업의 마무리"><div class="v106-doc-header" data-info="end-NAV"><span>명조 전투 조작 분석</span><nav aria-label="문서 이동"><a data-info="end-CONTENTS" href="#contents">↩ 목차</a></nav></div><div class="v106-end-content" data-info="end-CONTENT"><p class="v106-cover-type" data-info="end-KICKER">이 작업에서 보여드리는 방식</p><h1 data-info="end-SUMMARY">막힌 조작은 더 살피고,<br><em>상대가 함께 볼 수 있는</em><br>설명과 도구로 구체화했습니다.</h1><p data-info="end-ANALYSIS">교대 뒤 남는 행동과 현재 조작하는 대상, 누른 버튼과 실제 나온 행동을 구별했습니다.<br>장리와 앙코의 동작에서는 캐릭터의 표현과 다음 행동을 고르는 경험도 살폈습니다.</p><p data-info="end-DELIVERY">관찰한 장면과 관계를 영상·도표로 설명하고,<br>다른 사람도 입력에 따른 변화를 한 화면에서 직접 살펴볼 수 있는 도구로 만들었습니다.</p></div><footer class="v106-page-footer"><span>명조 전투 조작 분석 · 김지홍</span><span></span></footer></section></div>
+</main><template id="p04-classification-source"><svg aria-label="설명 도표: 살펴본 입력의 구분" class="v106-original-chart" data-info="p04-DIAGRAM-PRIORITY" height="100%" preserveaspectratio="xMidYMid meet" role="img" viewbox="0 0 320 326" width="100%" xmlns="http://www.w3.org/2000/svg">
+<rect fill="#d93025" height="70" rx="8" width="300" x="10" y="10"></rect>
+<text fill="#fff" font-size="15.0" font-weight="900" text-anchor="middle" x="160" y="38">공명 해방의 연출</text>
+<text fill="#ffeb3b" font-size="14" font-weight="700" text-anchor="middle" x="160" y="60">연출 중 멈추는 화면과 조작</text>
+<path d="M 160 85 L 160 100" fill="none" stroke="#d93025" stroke-width="2"></path>
+<rect fill="#4b5563" height="70" rx="8" width="270" x="25" y="105"></rect>
+<text fill="#fff" font-size="14" font-weight="900" text-anchor="middle" x="160" y="133">먼저 화면에 나오는 행동</text>
+<text fill="#e5e7eb" font-size="14" font-weight="700" text-anchor="middle" x="160" y="155">회피 / 점프</text>
+<path d="M 160 180 L 160 195" fill="none" stroke="#4b5563" stroke-width="2"></path>
+<rect fill="#fff" height="70" rx="8" stroke="#bbb" stroke-width="2" width="240" x="40" y="200"></rect>
+<text fill="#111" font-size="14" font-weight="900" text-anchor="middle" x="160" y="228">미리 눌러 두는 행동</text>
+<text fill="#666" font-size="14" font-weight="700" text-anchor="middle" x="160" y="250">일반 공격 · 공명 스킬</text>
+</svg></template><script>const wraps=[...document.querySelectorAll('.v106-page-wrap')];
+
+
+
+function fit(){if(matchMedia('print').matches){wraps.forEach(w=>w.querySelector('.v106-page').style.removeProperty('--scale'));return;}const scale=Math.min(window.innerWidth/1960,window.innerHeight/1100,1);wraps.forEach(w=>w.querySelector('.v106-page').style.setProperty('--scale',scale));}
+
+function navigateTo(id,writeHistory=true){const target=document.getElementById(id);if(!target?.classList.contains('v106-page-wrap'))return;fit();window.placeComparisonTool?.(id);target.scrollIntoView({block:'start',behavior:'instant'});if(writeHistory&&location.hash!=='#'+id)history.pushState(null,'','#'+id);}
+
+new ResizeObserver(fit).observe(document.querySelector('main'));window.addEventListener('resize',fit);fit();
+
+
+
+
+
+document.querySelectorAll('a[href^="#"]').forEach(a=>a.addEventListener('click',e=>{const id=a.hash.slice(1);if(document.getElementById(id)?.classList.contains('v106-page-wrap')){e.preventDefault();navigateTo(id);}}));
+
+let positionPending=false;
+
+window.addEventListener('scroll',()=>{if(positionPending||document.getElementById('media-modal')?.open||matchMedia('print').matches)return;positionPending=true;requestAnimationFrame(()=>{positionPending=false;const y=innerHeight/2;const visible=wraps.filter(w=>{const r=w.getBoundingClientRect();return r.bottom>0&&r.top<innerHeight});const current=visible.find(w=>{const r=w.getBoundingClientRect();return r.top<=y&&r.bottom>=y})||visible[0];if(current){if(location.hash!=='#'+current.id)history.replaceState(null,'','#'+current.id);window.placeComparisonTool?.(current.id);}});},{passive:true});
+
+window.addEventListener('hashchange',()=>navigateTo(location.hash.slice(1),false));window.addEventListener('popstate',()=>navigateTo(location.hash.slice(1),false));requestAnimationFrame(()=>{if(location.hash)navigateTo(location.hash.slice(1),false);else wraps[0]?.scrollIntoView({block:'center',behavior:'instant'});});
+
+
+
+matchMedia('print').addEventListener('change',fit);
+// DOCUMENT_PAGE_WHEEL_NAVIGATION_BEGIN
+(()=>{
+  // A wheel gesture advances one visible document page; its inertia stays on that page.
+  const gestureGap=180;
+  const threshold=30;
+  let lastWheelAt=-Infinity;
+  let direction=0;
+  let accumulated=0;
+  let consumed=false;
+  let destination=null;
+  let destinationExpires=0;
+  const clearNavigation=()=>{destination=null;lastWheelAt=-Infinity;consumed=false;accumulated=0;direction=0};
+  const nativeScrollTarget=target=>{
+    if(document.querySelector('dialog[open], [role="dialog"][aria-modal="true"]'))return true;
+    try{if(document.getElementById('comparison-simulator')?.contentDocument?.querySelector('dialog[open]'))return true;}catch{}
+    if(!target||target.nodeType!==1)return false;
+    const targetDocument=target.ownerDocument;
+    if(targetDocument.querySelector('dialog[open], [role="dialog"][aria-modal="true"]'))return true;
+    if(target.closest('input, textarea, select, [contenteditable="true"]'))return true;
+    for(let node=target;node&&node!==targetDocument.body;node=node.parentElement){
+      const style=targetDocument.defaultView.getComputedStyle(node);
+      if(/^(auto|scroll)$/.test(style.overflowY)&&node.scrollHeight>node.clientHeight+2)return true;
+    }
+    return false;
+  };
+  const onPageWheel=event=>{
+    if(event.defaultPrevented||event.ctrlKey||event.metaKey||window.matchMedia('print').matches)return;
+    if(!event.deltaY||Math.abs(event.deltaX)>Math.abs(event.deltaY))return;
+    const targetDocument=event.target?.ownerDocument;
+    const documentModal=document.querySelector('dialog[open], [role="dialog"][aria-modal="true"]');
+    let toolModal=null;
+    try{toolModal=document.getElementById('comparison-simulator')?.contentDocument?.querySelector('dialog[open]');}catch{}
+    if(documentModal||toolModal){
+      const targetModal=targetDocument?.querySelector('dialog[open], [role="dialog"][aria-modal="true"]');
+      let canScrollInside=false;
+      if(targetModal?.contains(event.target)){
+        for(let node=event.target;node&&node.nodeType===1;node=node.parentElement){
+          const style=targetDocument.defaultView.getComputedStyle(node);
+          const maximum=node.scrollHeight-node.clientHeight;
+          if(/^(auto|scroll)$/.test(style.overflowY)&&maximum>2&&
+             (event.deltaY>0?node.scrollTop<maximum-1:node.scrollTop>1)){
+            canScrollInside=true;break;
+          }
+          if(node===targetModal)break;
+        }
+      }
+      if(!canScrollInside)event.preventDefault();
+      return;
+    }
+    if(nativeScrollTarget(event.target))return;
+    const pages=[...document.querySelectorAll('main .v106-page-wrap')].filter(page=>page.getClientRects().length&&getComputedStyle(page).visibility!=='hidden');
+    if(pages.length<2)return;
+    event.preventDefault();
+    hidePreview();
+    const now=performance.now();
+    const nextDirection=Math.sign(event.deltaY);
+    if(now-lastWheelAt>gestureGap){consumed=false;accumulated=0;direction=nextDirection}
+    lastWheelAt=now;
+    if(consumed)return;
+    if(direction!==nextDirection){accumulated=0;direction=nextDirection}
+    const unit=event.deltaMode===1?16:event.deltaMode===2?window.innerHeight:1;
+    accumulated+=Math.abs(event.deltaY)*unit;
+    if(accumulated<threshold)return;
+    consumed=true;
+    let index=destination&&now<destinationExpires?pages.indexOf(destination):-1;
+    if(index<0&&location.hash)index=pages.findIndex(page=>page.id===location.hash.slice(1));
+    if(index<0&&window.scrollY<=1)index=0;
+    if(index<0){
+      let nearest=Infinity;
+      pages.forEach((page,i)=>{
+        const rect=page.getBoundingClientRect();
+        const distance=Math.abs(rect.top-Math.max(0,(window.innerHeight-rect.height)/2));
+        if(distance<nearest){nearest=distance;index=i}
+      });
+    }
+    const nextIndex=Math.max(0,Math.min(pages.length-1,index+direction));
+    if(nextIndex===index)return;
+    destination=pages[nextIndex];
+    destinationExpires=now+700;
+    const rect=destination.getBoundingClientRect();
+    const maximum=Math.max(0,document.documentElement.scrollHeight-window.innerHeight);
+    const top=Math.max(0,Math.min(maximum,window.scrollY+rect.top-Math.max(0,(window.innerHeight-rect.height)/2)));
+    window.scrollTo({top,behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
+  };
+  window.addEventListener('wheel',onPageWheel,{passive:false});
+  const toolFrame=document.getElementById('comparison-simulator');
+  function bindToolWheel(){
+    try{
+      const frameWindow=toolFrame.contentWindow;
+      frameWindow.addEventListener('wheel',onPageWheel,{passive:false});
+      frameWindow.document.addEventListener('pointerdown',clearNavigation);
+      frameWindow.document.addEventListener('keydown',clearNavigation);
+    }catch{
+      // A separately hosted tool keeps its own native scrolling.
+    }
+  }
+  toolFrame?.addEventListener('load',bindToolWheel);
+  if(toolFrame?.contentDocument?.readyState==='complete')bindToolWheel();
+  // A clicked anchor, keyboard action, or scrollbar drag establishes a new reading position.
+  document.addEventListener('pointerdown',clearNavigation);
+  document.addEventListener('keydown',clearNavigation);
+  window.addEventListener('hashchange',clearNavigation);
+  window.addEventListener('resize',clearNavigation);
+})();
+// DOCUMENT_PAGE_WHEEL_NAVIGATION_END
+
+
+
+
+const comparisonFrame=document.getElementById('comparison-simulator');let printingTool=false;
+const comparisonToolHome=document.querySelector('#p12 .v106-simulator-surface');
+function moveComparisonFrame(destination){if(comparisonFrame.parentElement!==destination)destination.moveBefore(comparisonFrame,null);}
+window.placeComparisonTool=function(id){if(printingTool||document.getElementById('media-modal')?.open||id!=='p12')return;moveComparisonFrame(comparisonToolHome);requestComparisonHelp('activate');};
+function restoreComparisonFrame(){moveComparisonFrame(comparisonToolHome);}
+function requestComparisonHelp(action){comparisonFrame.contentWindow?.postMessage({type:'switch-tool-help',action},'*');}
+const comparisonHelpButton=document.getElementById('comparison-help-open');
+comparisonHelpButton.addEventListener('click',()=>requestComparisonHelp('open'));
+window.addEventListener('message',e=>{
+ if(e.source!==comparisonFrame.contentWindow||!e.data||e.data.type!=='switch-tool-help')return;
+ const state=e.data.state;
+ if(state==='ready'){if(location.hash==='#p12'||document.getElementById('media-modal')?.open&&document.getElementById('media-modal-stage').dataset.tool==='true')requestComparisonHelp('activate');}
+ else if(state==='open'||state==='closed'){comparisonHelpButton.setAttribute('aria-expanded',String(state==='open'));comparisonHelpButton.classList.toggle('is-guide-closed',state==='closed');}
+ else if(state==='escape'){if(document.getElementById('media-modal')?.open&&document.getElementById('media-modal-stage').dataset.tool==='true')closeMedia();}
+});
+
+function fitToolModal(){if(!document.getElementById('media-modal')?.open||document.getElementById('media-modal-stage').dataset.tool!=='true')return;const stage=document.getElementById('media-modal-stage');const dialog=document.getElementById("media-modal");const dialogStyle=getComputedStyle(dialog);const usableWidth=dialog.clientWidth-parseFloat(dialogStyle.paddingLeft)-parseFloat(dialogStyle.paddingRight);const scale=Math.min(usableWidth/1430,Math.min(innerHeight*.82,innerHeight-128)/638);stage.style.setProperty('--tool-scale',scale);}
+window.addEventListener('resize',fitToolModal);
+window.addEventListener('beforeprint',()=>{printingTool=true;moveComparisonFrame(document.getElementById('comparison-tool-storage'));});
+window.addEventListener('afterprint',()=>{printingTool=false;restoreComparisonFrame();fit();});
+</script><div aria-hidden="true" class="v106-hover-preview" hidden="" id="media-hover-preview"><figure class="v106-preview-visual"><img alt=""><figcaption class="v106-image-caption"></figcaption></figure></div><dialog aria-label="자료 확대" class="v106-media-modal" data-info="GLOBAL-MODAL" id="media-modal"><header><h3 id="media-modal-title"></h3><button class="v106-modal-close" data-info="GLOBAL-MODAL-CLOSE" type="button">닫기</button></header><div class="v106-modal-stage" id="media-modal-stage"></div></dialog><script>
+
+const mediaModal=document.getElementById('media-modal');
+
+const mediaStage=document.getElementById('media-modal-stage');
+
+const mediaTitle=document.getElementById('media-modal-title');
+const mediaContext=document.createElement('p');mediaContext.id='media-modal-context';mediaContext.className='v106-flow-condition';mediaContext.hidden=true;mediaContext.dataset.info='GLOBAL-MEDIA-CONTEXT';mediaStage.before(mediaContext);mediaModal.setAttribute('aria-describedby',mediaContext.id);
+
+let mediaOpener=null; let mediaInstance=0; let mediaScroll=null; let mediaVideoSource=null; let mediaVideoWasPlaying=false;
+
+function closeMedia(){const expandedVideo=mediaStage.querySelector('video');if(expandedVideo&&mediaVideoSource){mediaVideoSource.currentTime=expandedVideo.currentTime;mediaVideoSource.muted=expandedVideo.muted;mediaVideoSource.volume=expandedVideo.volume;mediaVideoSource.playbackRate=expandedVideo.playbackRate;mediaVideoWasPlaying=!expandedVideo.paused&&!expandedVideo.ended;}mediaStage.querySelectorAll('video').forEach(v=>v.pause());if(comparisonFrame.parentElement===mediaStage)restoreComparisonFrame();mediaModal.close();document.body.style.removeProperty('--v106-document-overflow');delete mediaStage.dataset.tool;mediaStage.style.removeProperty('--tool-scale');mediaStage.replaceChildren();if(mediaOpener){mediaOpener.setAttribute('aria-expanded','false');mediaOpener.focus({preventScroll:true});}if(mediaScroll)window.scrollTo({left:mediaScroll[0],top:mediaScroll[1],behavior:'instant'});if(mediaVideoSource&&mediaVideoWasPlaying)mediaVideoSource.play().catch(()=>{});mediaVideoSource=null;mediaVideoWasPlaying=false;}
+
+document.querySelectorAll('.v106-zoom').forEach(button=>button.addEventListener('click',()=>{
+
+  hidePreview();mediaModal.dataset.sourceInfo=button.dataset.info;mediaContext.dataset.sourceInfo=button.dataset.info;button.setAttribute('aria-expanded','true');mediaContext.textContent=button.dataset.mediaContext||'';mediaContext.hidden=!mediaContext.textContent;mediaOpener=button;mediaScroll=[window.scrollX,window.scrollY];mediaVideoSource=button.dataset.mediaKind==='video'?[...document.querySelectorAll('main video')].find(v=>v.getAttribute('src')===button.dataset.mediaSrc):null;mediaVideoWasPlaying=!!mediaVideoSource&&!mediaVideoSource.paused;document.querySelectorAll('main video').forEach(v=>v.pause());mediaStage.replaceChildren();mediaTitle.textContent=button.dataset.mediaTitle;
+
+  if(button.dataset.mediaKind==='simulator'){mediaStage.dataset.tool='true';moveComparisonFrame(mediaStage);}
+
+  else {const visual=document.createElement('figure');visual.className='v106-modal-visual';const el=makeMedia(button);visual.append(el);const caption=document.createElement('figcaption');caption.className='v106-image-caption';caption.textContent=button.dataset.mediaCaption;visual.append(caption);mediaStage.append(visual);fitCaption(visual,el);}
+
+  document.body.style.setProperty('--v106-document-overflow','hidden');mediaModal.showModal();fitMediaSpace();fitToolModal();if(button.dataset.mediaKind==='simulator')requestComparisonHelp('activate');
+
+}));
+
+mediaModal.querySelector('.v106-modal-close').addEventListener('click',closeMedia);
+
+mediaModal.addEventListener('cancel',e=>{e.preventDefault();closeMedia()});
+
+function bindComparisonEscape(){try{comparisonFrame.contentWindow.addEventListener('keydown',e=>{if(e.key==='Escape'&&mediaModal.open){e.preventDefault();e.stopPropagation();closeMedia();}},true);}catch{}}
+comparisonFrame.addEventListener('load',bindComparisonEscape);if(comparisonFrame.contentDocument?.readyState==='complete')bindComparisonEscape();
+
+mediaModal.addEventListener('click',e=>{if(e.target===mediaModal)closeMedia()});
+
+document.querySelectorAll('.v106-page-wrap').forEach(w=>{
+
+  const io=new IntersectionObserver(entries=>entries.forEach(e=>{if(!e.isIntersecting)w.querySelectorAll('video').forEach(v=>v.pause());}),{threshold:0.05});io.observe(w);
+
+});
+
+
+
+const preview=document.getElementById('media-hover-preview');let previewTimer=null;const previewContext=document.createElement('p');previewContext.className='v106-flow-condition';previewContext.hidden=true;previewContext.dataset.info='GLOBAL-PREVIEW-CONTEXT';preview.prepend(previewContext);
+
+function hidePreview(){clearTimeout(previewTimer);preview.hidden=true;preview.setAttribute('aria-hidden','true');preview.querySelector('img,svg')?.remove();}
+
+function showPreview(button){clearTimeout(previewTimer);previewTimer=setTimeout(()=>{if(mediaModal.open)return;preview.dataset.sourceInfo=button.dataset.info;previewContext.dataset.sourceInfo=button.dataset.info;previewContext.textContent=button.dataset.mediaContext||'';previewContext.hidden=!previewContext.textContent;const visual=preview.querySelector('figure');visual.querySelector('img,svg')?.remove();const el=makeMedia(button);visual.prepend(el);fitCaption(visual,el);preview.querySelector('figcaption').textContent=button.dataset.mediaCaption;preview.hidden=false;preview.setAttribute('aria-hidden','false');},180);}
+
+document.querySelectorAll('.v106-zoom[data-hover-preview="true"]').forEach(button=>{const surface=button.closest('.v106-chart-visual,.v106-media-visual')||button.parentElement;button.addEventListener('mouseenter',()=>showPreview(button));button.addEventListener('mouseleave',hidePreview);button.addEventListener('focus',()=>requestAnimationFrame(()=>{if(document.activeElement===button)showPreview(button);}));button.addEventListener('blur',hidePreview);});
+
+window.addEventListener('scroll',hidePreview,{passive:true});window.addEventListener('resize',hidePreview);document.addEventListener('keydown',e=>{if(e.key==='Escape')hidePreview()});
+
+
+
+function makeMedia(button){
+
+ if(button.hasAttribute('data-svg-info')){const key=button.dataset.svgInfo;const source=document.querySelector('main svg[data-info="'+key+'"]')||document.getElementById('p04-classification-source').content.querySelector('svg[data-info="'+key+'"]');const el=source.cloneNode(true);const ids=new Map();const namespace='detail-'+(++mediaInstance)+'-';el.querySelectorAll('[id]').forEach(e=>{const old=e.id;e.id=namespace+old;ids.set(old,e.id)});el.querySelectorAll('*').forEach(e=>[...e.attributes].forEach(a=>{let v=a.value;ids.forEach((next,old)=>{v=v.replaceAll('url(#'+old+')','url(#'+next+')')});if(v!==a.value)e.setAttribute(a.name,v)}));return el;}
+
+ const video=button.dataset.mediaKind==='video';const el=document.createElement(video?'video':'img');el.src=button.dataset.mediaSrc;if(video){el.controls=true;el.preload='metadata';el.playsInline=true;if(mediaVideoSource){el.muted=mediaVideoSource.muted;el.volume=mediaVideoSource.volume;el.playbackRate=mediaVideoSource.playbackRate;}const sourceTime=mediaVideoSource?.currentTime||0;el.addEventListener('loadedmetadata',()=>{el.currentTime=sourceTime;if(mediaVideoWasPlaying)el.play().catch(()=>{});},{once:true});}else el.alt=button.dataset.mediaCaption;return el;
+
+}
+
+function fitMediaSpace(){if(!mediaModal.open)return;const h=mediaModal.querySelector('header').getBoundingClientRect().height;const note=mediaContext.hidden?0:mediaContext.getBoundingClientRect().height+10;mediaStage.style.setProperty('--media-space',Math.max(120,innerHeight-h-note-104)+'px');}
+addEventListener('resize',fitMediaSpace);
+function fitCaption(visual,el){const fit=()=>{let w=el.naturalWidth||el.videoWidth,h=el.naturalHeight||el.videoHeight;if(el.tagName.toLowerCase()==='svg'){w=el.viewBox.baseVal.width;h=el.viewBox.baseVal.height;}if(w&&h)visual.style.setProperty('--media-aspect',w/h);};el.addEventListener('load',fit,{once:true});el.addEventListener('loadedmetadata',fit,{once:true});fit();}
+
+
+
+function fitCharts(){document.querySelectorAll('main .v106-chart-visual').forEach(visual=>{const svg=visual.querySelector('svg,img');if(!svg)return;const vb=svg.tagName.toLowerCase()==='svg'?svg.viewBox.baseVal:{width:svg.naturalWidth,height:svg.naturalHeight};if(!vb.width||!vb.height)return;const r=svg.getBoundingClientRect(),v=visual.getBoundingClientRect(),pageScale=v.width/visual.clientWidth;const boxW=r.width/pageScale,boxH=r.height/pageScale;const scale=Math.min(boxW/vb.width,boxH/vb.height);visual.style.setProperty('--chart-width',vb.width*scale+'px');visual.style.setProperty('--chart-height',vb.height*scale+'px');visual.style.setProperty('--chart-right',((v.right-r.right)/pageScale+(boxW-vb.width*scale)/2)+'px');visual.style.setProperty('--chart-bottom',((v.bottom-r.bottom)/pageScale+(boxH-vb.height*scale)/2)+'px');});}
+
+const chartObserver=new ResizeObserver(fitCharts);document.querySelectorAll('main .v106-chart-visual').forEach(e=>chartObserver.observe(e));document.fonts.ready.then(fitCharts);
+
+</script><div hidden="" id="comparison-tool-storage"></div></body></html>

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" font-family="Pretendard, -apple-system, sans-serif" width="120" height="80" viewBox="0 0 120 80">
+                    <!-- Character Portrait Base -->
+                    <circle cx="60" cy="40" r="28" fill="#333" />
+                    <!-- Inner Portrait Detail -->
+                    <path d="M45,55 Q60,30 75,55" fill="#555" />
+                    <circle cx="60" cy="32" r="10" fill="#555" />
+                    <!-- Concerto Gauge Outline -->
+                    <circle cx="60" cy="40" r="34" fill="none" stroke="#ddd" stroke-width="4" />
+                    <!-- Concerto Gauge Fill (Full) -->
+                    <circle cx="60" cy="40" r="34" fill="none" stroke="#d93025" stroke-width="4" stroke-dasharray="213" stroke-dashoffset="40" transform="rotate(-90 60 40)" />
+                    <!-- Glowing Star/Effect -->
+                    <circle cx="85" cy="15" r="5" fill="#facc15" />
+                </svg>
