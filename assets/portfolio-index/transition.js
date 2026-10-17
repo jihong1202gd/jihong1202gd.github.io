@@ -27,11 +27,12 @@
     host.dataset.phase = intro ? 'waiting' : covered ? 'loading' : 'closing';
     host.dataset.minimumMs = String(MIN_PRESENTATION_MS);
     host.dataset.backdrop = !covered && !intro ? 'hill' : 'white';
-    host.style.cssText = 'position:fixed;inset:0;z-index:2147483647;display:block;';
+    host.style.cssText = 'position:fixed;inset:0;z-index:2147483647;display:block;'+(!covered&&!intro?'background:#fff;':'');
     const shadow = host.attachShadow({mode: 'open'});
     shadow.innerHTML = `<style>
       :host{color-scheme:light;font:13px/1.6 system-ui,sans-serif}
-      .departure-scenery{position:absolute;inset:0;background:#9cccf2 url('${new URL('assets/portfolio-index/sakura-hill-4x.webp',url).href}') center bottom/max(110vw,160vh) auto no-repeat}
+      .departure-scenery{position:absolute;inset:0;overflow:hidden;background:#fff}
+      .departure-scenery img{position:absolute;bottom:0;left:50%;width:max(110vw,160vh);height:auto;max-width:none;transform:translateX(-50%)}
       canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
       .message{position:absolute;bottom:max(28px,env(safe-area-inset-bottom));left:18px;right:18px;text-align:center;color:#9b7183;font-size:12px;letter-spacing:.04em}
       .message span{padding:5px 12px;background:#ffffffd9;border-radius:16px}
@@ -54,7 +55,7 @@
     let width, height, base, petals = [], frame = 0, last = 0, progress = covered ? 1 : 0;
     let disposed = false, finishTimer = 0, openingStarted = null, openingFraction = 0;
     let originalPetals = null;
-    const started = performance.now();
+    let started = performance.now(),departureReady=covered||intro||reduced.matches,imageTimer=0;
     const frameTimes=[],drawTimes=[];let previousProfileFrame=0;
     function profileReport() {
       if(!profile)return;
@@ -193,6 +194,7 @@
     }
     function render(ms) {
       if (disposed || document.hidden) {frame=0;last=0;return;}
+      if(!departureReady){frame=requestAnimationFrame(render);return;}
       const drawStarted=profile?performance.now():0;
       if(profile&&previousProfileFrame)frameTimes.push(ms-previousProfileFrame);
       previousProfileFrame=ms;
@@ -237,7 +239,7 @@
     }
     function visibility() {previousProfileFrame=0;if(document.hidden){cancelAnimationFrame(frame);frame=0;last=0;}else if(!frame&&!disposed)frame=requestAnimationFrame(render);}
     function stop() {
-      if (disposed) return;disposed=true;cancelAnimationFrame(frame);clearTimeout(slowTimer);clearTimeout(finishTimer);
+      if (disposed) return;disposed=true;cancelAnimationFrame(frame);clearTimeout(slowTimer);clearTimeout(finishTimer);clearTimeout(imageTimer);
       removeEventListener('resize',resize);reduced.removeEventListener('change',motionPreference);
       document.removeEventListener('visibilitychange',visibility);
       document.removeEventListener('DOMContentLoaded',hideOriginalPetals);
@@ -259,12 +261,37 @@
     }
     const slowTimer=intro?0:setTimeout(()=>{host.dataset.slow='';shadow.querySelector('.message span').textContent='연결이 늦어지고 있어요';},8000);
     function hideOriginalPetals() {if(intro&&!disposed){originalPetals=document.getElementById('petals');if(originalPetals)originalPetals.hidden=true;}}
-    function motionPreference() {motionOff=reduced.matches||requestedMotionOff;if(intro&&reduced.matches){stop();return;}resize();}
+    function motionPreference() {
+      motionOff=reduced.matches||requestedMotionOff;
+      if(intro&&reduced.matches){stop();return;}
+      if(reduced.matches&&!departureReady){clearTimeout(imageTimer);departureReady=true;started=performance.now();last=0;}
+      resize();
+    }
     addEventListener('resize',resize,{passive:true});document.addEventListener('visibilitychange',visibility);
     reduced.addEventListener('change',motionPreference);
     if (intro) {hideOriginalPetals();if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',hideOriginalPetals,{once:true});}
     resize();frame=requestAnimationFrame(render);
-    return {host,finish,stop,carryField,ready:()=>progress>=1};
+    if(!departureReady) {
+      host.dataset.phase='preparing';
+      const image=document.createElement('img');
+      const prepared=ok=>{
+        if(disposed||departureReady)return;
+        clearTimeout(imageTimer);departureReady=true;started=performance.now();last=0;previousProfileFrame=0;
+        if(ok)shadow.querySelector('.departure-scenery').append(image);
+        host.dataset.backgroundReady=ok?'decoded':'fallback';host.dataset.phase='closing';
+      };
+      const loaded=()=>{
+        if(typeof image.decode==='function')image.decode().then(()=>prepared(true),()=>prepared(false));
+        else prepared(true);
+      };
+      imageTimer=setTimeout(()=>prepared(false),4000);
+      image.addEventListener('load',loaded,{once:true});image.addEventListener('error',()=>prepared(false),{once:true});
+      image.alt='';
+      image.src=new URL('assets/portfolio-index/sakura-hill-4x.webp',url).href;
+      if(image.complete&&image.naturalWidth>0)loaded();
+    }
+    return {host,finish,stop,carryField,ready:()=>departureReady&&progress>=1,
+      startedAt:()=>Date.now()-(performance.now()-started)};
   }
 
   if (arriving) {
@@ -322,7 +349,6 @@
 
   if (!routes.has(entry)) return;
   function startOutgoing() {
-  const outgoingStarted = Date.now();
   const target=new URL(entry,url);cleanAddress();
   // Warm only the HTML during the closing animation; assets load normally in the real document.
   const prefetch=document.createElement('link');prefetch.rel='prefetch';prefetch.href=target.href;document.head.append(prefetch);
@@ -333,7 +359,7 @@
     function handoff() {
       if(!cover.ready()){requestAnimationFrame(handoff);return;}
       const destination=new URL(target);destination.searchParams.set('portfolio-opening','sakura');
-      destination.searchParams.set('portfolio-started',String(outgoingStarted));
+      destination.searchParams.set('portfolio-started',String(cover.startedAt()));
       if(motionOff)destination.searchParams.set('petal-motion','off');
       if(profile)destination.searchParams.set('transition-profile','1');
       requestAnimationFrame(()=>{cover.carryField();location.replace(destination.href);});
