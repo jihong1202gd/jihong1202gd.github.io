@@ -9,8 +9,22 @@
     return !!el && el.nodeType === 1 && MEDIA.test(el.tagName);
   }
 
+  // Some images sit under cards with pointer-events:none, so the click target is
+  // the card, not the <img>. Also match when the pointer is over a visible media box.
+  function pointOnMedia(x, y) {
+    var list = document.querySelectorAll('img, video, canvas');
+    for (var i = 0; i < list.length; i++) {
+      var r = list[i].getBoundingClientRect();
+      if (r.width > 0 && r.height > 0 && x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) {
+        var cs = getComputedStyle(list[i]);
+        if (cs.visibility !== 'hidden' && cs.display !== 'none') return true;
+      }
+    }
+    return false;
+  }
+
   document.addEventListener('contextmenu', function (e) {
-    if (isMedia(e.target)) e.preventDefault();
+    if (isMedia(e.target) || pointOnMedia(e.clientX, e.clientY)) e.preventDefault();
   }, true);
 
   document.addEventListener('dragstart', function (e) {
