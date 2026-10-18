@@ -67,7 +67,7 @@
     button.setAttribute('aria-busy', String(pending));
     button.dataset.state = pending ? 'loading' : playing ? 'playing' : blocked ? 'blocked' : failed ? 'error' : 'paused';
     label.textContent = pending ? 'BGM 준비' : playing ? 'BGM 끄기' : 'BGM 켜기';
-    button.title = failed ? '음악을 불러오지 못했습니다. 다시 눌러주세요.' : pending ? '음악을 불러오는 중입니다. 다시 누르면 취소합니다.' : playing ? 'A Spring Morning Surprise 일시정지' : 'A Spring Morning Surprise 재생';
+    button.title = failed ? '음악을 불러오지 못했습니다. 다시 눌러주세요.' : pending ? '음악을 불러오는 중입니다. 다시 누르면 취소합니다.' : playing ? 'A Spring Morning Surprise 일시정지 · ESC로 끄기' : 'A Spring Morning Surprise 재생';
     button.setAttribute('aria-label', playing ? '배경음악 일시정지' : '배경음악 재생');
     document.documentElement.dataset.bgmClickToPlay = String(blocked && !userStopped);
   }
@@ -111,6 +111,7 @@
   document.addEventListener('click', event => {
     if (!event.isTrusted || event.button !== 0 || !blocked || userStopped || desired || !audio.paused) return;
     if (event.target?.closest?.('.music-toggle,.music-volume')) return;
+    if (event.target?.closest?.('a.chapter')) return;
     remember('on'); void start(true);
   }, true);
   audio.addEventListener('playing', () => {
@@ -120,9 +121,16 @@
   });
   audio.addEventListener('pause', update);
   audio.addEventListener('error', () => { request++; desired = false; pending = false; failed = true; update(); });
-  if (channel) channel.onmessage = event => { if (event.data === 'playing') stop(); };
+  function stopByShortcut() { remember('off'); stop(true); }
+  addEventListener('portfolio-bgm-stop', stopByShortcut);
+  addEventListener('portfolio-bgm-pause', () => stop());
+  if (channel) channel.onmessage = event => {
+    if (event.data === 'playing') stop();
+    if (event.data === 'stop') stopByShortcut();
+  };
   addEventListener('storage', event => {
     if (event.key === preferenceKey && event.newValue === 'off') stop(true);
+    if (event.key === 'jihong-portfolio-bgm-stop-v1' && event.newValue) stopByShortcut();
     if (event.key === volumeKey && !userStopped) setVolume(Number(event.newValue) >= 1 ? event.newValue : 3);
   });
   addEventListener('pagehide', () => { stop(); });

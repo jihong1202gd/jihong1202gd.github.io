@@ -1,5 +1,30 @@
 (() => {
   'use strict';
+  let musicStopChannel;
+  try { musicStopChannel = new BroadcastChannel('jihong-portfolio-bgm'); } catch (_) {}
+  function requestMusicStop() {
+    try { localStorage.setItem('jihong-portfolio-bgm-v1', 'off'); } catch (_) {}
+    // A distinct request also reaches tabs when the saved preference was already off.
+    try { localStorage.setItem('jihong-portfolio-bgm-stop-v1', `${Date.now()}:${Math.random()}`); } catch (_) {}
+    window.dispatchEvent(new Event('portfolio-bgm-stop'));
+    try { musicStopChannel?.postMessage('stop'); } catch (_) {}
+  }
+  function bindMusicEscape(target) {
+    try {
+      const doc = target.document;
+      if (!doc.documentElement || doc.documentElement.dataset.bgmEscapeBound) return;
+      doc.documentElement.dataset.bgmEscapeBound = 'true';
+      target.addEventListener('keydown', event => {
+        if (event.key === 'Escape' && !event.repeat) requestMusicStop();
+      }, true);
+      // Keyboard events in a frame do not bubble to the surrounding document.
+      doc.addEventListener('load', event => {
+        if (event.target.tagName === 'IFRAME') bindMusicEscape(event.target.contentWindow);
+      }, true);
+      for (const frame of doc.querySelectorAll('iframe')) bindMusicEscape(frame.contentWindow);
+    } catch (_) { /* External frames keep their own keyboard controls. */ }
+  }
+  bindMusicEscape(window);
   const routes = new Set(['about.html', 'project-kizaki-ako.html',
     'wuthering-waves-control-analysis.html', 'study-character-making.html']);
   const openedStorageKey = 'jihong-portfolio-opened-v1';
@@ -434,13 +459,18 @@
   const chapters=document.querySelectorAll('a.chapter');
   for (const link of chapters) {
     link.target='_blank';link.rel='noopener';
+    link.addEventListener('auxclick', event => {
+      if (event.button === 1 && !event.defaultPrevented) window.dispatchEvent(new Event('portfolio-bgm-pause'));
+    });
     link.addEventListener('click',event=>{
-      if(event.defaultPrevented||event.button!==0||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;
+      if(event.defaultPrevented||event.button!==0)return;
       const target=new URL(link.href);
       if(target.origin!==url.origin||!routes.has(target.pathname.split('/').pop()))return;
+      window.dispatchEvent(new Event('portfolio-bgm-pause'));
+      if(event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;
       const opening=new URL('index.html',url);
       opening.searchParams.set('open-portfolio',target.pathname.split('/').pop());
-      opening.searchParams.set('portfolio-version','20261018-13');
+      opening.searchParams.set('portfolio-version','20261018-14');
       if(reduced.matches||document.querySelector('#petals')?.dataset.motion==='paused')opening.searchParams.set('petal-motion','off');
       if(profile)opening.searchParams.set('transition-profile','1');
       const original=link.getAttribute('href');link.href=opening.href;
