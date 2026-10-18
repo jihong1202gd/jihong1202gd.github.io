@@ -9,6 +9,7 @@
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   const MIN_PRESENTATION_MS = 3000;
   const INTRO_REVEAL_MS = 1150;
+  const DOCUMENT_REVEAL_MS = 1000;
   const profile = url.searchParams.get('transition-profile') === '1';
   const navigationStarted = Number(url.searchParams.get('portfolio-started'));
   const navigationElapsed = Date.now()-navigationStarted;
@@ -17,7 +18,7 @@
   let motionOff = reduced.matches || requestedMotionOff;
 
   function cleanAddress() {
-    for (const key of ['open-portfolio', 'portfolio-opening', 'portfolio-started', 'petal-motion']) url.searchParams.delete(key);
+    for (const key of ['open-portfolio', 'portfolio-opening', 'portfolio-started', 'petal-motion', 'portfolio-version']) url.searchParams.delete(key);
     history.replaceState(history.state, '', url);
   }
 
@@ -34,7 +35,8 @@
       .departure-scenery{position:absolute;inset:0;overflow:hidden;background:#fff}
       .departure-scenery img{position:absolute;bottom:0;left:50%;width:max(110vw,160vh);height:auto;max-width:none;transform:translateX(-50%)}
       canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
-      .message{position:absolute;bottom:max(28px,calc(env(safe-area-inset-bottom) + 16px));left:16px;right:16px;display:flex;flex-direction:column;align-items:center;text-align:center;color:#bd3c69;font-family:"Malgun Gothic",sans-serif;max-height:calc(100vh - 40px);overflow:auto;padding:72px 32px 0;left:0;right:0;box-sizing:border-box}
+      .message{position:absolute;bottom:max(28px,calc(env(safe-area-inset-bottom) + 16px));left:16px;right:16px;display:flex;flex-direction:column;align-items:center;text-align:center;color:#bd3c69;font-family:"Malgun Gothic",sans-serif;max-height:calc(100vh - 40px);overflow:auto;padding:72px 32px 0;left:0;right:0;box-sizing:border-box;transition:opacity .18s}
+      :host([data-phase="revealing"]) .message{opacity:0;pointer-events:none}
       .loading-card{position:relative;box-sizing:border-box;width:min(440px,100%);padding:18px 24px;border:1px solid #e3cbd6;border-radius:24px;background:rgba(255,255,255,.78);box-shadow:0 3px 12px #7343550a}
 
       .perched-beret{position:absolute;left:-48px;top:-55px;width:102px;height:70px;overflow:visible;pointer-events:none;transform-origin:76% 83%;transform:rotate(-15deg);animation:beret-breeze 2.6s ease-in-out infinite;filter:drop-shadow(0 3px 2px #73435518)}
@@ -86,6 +88,7 @@
     document.documentElement.append(host);
     let width, height, base, petals = [], frame = 0, last = 0, progress = covered ? 1 : 0;
     let disposed = false, finishTimer = 0, openingStarted = null, openingFraction = 0;
+    let revealStarted = null, revealFraction = 0;
     let originalPetals = null;
     let started = performance.now(),departureReady=covered||intro||reduced.matches,imageTimer=0;
     const frameTimes=[],drawTimes=[];let previousProfileFrame=0;
@@ -165,6 +168,17 @@
     }
     function whiten() {
       paint.clearRect(0,0,width,height);
+      if (!intro && revealStarted !== null) {
+        if(revealFraction>=1)return;
+        paint.save();paint.translate(width/2,height/2);paint.scale(width/2,height/2);
+        const edge=1.9*(1-revealFraction)-.45;
+        const inner=Math.max(0,edge-.35),outer=Math.max(.001,edge+.35);
+        const alpha=Math.min(1,Math.max(0,(edge+.35)/.7));
+        const fill=paint.createRadialGradient(0,0,inner,0,0,outer);
+        fill.addColorStop(0,`rgba(255,255,255,${alpha})`);
+        fill.addColorStop(1,'rgba(255,255,255,0)');
+        paint.fillStyle=fill;paint.fillRect(-1,-1,2,2);paint.restore();return;
+      }
       if (progress >= 1) {paint.fillStyle='#fff';paint.fillRect(0,0,width,height);return;}
       if (progress <= 0) return;
       paint.save();paint.translate(width/2,height/2);paint.scale(width/2,height/2);
@@ -177,7 +191,7 @@
       ctx.save();ctx.translate(p.x+Math.sin(p.phase)*18,p.y);ctx.rotate(p.angle);
       const size=p.size*petalScale;
       ctx.scale(size,size*(Math.cos(p.phase*1.3)*.3+.7));
-      const blend=intro?Math.min(1,(1-openingFraction)/.15):1;
+      const blend=intro?Math.min(1,(1-openingFraction)/.15):1-revealFraction;
       ctx.globalAlpha=Math.min(.95,p.alpha+gust*(intro?0:.12))*blend*p.visibility;
       ctx.drawImage(sprite,-1.125,-1.125,2.25,2.25);ctx.restore();
     }
@@ -238,6 +252,10 @@
         progress=1-openingFraction;whiten();
         host.dataset.phase='opening';
         if (elapsed===1) {stop();return;}
+      } else if (revealStarted !== null) {
+        const elapsed=Math.max(0,Math.min(1,(ms-revealStarted)/DOCUMENT_REVEAL_MS));
+        revealFraction=smooth(elapsed);host.dataset.revealFraction=revealFraction.toFixed(4);whiten();
+        if(elapsed===1){stop();return;}
       } else if (!covered && progress<1) {
         const elapsed = reduced.matches ? 1 : Math.max(0,Math.min(1,(ms-started-300)/700));
         progress=elapsed*elapsed*(3-2*elapsed);whiten();
@@ -296,8 +314,9 @@
       }
       host.dataset.phase='revealing';updateBar(1);
       if(reduced.matches){stop();return;}
-      const animation=host.animate([{opacity:1},{opacity:0}],{duration:260,fill:'forwards'});
-      animation.finished.then(stop,stop);finishTimer=setTimeout(stop,400);
+      revealStarted=performance.now();host.dataset.revealDirection='edges-to-center';
+      host.style.background='transparent';shadow.querySelector('.departure-scenery')?.remove();
+      whiten();finishTimer=setTimeout(stop,DOCUMENT_REVEAL_MS+400);
     }
     const slowTimer=intro?0:setTimeout(()=>{host.dataset.slow='';shadow.querySelector('.message span').textContent='연결이 늦어지고 있어요';},8000);
     function hideOriginalPetals() {if(intro&&!disposed){originalPetals=document.getElementById('petals');if(originalPetals)originalPetals.hidden=true;}}
@@ -408,6 +427,7 @@
       if(target.origin!==url.origin||!routes.has(target.pathname.split('/').pop()))return;
       const opening=new URL('index.html',url);
       opening.searchParams.set('open-portfolio',target.pathname.split('/').pop());
+      opening.searchParams.set('portfolio-version','20261018-12');
       if(reduced.matches||document.querySelector('#petals')?.dataset.motion==='paused')opening.searchParams.set('petal-motion','off');
       if(profile)opening.searchParams.set('transition-profile','1');
       const original=link.getAttribute('href');link.href=opening.href;
@@ -479,7 +499,7 @@
         document.documentElement.dataset.portfolioShell='ready';
         frame.removeAttribute('aria-hidden');frame.inert=false;printSource.hidden=false;
         cover.finish();
-        setTimeout(()=>frame.focus({preventScroll:true}),420);
+        setTimeout(()=>frame.focus({preventScroll:true}),DOCUMENT_REVEAL_MS+60);
       }
       requestAnimationFrame(revealWhenReady);
     }catch(_){clearTimeout(watchdog);if(cover)cover.stop();location.replace(target.href);}
