@@ -165,7 +165,7 @@
         Math.min(1,((covered?elapsedBeforeArrival:0)+age)/2200);
       gust=intro?1-smooth(journey):smooth(journey);
       const peak=intro?base*5:Math.min(1600,Math.max(base*10,Math.round(width*height/900)));
-      activeCount=motionOff?0:Math.round(base+(peak-base)*gust);
+      activeCount=motionOff?0:Math.round((base+(peak-base)*gust)*(intro?1:.75));
       petalScale=intro?1+gust*.45:1;
       // Depth layers emerge across the whole field as the shared wind strengthens.
       if(!motionOff)while(petals.length<activeCount)petals.push(make(false,true));
@@ -197,7 +197,7 @@
       } else if(oldWidth&&oldHeight) {
         for(const p of petals){p.x*=width/oldWidth;p.y*=height/oldHeight;}
       } else {
-        petals=Array.from({length:motionOff?0:base*(intro?5:1)},()=>make());
+        petals=Array.from({length:motionOff?0:Math.round(base*(intro?5:.75))},()=>make());
       }
       if(motionOff)petals=[];
       field(performance.now());
@@ -320,14 +320,15 @@
         const response=1-Math.exp(-dt/.18);
         p.vx=p.vx===undefined?vx:p.vx+(vx-p.vx)*response;
         p.vy=p.vy===undefined?vy:p.vy+(vy-p.vy)*response;
-        p.x+=p.vx*dt;p.y+=p.vy*dt;p.angle+=p.spin*(1+gust*2)*dt;p.phase+=(.7+gust*2.3)*dt;
+        const petalStep=dt*(intro?1:.8);
+        p.x+=p.vx*petalStep;p.y+=p.vy*petalStep;p.angle+=p.spin*(1+gust*2)*petalStep;p.phase+=(.7+gust*2.3)*petalStep;
         if(p.y>height+80||p.y< -100||p.x< -Math.max(180,width*.4)||p.x>width+80) {
           const opacity=p.visibility;p=petals[i]=make(false);p.visibility=opacity;
         }
         draw(p,ms/1000);if(p.visibility>.01)drawn++;
       }
       host.dataset.drawnCount=String(drawn);
-      host.dataset.windSpeed=String(Math.round(gust*width*.55));
+      host.dataset.windSpeed=String(Math.round(gust*width*.55*(intro?1:.8)));
       drawBeret(ms);
       if(profile)drawTimes.push(performance.now()-drawStarted);
       frame=requestAnimationFrame(render);
@@ -470,7 +471,7 @@
       if(event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;
       const opening=new URL('index.html',url);
       opening.searchParams.set('open-portfolio',target.pathname.split('/').pop());
-      opening.searchParams.set('portfolio-version','20261018-14');
+      opening.searchParams.set('portfolio-version','20261018-15');
       if(reduced.matches||document.querySelector('#petals')?.dataset.motion==='paused')opening.searchParams.set('petal-motion','off');
       if(profile)opening.searchParams.set('transition-profile','1');
       const original=link.getAttribute('href');link.href=opening.href;
