@@ -2,6 +2,19 @@
   'use strict';
   const routes = new Set(['about.html', 'project-kizaki-ako.html',
     'wuthering-waves-control-analysis.html', 'study-character-making.html']);
+  const openedStorageKey = 'jihong-portfolio-opened-v1';
+  function recordOpenedDocument() {
+    const route = location.pathname.split('/').pop();
+    if (!routes.has(route)) return;
+    try {
+      const saved = JSON.parse(localStorage.getItem(openedStorageKey) || '[]');
+      const opened = new Set((Array.isArray(saved) ? saved : []).filter(item => routes.has(item)));
+      if (opened.has(route)) return;
+      opened.add(route); localStorage.setItem(openedStorageKey, JSON.stringify([...opened]));
+    } catch (_) {}
+  }
+  if (document.readyState === 'complete') recordOpenedDocument();
+  else addEventListener('load', recordOpenedDocument, { once: true });
   const url = new URL(location.href);
   const file = url.pathname.split('/').pop();
   const entry = url.searchParams.get('open-portfolio');
@@ -427,7 +440,7 @@
       if(target.origin!==url.origin||!routes.has(target.pathname.split('/').pop()))return;
       const opening=new URL('index.html',url);
       opening.searchParams.set('open-portfolio',target.pathname.split('/').pop());
-      opening.searchParams.set('portfolio-version','20261018-12');
+      opening.searchParams.set('portfolio-version','20261018-13');
       if(reduced.matches||document.querySelector('#petals')?.dataset.motion==='paused')opening.searchParams.set('petal-motion','off');
       if(profile)opening.searchParams.set('transition-profile','1');
       const original=link.getAttribute('href');link.href=opening.href;
