@@ -46,8 +46,35 @@
   const arriving = routes.has(file) && url.searchParams.get('portfolio-opening') === 'sakura';
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   const MIN_PRESENTATION_MS = 3000;
+  // Share completed first-document presentation across new tabs, not across long breaks.
+  const readingSessionKey = 'jihong-portfolio-reading-session-v1';
+  const READING_IDLE_MS = 30 * 60 * 1000;
+  function readReadingSession(now = Date.now()) {
+    try {
+      const saved = JSON.parse(localStorage.getItem(readingSessionKey) || 'null');
+      if (saved && Number.isFinite(saved.completedAt) && Number.isFinite(saved.lastActivity) &&
+          saved.completedAt > 0 && saved.completedAt <= saved.lastActivity &&
+          now >= saved.lastActivity && now - saved.lastActivity < READING_IDLE_MS) return saved;
+    } catch (_) { /* Unavailable storage keeps the full first-document presentation. */ }
+    return null;
+  }
+  function touchReadingSession(completed = false) {
+    const now = Date.now(), saved = readReadingSession(now);
+    if (!completed && (!saved || now - saved.lastActivity < 10000)) return;
+    try {
+      localStorage.setItem(readingSessionKey, JSON.stringify({
+        completedAt: saved?.completedAt || now, lastActivity: now
+      }));
+    } catch (_) {}
+  }
+  const repeatPresentation = Boolean(readReadingSession());
+  touchReadingSession();
+  addEventListener('pointerdown', () => touchReadingSession(), {passive: true});
+  addEventListener('keydown', () => touchReadingSession(), {passive: true});
+  addEventListener('focus', () => { if (!document.hidden) touchReadingSession(); });
   const INTRO_REVEAL_MS = 1150;
-  const DOCUMENT_REVEAL_MS = 1000;
+  const DOCUMENT_MIN_MS = repeatPresentation ? 750 : MIN_PRESENTATION_MS;
+  const DOCUMENT_REVEAL_MS = repeatPresentation ? 450 : 1000;
   const profile = url.searchParams.get('transition-profile') === '1';
   const navigationStarted = Number(url.searchParams.get('portfolio-started'));
   const navigationElapsed = Date.now()-navigationStarted;
@@ -64,7 +91,11 @@
     const host = document.createElement('div');
     host.id = intro ? 'index-entry-transition' : 'portfolio-transition';
     host.dataset.phase = intro ? 'waiting' : covered ? 'loading' : 'closing';
-    host.dataset.minimumMs = String(MIN_PRESENTATION_MS);
+    const shortOpening = !intro && repeatPresentation;
+    const minimumMs = intro ? MIN_PRESENTATION_MS : DOCUMENT_MIN_MS;
+    const createdAt = performance.now();
+    host.dataset.minimumMs = String(minimumMs);
+    host.dataset.presentation = intro ? 'intro' : shortOpening ? 'repeat' : 'first';
     host.dataset.backdrop = !covered && !intro ? 'hill' : 'white';
     host.style.cssText = 'position:fixed;inset:0;z-index:2147483647;display:block;'+(!covered&&!intro?'background:#fff;':'');
     const shadow = host.attachShadow({mode: 'open'});
@@ -137,6 +168,10 @@
         samples:frameTimes.length,fps:sum?1000*frameTimes.length/sum:0,
         p95FrameMs:sorted[Math.floor((sorted.length-1)*.95)]||0,
         framesOver33Ms:frameTimes.filter(x=>x>33.4).length,
+        presentation: host.dataset.presentation, minimumMs, revealMs: DOCUMENT_REVEAL_MS,
+        totalMs: Math.round(performance.now()-createdAt),
+        documentReadyMs: Number(host.dataset.documentReadyMs || 0),
+        revealStartMs: Number(host.dataset.revealStartMs || 0),
         averageDrawMs:drawTimes.length?drawTimes.reduce((a,b)=>a+b,0)/drawTimes.length:0,
         peakDrawMs:drawTimes.length?Math.max(...drawTimes):0};
       const report=document.createElement('script');report.type='application/json';report.id='transition-performance';
@@ -163,8 +198,9 @@
       journey=intro?(openingStarted===null||ms<openingStarted?
         Math.min(.73,age/(MIN_PRESENTATION_MS-INTRO_REVEAL_MS)*.73):.73+.27*openingFraction):
         Math.min(1,((covered?elapsedBeforeArrival:0)+age)/2200);
-      gust=intro?1-smooth(journey):smooth(journey);
-      const peak=intro?base*5:Math.min(1600,Math.max(base*10,Math.round(width*height/900)));
+      gust=intro?1-smooth(journey):shortOpening?
+        .12+.20*Math.sin(Math.PI*Math.min(1,age/1000)):smooth(journey);
+      const peak=intro?base*5:shortOpening?base*2:Math.min(1600,Math.max(base*10,Math.round(width*height/900)));
       activeCount=motionOff?0:Math.round((base+(peak-base)*gust)*(intro?1:.75));
       petalScale=intro?1+gust*.45:1;
       // Depth layers emerge across the whole field as the shared wind strengthens.
@@ -295,14 +331,15 @@
         revealFraction=smooth(elapsed);host.dataset.revealFraction=revealFraction.toFixed(4);whiten();
         if(elapsed===1){stop();return;}
       } else if (!covered && progress<1) {
-        const elapsed = reduced.matches ? 1 : Math.max(0,Math.min(1,(ms-started-300)/700));
+        const elapsed = reduced.matches ? 1 : Math.max(0,Math.min(1,
+          (ms-started-(shortOpening?0:300))/(shortOpening?280:700)));
         progress=elapsed*elapsed*(3-2*elapsed);whiten();
         if (elapsed===1) {
           host.dataset.phase='covered';
         }
       }
       field(ms);
-      if(!intro)updateBar(host.dataset.phase==='revealing'?1:Math.min(.9,.1+.8*((covered?elapsedBeforeArrival:0)+ms-started)/MIN_PRESENTATION_MS));
+      if(!intro)updateBar(host.dataset.phase==='revealing'?1:Math.min(.9,.1+.8*((covered?elapsedBeforeArrival:0)+ms-started)/minimumMs));
       if(intro&&originalPetals&&openingFraction>.85)originalPetals.hidden=false;
       ctx.clearRect(0,0,width,height);
       let drawn=0;
@@ -340,6 +377,8 @@
       document.removeEventListener('visibilitychange',visibility);
       document.removeEventListener('DOMContentLoaded',hideOriginalPetals);
       if (originalPetals) originalPetals.hidden=false;
+      if (!intro && revealStarted !== null && !document.hidden &&
+          performance.now()-revealStarted >= DOCUMENT_REVEAL_MS-40) touchReadingSession(true);
       profileReport();host.remove();
       for(const [name,value,priority] of savedScrollStyles){if(value)rootStyle.setProperty(name,value,priority);else rootStyle.removeProperty(name);}
     }
@@ -354,6 +393,7 @@
       host.dataset.phase='revealing';updateBar(1);
       if(reduced.matches){stop();return;}
       revealStarted=performance.now();host.dataset.revealDirection='edges-to-center';
+      host.dataset.revealStartMs=String(Math.round(revealStarted-createdAt));
       host.style.background='transparent';shadow.querySelector('.departure-scenery')?.remove();
       whiten();finishTimer=setTimeout(stop,DOCUMENT_REVEAL_MS+400);
     }
@@ -397,7 +437,7 @@
     let cover;
     try {
       cover=createCover(true,url);
-      const earliestReveal = performance.now() + (reduced.matches ? 0 : Math.max(0,MIN_PRESENTATION_MS-elapsedBeforeArrival-260));
+      const earliestReveal = performance.now() + (reduced.matches ? 0 : Math.max(0,DOCUMENT_MIN_MS-elapsedBeforeArrival-260));
       const watchdog=setTimeout(()=>cover.finish(),15000);
       const ready=()=>{
         const fonts=document.fonts?document.fonts.ready:Promise.resolve();
@@ -471,7 +511,7 @@
       if(event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;
       const opening=new URL('index.html',url);
       opening.searchParams.set('open-portfolio',target.pathname.split('/').pop());
-      opening.searchParams.set('portfolio-version','20261018-15');
+      opening.searchParams.set('portfolio-version','20261018-16');
       if(reduced.matches||document.querySelector('#petals')?.dataset.motion==='paused')opening.searchParams.set('petal-motion','off');
       if(profile)opening.searchParams.set('transition-profile','1');
       const original=link.getAttribute('href');link.href=opening.href;
@@ -484,7 +524,7 @@
   if (!routes.has(entry)) return;
   function startOutgoing() {
     const target=new URL(entry,url);cleanAddress();
-    let cover,frame,watchdog;
+    let cover,frame,watchdog;const shellStarted=performance.now();
     try {
       // Keep this document and its animated cover alive until the child is ready.
       cover=createCover(false,target);
@@ -519,6 +559,7 @@
         const fonts=doc.fonts?doc.fonts.ready:Promise.resolve();
         Promise.race([fonts,new Promise(resolve=>setTimeout(resolve,1200))]).then(()=>{
           ready=true;clearTimeout(watchdog);
+          cover.host.dataset.documentReadyMs=String(Math.round(performance.now()-shellStarted));
           frame.title=doc.title||'포트폴리오 문서';
           frame.contentWindow.addEventListener('keydown',printDocument,true);
           // Keep ordinary cross-document links as top-level navigation; anchors stay inside.
@@ -534,7 +575,7 @@
       function revealWhenReady() {
         if(!cover.host.isConnected)return;
         const age=Date.now()-cover.startedAt();
-        if(!ready||!cover.ready()||(!reduced.matches&&age<MIN_PRESENTATION_MS-260)){
+        if(!ready||!cover.ready()||(!reduced.matches&&age<DOCUMENT_MIN_MS-260)){
           requestAnimationFrame(revealWhenReady);return;
         }
         if(revealed)return;revealed=true;
