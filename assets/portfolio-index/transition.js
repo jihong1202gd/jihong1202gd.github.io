@@ -34,23 +34,55 @@
       .departure-scenery{position:absolute;inset:0;overflow:hidden;background:#fff}
       .departure-scenery img{position:absolute;bottom:0;left:50%;width:max(110vw,160vh);height:auto;max-width:none;transform:translateX(-50%)}
       canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
-      .message{position:absolute;bottom:max(28px,env(safe-area-inset-bottom));left:18px;right:18px;text-align:center;color:#9b7183;font-size:12px;letter-spacing:.04em}
-      .message span{padding:5px 12px;background:#ffffffd9;border-radius:16px}
+      .message{position:absolute;bottom:max(28px,calc(env(safe-area-inset-bottom) + 16px));left:16px;right:16px;display:flex;flex-direction:column;align-items:center;text-align:center;color:#bd3c69;font-family:"Malgun Gothic",sans-serif;max-height:calc(100vh - 40px);overflow:auto;padding:72px 32px 0;left:0;right:0;box-sizing:border-box}
+      .loading-card{position:relative;box-sizing:border-box;width:min(440px,100%);padding:18px 24px;border:1px solid #e3cbd6;border-radius:24px;background:rgba(255,255,255,.78);box-shadow:0 3px 12px #7343550a}
+
+      .perched-beret{position:absolute;left:-48px;top:-55px;width:102px;height:70px;overflow:visible;pointer-events:none;transform-origin:76% 83%;transform:rotate(-15deg);animation:beret-breeze 2.6s ease-in-out infinite;filter:drop-shadow(0 3px 2px #73435518)}
+      @keyframes beret-breeze{0%,100%{transform:rotate(-15deg)}28%{transform:rotate(calc(-15deg - var(--beret-sway,2deg)))}57%{transform:rotate(calc(-15deg + var(--beret-sway,2deg)))}78%{transform:rotate(-15deg)}}
+      @media(max-width:480px){.perched-beret{width:78px;height:54px;left:-30px;top:-42px}}
+      @media(prefers-reduced-motion:reduce){.perched-beret{animation:none}}
+      .message span{display:block;font-size:clamp(18px,1.8vw,24px);font-weight:650;line-height:1.55;letter-spacing:.02em;word-break:keep-all}
+      .loading-meter{position:relative;margin-top:14px}
+      .loading-track{height:5px;overflow:hidden;border-radius:3px;background:#ecdce4}
+      .loading-fill{width:100%;height:100%;transform:scaleX(0);transform-origin:left;background:linear-gradient(90deg,#ed326e,#ffb40d)}
+      .loading-disc{position:absolute;right:-12px;top:50%;width:24px;height:24px;transform:translateY(-50%);pointer-events:none}
+      .disc-spin{display:block;width:100%;height:100%;transform-origin:center;animation:disc-turn 1.5s linear infinite}
+      @keyframes disc-turn{to{transform:rotate(360deg)}}
+      @media(prefers-reduced-motion:reduce){.disc-spin{animation:none}}
+      @media(prefers-reduced-motion:reduce){.loading-fill{animation:none;transition:none}}
       .recovery{display:none;margin-top:12px;gap:10px;justify-content:center;flex-wrap:wrap}
       .recovery a{padding:7px 14px;border:1px solid #ead2dc;border-radius:18px;background:#fff;color:#97556d;text-decoration:none}
       .recovery a:focus-visible{outline:3px solid #ed326e;outline-offset:3px}
       :host([data-slow]) .recovery{display:flex}
       @media print{:host{visibility:hidden}}
     </style>${!covered && !intro ? '<div class="departure-scenery" aria-hidden="true"></div>' : ''}<canvas class="white" aria-hidden="true"></canvas><canvas class="petals" aria-hidden="true"></canvas>
-    ${intro ? '' : '<div class="message" role="status" aria-live="polite"><span>포트폴리오를 여는 중</span><div class="recovery"><a class="direct">문서 바로 열기</a><a class="return">목차로 돌아가기</a></div></div>'}`;
+    ${intro ? '' : '<div class="message" role="status" aria-live="polite"><div class="loading-card"><svg class="perched-beret" viewBox="-1.05 -.8 2.1 1.45" aria-hidden="true" focusable="false"><g stroke="#b1a4ad" stroke-width=".025" stroke-linejoin="round"><ellipse cx=".03" cy=".28" rx=".66" ry=".17" transform="rotate(-3 .03 .28)" fill="#eee5e7"/><path fill="#fffdfa" d="M-.88 .16C-.87-.19-.36-.56.17-.49C.69-.44 1.02-.12.86.13C.65.35-.38.47-.81.32C-.91.29-.93.22-.88.16Z"/><path fill="none" stroke="#c9bbc3" stroke-width=".018" d="M-.74 .28C-.15 .06 .42 .02 .8 .13"/><path fill="#fffdfa" d="M-.04-.49C-.13-.57-.12-.67-.04-.65C.02-.63.02-.55.03-.49Z"/></g></svg><span>기획서를 펼치는 중</span><div class="loading-meter" aria-hidden="true"><div class="loading-track"><div class="loading-fill"></div></div><div class="loading-disc" aria-hidden="true"><svg class="disc-spin" viewBox="0 0 24 24" focusable="false"><defs><linearGradient id="disc-metal" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fafbfc"/><stop offset=".3" stop-color="#c4cad4"/><stop offset=".52" stop-color="#fff"/><stop offset=".8" stop-color="#cdd2dc"/><stop offset="1" stop-color="#f8f8fc"/></linearGradient></defs><circle cx="12" cy="12" r="11" fill="url(#disc-metal)" stroke="#bfc1ca" stroke-width=".8"/><path d="M12 12 20.5 5A11 11 0 0 1 22.3 8.2Z" fill="#ed326e" opacity=".65"/><path d="M12 12 3.6 19.1A11 11 0 0 1 1.7 15.9Z" fill="#ffb40d" opacity=".7"/><path d="M12 12 4.1 4.4A11 11 0 0 1 7.4 2Z" fill="#fff" opacity=".75"/><circle cx="12" cy="12" r="4.7" fill="none" stroke="#aeb4c0" stroke-width=".5"/><circle cx="12" cy="12" r="2.8" fill="#fffdfa" stroke="#afb2bc" stroke-width=".7"/></svg></div></div></div><div class="recovery"><a class="direct">문서 바로 열기</a><a class="return">목차로 돌아가기</a></div></div>'}`;
     if (!intro) {
-      shadow.querySelector('.message span').textContent = '포트폴리오를 여는 중';
+      shadow.querySelector('.message span').textContent = '기획서를 펼치는 중';
       shadow.querySelector('.direct').href = target.href;
       shadow.querySelector('.return').href = new URL('index.html', url).href;
     }
     const white = shadow.querySelector('.white'), canvas = shadow.querySelector('.petals');
     const paint = white.getContext('2d'), ctx = canvas.getContext('2d');
+    const loadingFill=intro?null:shadow.querySelector('.loading-fill');let lastBar=0;
+    let initialBar=.04;
+    if(covered&&!intro)try {
+      const saved=JSON.parse(sessionStorage.getItem('portfolio-transition-progress'));
+      sessionStorage.removeItem('portfolio-transition-progress');
+      if(saved&&saved.target===target.pathname&&Date.now()-saved.at>=0&&Date.now()-saved.at<15000&&Number.isFinite(saved.value))initialBar=Math.max(.04,Math.min(.9,saved.value));
+    }catch(_){}
+    function updateBar(value) {
+      if(!loadingFill)return;
+      const next=Math.max(lastBar,Math.min(1,value));
+      if(next===lastBar)return;
+      loadingFill.style.transform=`scaleX(${next})`;lastBar=next;
+      host.dataset.loadingProgress=next.toFixed(5);
+    }
+    updateBar(initialBar);
     if (!paint || !ctx) throw new Error('Canvas unavailable');
+    const rootStyle=document.documentElement.style;
+    const savedScrollStyles=['overflow','scrollbar-gutter'].map(name=>[name,rootStyle.getPropertyValue(name),rootStyle.getPropertyPriority(name)]);
+    rootStyle.setProperty('overflow','hidden');rootStyle.setProperty('scrollbar-gutter','auto');
     document.documentElement.append(host);
     let width, height, base, petals = [], frame = 0, last = 0, progress = covered ? 1 : 0;
     let disposed = false, finishTimer = 0, openingStarted = null, openingFraction = 0;
@@ -96,7 +128,7 @@
       petalScale=intro?1+gust*.45:1;
       // Depth layers emerge across the whole field as the shared wind strengthens.
       if(!motionOff)while(petals.length<activeCount)petals.push(make(false,true));
-      host.dataset.petalCount=String(activeCount);host.dataset.gust=gust.toFixed(3);
+      host.style.setProperty('--beret-sway', (2 + gust * 10).toFixed(2) + 'deg');host.dataset.petalCount=String(activeCount);host.dataset.gust=gust.toFixed(3);
     }
     function make(initial=true,depthLayer=false) {
       return {x:initial||depthLayer?rand(-width*.1,width*1.1):rand(-Math.max(110,width*.18),-90),y:rand(-25,height+25),
@@ -104,6 +136,7 @@
         angle:rand(0,6.3),spin:rand(-.8,.8),alpha:rand(.5,.82),visibility:initial?1:0};
     }
     function carryField() {
+      if(!intro)try{sessionStorage.setItem('portfolio-transition-progress',JSON.stringify({target:target.pathname,at:Date.now(),value:lastBar}));}catch(_){}
       if(intro||motionOff)return;
       try{sessionStorage.setItem('portfolio-transition-field',JSON.stringify({target:target.pathname,at:Date.now(),width,height,petals}));}catch(_){}
     }
@@ -213,6 +246,7 @@
         }
       }
       field(ms);
+      if(!intro)updateBar(host.dataset.phase==='revealing'?1:Math.min(.9,.1+.8*((covered?elapsedBeforeArrival:0)+ms-started)/MIN_PRESENTATION_MS));
       if(intro&&originalPetals&&openingFraction>.85)originalPetals.hidden=false;
       ctx.clearRect(0,0,width,height);
       let drawn=0;
@@ -224,15 +258,20 @@
         if(p.visibility<.002&&targetAlpha===0)continue;
         const dx=p.x-width*.50,dy=p.y-height*.30;
         const influence=swirl*Math.exp(-((dx/(width*.4))**2+(dy/(height*.45))**2));
-        const vx=p.drift+gust*width*.20+dy*influence*1.5;
-        const vy=p.speed-gust*height*.10-dx*influence*1.5;
-        p.x+=vx*dt;p.y+=vy*dt;p.angle+=p.spin*(1+gust*2)*dt;p.phase+=(.7+gust)*dt;
+        const depth=.72+p.size/22;
+        const vx=Math.abs(p.drift)+gust*width*.55*depth+dy*influence*1.5;
+        const vy=p.speed*(1+gust*.7)-gust*height*.13*depth-dx*influence*1.5;
+        const response=1-Math.exp(-dt/.18);
+        p.vx=p.vx===undefined?vx:p.vx+(vx-p.vx)*response;
+        p.vy=p.vy===undefined?vy:p.vy+(vy-p.vy)*response;
+        p.x+=p.vx*dt;p.y+=p.vy*dt;p.angle+=p.spin*(1+gust*2)*dt;p.phase+=(.7+gust*2.3)*dt;
         if(p.y>height+80||p.y< -100||p.x< -Math.max(180,width*.4)||p.x>width+80) {
           const opacity=p.visibility;p=petals[i]=make(false);p.visibility=opacity;
         }
         draw(p,ms/1000);if(p.visibility>.01)drawn++;
       }
       host.dataset.drawnCount=String(drawn);
+      host.dataset.windSpeed=String(Math.round(gust*width*.55));
       drawBeret(ms);
       if(profile)drawTimes.push(performance.now()-drawStarted);
       frame=requestAnimationFrame(render);
@@ -245,6 +284,7 @@
       document.removeEventListener('DOMContentLoaded',hideOriginalPetals);
       if (originalPetals) originalPetals.hidden=false;
       profileReport();host.remove();
+      for(const [name,value,priority] of savedScrollStyles){if(value)rootStyle.setProperty(name,value,priority);else rootStyle.removeProperty(name);}
     }
     function finish() {
       if (disposed || host.dataset.phase==='revealing') return;
@@ -254,7 +294,7 @@
         if (!finishTimer) finishTimer=setTimeout(stop,Math.max(0,openingStarted-performance.now())+INTRO_REVEAL_MS+400);
         return;
       }
-      host.dataset.phase='revealing';
+      host.dataset.phase='revealing';updateBar(1);
       if(reduced.matches){stop();return;}
       const animation=host.animate([{opacity:1},{opacity:0}],{duration:260,fill:'forwards'});
       animation.finished.then(stop,stop);finishTimer=setTimeout(stop,400);
@@ -328,7 +368,37 @@
     } catch (_) {if(intro)intro.stop();document.getElementById('index-entry-transition')?.remove();}
   }
 
+  function prewarmDocuments() {
+    if(!indexPage||routes.has(entry))return;
+    const connection=navigator.connection;
+    if(connection?.saveData||/^(slow-)?2g$/.test(connection?.effectiveType||''))return;
+    const seen=new Set();
+    function hint(path,as) {
+      const address=new URL(path,url).href;
+      if(seen.has(address))return;seen.add(address);
+      const link=document.createElement('link');link.rel='prefetch';link.href=address;link.as=as;
+      if(as==='font'){link.type='font/ttf';link.crossOrigin='anonymous';}
+      document.head.append(link);
+      document.documentElement.dataset.portfolioPrefetchCount=String(seen.size);
+    }
+    for(const chapter of document.querySelectorAll('a.chapter')) {
+      const warm=()=>hint(chapter.getAttribute('href'),'document');
+      chapter.addEventListener('pointerenter',warm,{once:true});
+      chapter.addEventListener('focus',warm,{once:true});
+    }
+    function idleWarm() {
+      if(document.getElementById('index-entry-transition')){setTimeout(idleWarm,150);return;}
+      const run=()=>{
+        for(const route of routes)hint(route,'document');
+        hint('assets/fonts/NotoSansKR-VF.ttf','font');
+      };
+      if('requestIdleCallback' in window)requestIdleCallback(run,{timeout:1800});else setTimeout(run,400);
+    }
+    if(document.readyState==='complete')idleWarm();else addEventListener('load',idleWarm,{once:true});
+  }
+
   function bindChapters() {
+  prewarmDocuments();
   const chapters=document.querySelectorAll('a.chapter');
   for (const link of chapters) {
     link.target='_blank';link.rel='noopener';
@@ -349,24 +419,70 @@
 
   if (!routes.has(entry)) return;
   function startOutgoing() {
-  const target=new URL(entry,url);cleanAddress();
-  // Warm only the HTML during the closing animation; assets load normally in the real document.
-  const prefetch=document.createElement('link');prefetch.rel='prefetch';prefetch.href=target.href;document.head.append(prefetch);
-  let cover;
-  try {
-    const existing=document.getElementById('petals');if(existing)existing.hidden=true;
-    cover=createCover(false,target);
-    function handoff() {
-      if(!cover.ready()){requestAnimationFrame(handoff);return;}
-      const destination=new URL(target);destination.searchParams.set('portfolio-opening','sakura');
-      destination.searchParams.set('portfolio-started',String(cover.startedAt()));
-      if(motionOff)destination.searchParams.set('petal-motion','off');
-      if(profile)destination.searchParams.set('transition-profile','1');
-      requestAnimationFrame(()=>{cover.carryField();location.replace(destination.href);});
-    }
-    requestAnimationFrame(handoff);
-  } catch (_) {if(cover)cover.stop();location.replace(target.href);}
+    const target=new URL(entry,url);cleanAddress();
+    let cover,frame,watchdog;
+    try {
+      // Keep this document and its animated cover alive until the child is ready.
+      cover=createCover(false,target);
+      document.documentElement.dataset.portfolioShell='loading';
+      const style=document.createElement('style');
+      style.textContent='html[data-portfolio-shell]{overflow:hidden;scrollbar-gutter:auto}html[data-portfolio-shell] .viewport-shell{display:none}#portfolio-document{position:fixed;inset:38px 0 0;width:100%;height:calc(100% - 38px);border:0;display:block;background:#fff;z-index:2147483646}.portfolio-print-source{position:fixed;right:max(12px,env(safe-area-inset-right));top:4px;z-index:2147483646;padding:5px 11px;border:1px solid #e3cbd6;border-radius:16px;background:rgba(255,255,255,.92);color:#745463;text-decoration:none;font:11px/1.6 \"Malgun Gothic\",sans-serif}.portfolio-print-source:focus-visible{outline:3px solid #ed326e;outline-offset:3px}@media print{.portfolio-print-source{display:none}}';
+      document.head.append(style);
+      const pauseIndex=()=>{
+        const toggle=document.querySelector('.motion-toggle');
+        if(toggle&&toggle.getAttribute('aria-pressed')==='false')toggle.click();
+      };
+      if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',pauseIndex,{once:true});else pauseIndex();
+      frame=document.createElement('iframe');frame.id='portfolio-document';
+      frame.title='포트폴리오 문서';frame.tabIndex=0;frame.allowFullscreen=true;
+      frame.setAttribute('aria-hidden','true');frame.inert=true;
+      const printSource=document.createElement('a');printSource.className='portfolio-print-source';
+      printSource.textContent='인쇄용 문서 열기 ↗';printSource.href=target.href;
+      printSource.target='_blank';printSource.rel='noopener';printSource.hidden=true;
+      let ready=false,revealed=false;
+      function printDocument(event) {
+        if(!ready||event.defaultPrevented||event.altKey||(!event.ctrlKey&&!event.metaKey)||event.key.toLowerCase()!=='p')return;
+        event.preventDefault();frame.contentWindow.focus();frame.contentWindow.print();
+      }
+      function delayedNotice() {
+        cover.host.dataset.slow='';
+      }
+      frame.addEventListener('error',delayedNotice);
+      frame.addEventListener('load',()=>{
+        let doc;
+        try{doc=frame.contentDocument;if(!doc?.body)throw new Error('Document unavailable');}
+        catch(_){delayedNotice();return;}
+        const fonts=doc.fonts?doc.fonts.ready:Promise.resolve();
+        Promise.race([fonts,new Promise(resolve=>setTimeout(resolve,1200))]).then(()=>{
+          ready=true;clearTimeout(watchdog);
+          frame.title=doc.title||'포트폴리오 문서';
+          frame.contentWindow.addEventListener('keydown',printDocument,true);
+          // Keep ordinary cross-document links as top-level navigation; anchors stay inside.
+          for(const link of doc.querySelectorAll('a[href]')) {
+            const address=new URL(link.getAttribute('href'),target);
+            if(!link.hasAttribute('download')&&(!link.target||link.target==='_self')&&address.origin===target.origin&&address.pathname!==target.pathname&&/\.html$/.test(address.pathname))link.target='_top';
+          }
+        });
+      });
+      frame.src=target.href;document.documentElement.append(frame);document.documentElement.append(printSource);
+      addEventListener('keydown',printDocument,true);
+      watchdog=setTimeout(delayedNotice,15000);
+      function revealWhenReady() {
+        if(!cover.host.isConnected)return;
+        const age=Date.now()-cover.startedAt();
+        if(!ready||!cover.ready()||(!reduced.matches&&age<MIN_PRESENTATION_MS-260)){
+          requestAnimationFrame(revealWhenReady);return;
+        }
+        if(revealed)return;revealed=true;
+        document.title=frame.title;
+        history.replaceState(history.state,'',target);
+        document.documentElement.dataset.portfolioShell='ready';
+        frame.removeAttribute('aria-hidden');frame.inert=false;printSource.hidden=false;
+        cover.finish();
+        setTimeout(()=>frame.focus({preventScroll:true}),420);
+      }
+      requestAnimationFrame(revealWhenReady);
+    }catch(_){clearTimeout(watchdog);if(cover)cover.stop();location.replace(target.href);}
   }
-  // The opaque hill cover is mounted in the head, before index content can paint.
   startOutgoing();
 })();
