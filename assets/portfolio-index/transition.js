@@ -46,6 +46,18 @@
   // Fit the existing 1920 x 1080 paper inside the usable CSS viewport.
   // An iframe already excludes its parent's toolbar; subtract it only at top level.
   if (routes.has(file)) {
+    // Pinch magnifies the visual viewport, not the 1920 x 1080 paper layout.
+    const nativeViewports = new Set([window.visualViewport].filter(Boolean));
+    try { if (window.top.visualViewport) nativeViewports.add(window.top.visualViewport); } catch (_) {}
+    const nativeZoomed = () => [...nativeViewports].some(viewport =>
+      viewport.scale > 0 && Math.abs(viewport.scale - 1) > 0.01);
+    let fittedScale = null;
+    let nativeFitFrame = 0;
+    for (const viewport of nativeViewports) viewport.addEventListener('resize', () => {
+      if (nativeZoomed()) return;
+      cancelAnimationFrame(nativeFitFrame);
+      nativeFitFrame = requestAnimationFrame(() => window.dispatchEvent(new Event('resize')));
+    }, {passive: true});
     window.portfolioReaderViewport = () => {
       const top = window.top === window ?
         document.getElementById('portfolio-reader-tools')?.getBoundingClientRect().height || 0 : 0;
@@ -58,8 +70,10 @@
       }
       const width = document.documentElement.clientWidth || innerWidth;
       const height = Math.max(1, innerHeight - top);
-      return { top, height, scale: Math.max(0.001, Math.min(width / 1960,
-        Math.max(1, height - before - after) / 1080, 1)) };
+      const nextScale = Math.max(0.001, Math.min(width / 1960,
+        Math.max(1, height - before - after) / 1080, 1));
+      if (fittedScale === null || !nativeZoomed()) fittedScale = nextScale;
+      return { top, height, scale: fittedScale };
     };
     window.portfolioReaderPageTop = pageHeight => {
       const viewport = window.portfolioReaderViewport();
