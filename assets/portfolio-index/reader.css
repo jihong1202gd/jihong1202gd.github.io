@@ -1,0 +1,47 @@
+html[data-portfolio-reader-direct] { padding-top: var(--portfolio-reader-offset,56px); scroll-padding-top: var(--portfolio-reader-offset,56px); }
+#portfolio-reader-tools {
+  position: fixed; inset: 0 0 auto; z-index: 2147483646;
+  box-sizing: border-box; min-height: 56px; padding: 6px 14px;
+  display: flex; align-items: center; gap: 8px;
+  border-bottom: 1px solid #e8dce3; background: rgba(255,255,255,.97);
+  color: #695361; font: 12px/1.4 "Malgun Gothic",sans-serif;
+}
+#portfolio-reader-tools a, #portfolio-reader-tools button, #portfolio-reader-tools select {
+  box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center;
+  flex: none; min-height: 44px; min-width: 44px; padding: 6px 10px;
+  border: 1px solid transparent; border-radius: 8px;
+  background: transparent; color: inherit; font: inherit; text-decoration: none;
+  cursor: pointer; white-space: nowrap;
+}
+#portfolio-reader-tools button:disabled { color: #c5b9c1; cursor: default; }
+#portfolio-reader-tools a:hover, #portfolio-reader-tools button:hover:not(:disabled) {
+  background: #fff2f7; color: #bd3c69;
+}
+#portfolio-reader-tools a:focus-visible, #portfolio-reader-tools button:focus-visible, #portfolio-reader-tools select:focus-visible {
+  outline: 2px solid #bd3c69; outline-offset: 1px;
+}
+#portfolio-reader-tools .reader-switch { display: flex; align-items: center; gap: 7px; flex: 1; min-width: 0; max-width: 290px; }
+#portfolio-reader-tools .reader-switch > span { flex: none; color: #8a7884; font-size: 11px; white-space: nowrap; }
+#portfolio-reader-tools .reader-switch select { flex: 1; width: 100%; min-width: 0; border-color: #eadde5; background: #fff; }
+#portfolio-reader-tools .reader-actions { display: flex; align-items: center; gap: 4px; margin-left: auto; }
+#portfolio-reader-tools .reader-zoom { display: flex; align-items: center; border: 1px solid #eadde5; border-radius: 9px; }
+#portfolio-reader-tools .reader-fit { min-width: 56px; font-variant-numeric: tabular-nums; }
+#portfolio-reader-tools .reader-plus, #portfolio-reader-tools .reader-minus { font-size: 20px; }
+@media (max-width: 700px) {
+  #portfolio-reader-tools { flex-wrap: wrap; gap: 4px 8px; padding-left: 8px; padding-right: 8px; }
+  #portfolio-reader-tools .reader-switch { max-width: none; }
+  #portfolio-reader-tools .reader-print { display: none; }
+  #portfolio-reader-tools .reader-actions { flex-basis: 100%; }
+  #portfolio-reader-tools .reader-zoom { margin-left: auto; }
+}
+@media (max-width: 359px) {
+  #portfolio-reader-tools { gap: 2px; padding-left: 4px; padding-right: 4px; font-size: 11px; }
+  #portfolio-reader-tools a, #portfolio-reader-tools button { min-width: 38px; padding-left: 6px; padding-right: 6px; }
+  #portfolio-reader-tools .reader-switch { gap: 4px; }
+  #portfolio-reader-tools .reader-switch > span { font-size: 10px; }
+  #portfolio-reader-tools .reader-fit { min-width: 49px; }
+}
+@media print {
+  html[data-portfolio-reader-direct] { padding-top: 0; scroll-padding-top: 0; }
+  #portfolio-reader-tools { display: none; }
+}

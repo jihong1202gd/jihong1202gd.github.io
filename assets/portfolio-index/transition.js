@@ -79,6 +79,11 @@
   const navigationStarted = Number(url.searchParams.get('portfolio-started'));
   const navigationElapsed = Date.now()-navigationStarted;
   const elapsedBeforeArrival = navigationStarted>0 && navigationElapsed>=0 && navigationElapsed<15000 ? navigationElapsed : 0;
+  if (window.top === window && (routes.has(file) || routes.has(entry))) {
+    const reader = document.createElement('script');
+    reader.src = new URL('assets/portfolio-index/reader.js?v=20261104-2', url).href;
+    document.head.append(reader);
+  }
   const requestedMotionOff = url.searchParams.get('petal-motion') === 'off';
   let motionOff = reduced.matches || requestedMotionOff;
 
@@ -530,7 +535,7 @@
       cover=createCover(false,target);
       document.documentElement.dataset.portfolioShell='loading';
       const style=document.createElement('style');
-      style.textContent='html[data-portfolio-shell]{overflow:hidden;scrollbar-gutter:auto}html[data-portfolio-shell] .viewport-shell{display:none}#portfolio-document{position:fixed;inset:38px 0 0;width:100%;height:calc(100% - 38px);border:0;display:block;background:#fff;z-index:2147483646}.portfolio-print-source{position:fixed;right:max(12px,env(safe-area-inset-right));top:4px;z-index:2147483646;padding:5px 11px;border:1px solid #e3cbd6;border-radius:16px;background:rgba(255,255,255,.92);color:#745463;text-decoration:none;font:11px/1.6 \"Malgun Gothic\",sans-serif}.portfolio-print-source:focus-visible{outline:3px solid #ed326e;outline-offset:3px}@media print{.portfolio-print-source{display:none}}';
+      style.textContent='html[data-portfolio-shell]{overflow:hidden;scrollbar-gutter:auto}html[data-portfolio-shell] .viewport-shell{display:none}#portfolio-document{position:fixed;inset:var(--portfolio-reader-offset,56px) 0 0;width:100%;height:calc(100% - var(--portfolio-reader-offset,56px));border:0;display:block;background:#fff;z-index:2147483646}.portfolio-print-source{color:inherit;text-decoration:none}.portfolio-print-source:focus-visible{outline:3px solid #ed326e;outline-offset:3px}@media print{.portfolio-print-source{display:none}}';
       document.head.append(style);
       const pauseIndex=()=>{
         const toggle=document.querySelector('.motion-toggle');
