@@ -43,6 +43,29 @@
   const url = new URL(location.href);
   const file = url.pathname.split('/').pop();
   const entry = url.searchParams.get('open-portfolio');
+  // Fit the existing 1920 x 1080 paper inside the usable CSS viewport.
+  // An iframe already excludes its parent's toolbar; subtract it only at top level.
+  if (routes.has(file)) {
+    window.portfolioReaderViewport = () => {
+      const top = window.top === window ?
+        document.getElementById('portfolio-reader-tools')?.getBoundingClientRect().height || 0 : 0;
+      let before = 0, after = 0;
+      let surface = document.querySelector('main.ap-document, main.v106-main') || document.body;
+      for (; surface && surface !== document.documentElement; surface = surface.parentElement) {
+        const style = getComputedStyle(surface);
+        before += (parseFloat(style.paddingTop) || 0) + (parseFloat(style.marginTop) || 0);
+        after += (parseFloat(style.paddingBottom) || 0) + (parseFloat(style.marginBottom) || 0);
+      }
+      const width = document.documentElement.clientWidth || innerWidth;
+      const height = Math.max(1, innerHeight - top);
+      return { top, height, scale: Math.max(0.001, Math.min(width / 1960,
+        Math.max(1, height - before - after) / 1080, 1)) };
+    };
+    window.portfolioReaderPageTop = pageHeight => {
+      const viewport = window.portfolioReaderViewport();
+      return viewport.top + Math.max(0, (viewport.height - pageHeight) / 2);
+    };
+  }
   const arriving = routes.has(file) && url.searchParams.get('portfolio-opening') === 'sakura';
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   const MIN_PRESENTATION_MS = 3000;
@@ -81,7 +104,7 @@
   const elapsedBeforeArrival = navigationStarted>0 && navigationElapsed>=0 && navigationElapsed<15000 ? navigationElapsed : 0;
   if (window.top === window && (routes.has(file) || routes.has(entry))) {
     const reader = document.createElement('script');
-    reader.src = new URL('assets/portfolio-index/reader.js?v=20261104-2', url).href;
+    reader.src = new URL('assets/portfolio-index/reader.js?v=20261104-fit-1', url).href;
     document.head.append(reader);
   }
   const requestedMotionOff = url.searchParams.get('petal-motion') === 'off';

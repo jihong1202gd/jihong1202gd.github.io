@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-<script src="assets/portfolio-index/transition.js?v=20261104-reader-2"></script>
+<script src="assets/portfolio-index/transition.js?v=20261104-fit-1"></script>
   <meta name="author" content="KIM JIHONG">
   <title>자기 PR | 여러분이 찾고 있던 “진짜 오타쿠” 기획자</title>
   <style>
@@ -1975,7 +1975,7 @@ function adjustScale(){
   }
   const sw=window.innerWidth/1960;
   const sh=window.innerHeight/1100;
-  const scale=Math.min(sw,sh,1);
+  const scale=window.portfolioReaderViewport?.().scale ?? Math.min(sw,sh,1);
   pages.forEach(page=>{
     page.style.transform='scale('+scale+')';
     page.style.transformOrigin='top center';
@@ -2029,7 +2029,7 @@ if(document.readyState==='complete'||document.readyState==='interactive')adjustS
       let nearest=Infinity;
       pages.forEach((page,i)=>{
         const rect=page.getBoundingClientRect();
-        const distance=Math.abs(rect.top-Math.max(0,(window.innerHeight-rect.height)/2));
+        const distance=Math.abs(rect.top-(window.portfolioReaderPageTop?.(rect.height) ?? Math.max(0,(window.innerHeight-rect.height)/2)));
         if(distance<nearest){nearest=distance;index=i}
       });
     }
@@ -2039,7 +2039,7 @@ if(document.readyState==='complete'||document.readyState==='interactive')adjustS
     destinationExpires=now+700;
     const rect=destination.getBoundingClientRect();
     const maximum=Math.max(0,document.documentElement.scrollHeight-window.innerHeight);
-    const top=Math.max(0,Math.min(maximum,window.scrollY+rect.top-Math.max(0,(window.innerHeight-rect.height)/2)));
+    const top=Math.max(0,Math.min(maximum,window.scrollY+rect.top-(window.portfolioReaderPageTop?.(rect.height) ?? Math.max(0,(window.innerHeight-rect.height)/2))));
     window.scrollTo({top,behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
   },{passive:false});
   // A clicked anchor, keyboard action, or scrollbar drag establishes a new reading position.

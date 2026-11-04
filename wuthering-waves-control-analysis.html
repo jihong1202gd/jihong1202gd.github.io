@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko"><head>
-<script src="assets/portfolio-index/transition.js?v=20261104-reader-2"></script><meta charset="utf-8"><meta content="width=device-width,initial-scale=1" name="viewport"><title>명조 전투 조작 분석</title><style>
+<script src="assets/portfolio-index/transition.js?v=20261104-fit-1"></script><meta charset="utf-8"><meta content="width=device-width,initial-scale=1" name="viewport"><title>명조 전투 조작 분석</title><style>
 /* Isolated module B. CSS_ARCHITECTURE_V108.md sections 2, 3, 6. */
 
 /* 01 Tokens and module defaults */
@@ -592,7 +592,7 @@ body[data-layout-system="v106"] .v106-zoom,body[data-layout-system="v106"] .v106
 
 
 
-function fit(){if(matchMedia('print').matches){wraps.forEach(w=>w.querySelector('.v106-page').style.removeProperty('--scale'));return;}const scale=Math.min(window.innerWidth/1960,window.innerHeight/1100,1);wraps.forEach(w=>w.querySelector('.v106-page').style.setProperty('--scale',scale));}
+function fit(){if(matchMedia('print').matches){wraps.forEach(w=>{w.style.removeProperty('--paper-width');w.querySelector('.v106-page').style.removeProperty('--scale');});return;}const scale=window.portfolioReaderViewport?.().scale ?? Math.min(window.innerWidth/1960,window.innerHeight/1100,1);wraps.forEach(w=>{w.style.setProperty('--paper-width',(1920*scale)+'px');w.querySelector('.v106-page').style.setProperty('--scale',scale);});}
 
 function navigateTo(id,writeHistory=true){const target=document.getElementById(id);if(!target?.classList.contains('v106-page-wrap'))return;fit();window.placeComparisonTool?.(id);target.scrollIntoView({block:'start',behavior:'instant'});if(writeHistory&&location.hash!=='#'+id)history.pushState(null,'','#'+id);}
 
@@ -684,7 +684,7 @@ matchMedia('print').addEventListener('change',fit);
       let nearest=Infinity;
       pages.forEach((page,i)=>{
         const rect=page.getBoundingClientRect();
-        const distance=Math.abs(rect.top-Math.max(0,(window.innerHeight-rect.height)/2));
+        const distance=Math.abs(rect.top-(window.portfolioReaderPageTop?.(rect.height) ?? Math.max(0,(window.innerHeight-rect.height)/2)));
         if(distance<nearest){nearest=distance;index=i}
       });
     }
@@ -694,7 +694,7 @@ matchMedia('print').addEventListener('change',fit);
     destinationExpires=now+700;
     const rect=destination.getBoundingClientRect();
     const maximum=Math.max(0,document.documentElement.scrollHeight-window.innerHeight);
-    const top=Math.max(0,Math.min(maximum,window.scrollY+rect.top-Math.max(0,(window.innerHeight-rect.height)/2)));
+    const top=Math.max(0,Math.min(maximum,window.scrollY+rect.top-(window.portfolioReaderPageTop?.(rect.height) ?? Math.max(0,(window.innerHeight-rect.height)/2))));
     window.scrollTo({top,behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
   };
   window.addEventListener('wheel',onPageWheel,{passive:false});

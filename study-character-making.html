@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ko">
 <head>
-<script src="assets/portfolio-index/transition.js?v=20261104-reader-2"></script>
+<script src="assets/portfolio-index/transition.js?v=20261104-fit-1"></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>캐릭터 메이킹 스터디 이거 모에요 · 김지홍</title>
@@ -1426,7 +1426,7 @@
 <template id="chat-sharing"><p class="ap-label">원문 기반 재구성</p><h3 class="ap-chat-dialog-title">다른 사람의 발표를 준비하다 신나서 꺼낸 이야기</h3><p class="ap-chat-scene">2025.09.15 · ‘귀여움’ 발표를 함께 준비하며</p><div class="ap-chat-thread" aria-label="2025.09.15 · ‘귀여움’ 발표를 함께 준비하며"><div class="ap-chat-message" data-chat-side="left"><span class="ap-speaker">발표자</span>저는 아리스 같은 캐릭터가 그런 느낌을 많이 준다고 생각해요.</div><div class="ap-chat-message" data-chat-side="right"><span class="ap-speaker">나</span>아리스가 가끔 하는 말은 외견과 다르게 어른스럽잖아요. 그것도 귀엽죠.</div><div class="ap-chat-message" data-chat-side="right"><span class="ap-speaker">나</span>반대로 리오처럼 어른스러운 캐릭터가 보여 주는 엉뚱함은 ‘아, 얘도 학생이구나ㅋㅋ 귀엽네’ 싶게 하고요.</div><div class="ap-chat-message" data-chat-side="left"><span class="ap-speaker">발표자</span>저도 핵심은 그 적정선에 있다고 생각해요. 그걸 다루는 방법이 중요하겠죠.</div><div class="ap-chat-message" data-chat-side="right"><span class="ap-speaker">나</span>캐릭터를 살아 있게 만드는 건 그런 허점이나 장점, 변화와 발전인 것 같아요.</div><div class="ap-chat-message" data-chat-side="left"><span class="ap-speaker">발표자</span>좋습니다! 제 발표 의도가 술술 풀리고 있네요.</div><div class="ap-chat-message" data-chat-side="right"><span class="ap-speaker">나</span>제 비장의 보따리였는데, 여기서 다 풀어 버리면 저는 뭘 발표하죠ㅋㅋ 하지만 좋습니다.</div><div class="ap-chat-message" data-chat-side="left"><span class="ap-speaker">발표자</span>거기서 더 고민해서 발전시키면 됩니다!!ㅋㅋ</div></div></template>
 <script>
 const fitBaseDpr=window.devicePixelRatio||1;
-function fitPages(){const pages=document.querySelectorAll('.ap-page'),documentSurface=document.querySelector('.ap-document');if(window.matchMedia('print').matches){document.querySelectorAll('details[open]').forEach(d=>d.open=false);document.querySelectorAll('dialog[open]').forEach(d=>d.close());documentSurface.style.removeProperty('min-width');pages.forEach(p=>{p.style.removeProperty('transform');p.style.removeProperty('transform-origin');p.style.removeProperty('margin-bottom')});return}const zoomRatio=(window.devicePixelRatio||1)/fitBaseDpr;const scale=Math.min(window.innerWidth*zoomRatio/1960,window.innerHeight*zoomRatio/1100,1);documentSurface.style.minWidth=(1960*scale)+'px';pages.forEach(p=>{p.style.transform='scale('+scale+')';p.style.transformOrigin='top center';p.style.marginBottom='-'+(1080-1080*scale)+'px'})}
+function fitPages(){const pages=document.querySelectorAll('.ap-page'),documentSurface=document.querySelector('.ap-document');if(window.matchMedia('print').matches){document.querySelectorAll('details[open]').forEach(d=>d.open=false);document.querySelectorAll('dialog[open]').forEach(d=>d.close());documentSurface.style.removeProperty('min-width');pages.forEach(p=>{p.style.removeProperty('transform');p.style.removeProperty('transform-origin');p.style.removeProperty('margin-bottom')});return}const zoomRatio=(window.devicePixelRatio||1)/fitBaseDpr;const scale=window.portfolioReaderViewport?.().scale ?? Math.min(window.innerWidth*zoomRatio/1960,window.innerHeight*zoomRatio/1100,1);documentSurface.style.minWidth=(1960*scale)+'px';pages.forEach(p=>{p.style.transform='scale('+scale+')';p.style.transformOrigin='top center';p.style.marginBottom='-'+(1080-1080*scale)+'px'})}
 const preview=document.querySelector('.ap-hover-preview'),previewImage=preview.querySelector('img'),previewCaption=preview.querySelector('figcaption'),imageDialog=document.querySelector('.ap-image-dialog'),imageDialogImage=imageDialog.querySelector('img'),imageDialogCaption=imageDialog.querySelector('figcaption');
 const chatDialog=document.querySelector('.ap-chat-dialog'),chatDialogBody=chatDialog.querySelector('.ap-chat-dialog-body');
 let imageTrigger=null,chatTrigger=null,previewTimer=null;
@@ -1485,7 +1485,7 @@ window.addEventListener('load',fitPages);window.addEventListener('resize',()=>{h
       let nearest=Infinity;
       pages.forEach((page,i)=>{
         const rect=page.getBoundingClientRect();
-        const distance=Math.abs(rect.top-Math.max(0,(window.innerHeight-rect.height)/2));
+        const distance=Math.abs(rect.top-(window.portfolioReaderPageTop?.(rect.height) ?? Math.max(0,(window.innerHeight-rect.height)/2)));
         if(distance<nearest){nearest=distance;index=i}
       });
     }
@@ -1495,7 +1495,7 @@ window.addEventListener('load',fitPages);window.addEventListener('resize',()=>{h
     destinationExpires=now+700;
     const rect=destination.getBoundingClientRect();
     const maximum=Math.max(0,document.documentElement.scrollHeight-window.innerHeight);
-    const top=Math.max(0,Math.min(maximum,window.scrollY+rect.top-Math.max(0,(window.innerHeight-rect.height)/2)));
+    const top=Math.max(0,Math.min(maximum,window.scrollY+rect.top-(window.portfolioReaderPageTop?.(rect.height) ?? Math.max(0,(window.innerHeight-rect.height)/2))));
     window.scrollTo({top,behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
   },{passive:false});
   // Manual navigation establishes a new reading position.

@@ -2,7 +2,7 @@
 
 <html lang="ko">
 <head>
-<script src="assets/portfolio-index/transition.js?v=20261104-reader-2"></script>
+<script src="assets/portfolio-index/transition.js?v=20261104-fit-1"></script>
 <meta charset="utf-8"/>
 <title>[명조 기획 포트폴리오] 신규 캐릭터 키자키 아코</title>
 <style>
@@ -2912,7 +2912,7 @@ function adjustScale() {
     const slides = document.querySelectorAll('.slide');
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
-    const scale = Math.min(viewportWidth / 1960, viewportHeight / 1100, 1);
+    const scale = window.portfolioReaderViewport?.().scale ?? Math.min(viewportWidth / 1960, viewportHeight / 1100, 1);
 
     slides.forEach(slide => {
         slide.style.setProperty('--ako-screen-transform', 'scale(' + scale + ')');
@@ -3154,7 +3154,7 @@ if (document.readyState === 'complete' || document.readyState === 'interactive')
       let nearest=Infinity;
       pages.forEach((page,i)=>{
         const rect=page.getBoundingClientRect();
-        const distance=Math.abs(rect.top-Math.max(0,(window.innerHeight-rect.height)/2));
+        const distance=Math.abs(rect.top-(window.portfolioReaderPageTop?.(rect.height) ?? Math.max(0,(window.innerHeight-rect.height)/2)));
         if(distance<nearest){nearest=distance;index=i}
       });
     }
@@ -3164,7 +3164,7 @@ if (document.readyState === 'complete' || document.readyState === 'interactive')
     destinationExpires=now+700;
     const rect=destination.getBoundingClientRect();
     const maximum=Math.max(0,document.documentElement.scrollHeight-window.innerHeight);
-    const top=Math.max(0,Math.min(maximum,window.scrollY+rect.top-Math.max(0,(window.innerHeight-rect.height)/2)));
+    const top=Math.max(0,Math.min(maximum,window.scrollY+rect.top-(window.portfolioReaderPageTop?.(rect.height) ?? Math.max(0,(window.innerHeight-rect.height)/2))));
     window.scrollTo({top,behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
   },{passive:false});
   // Manual navigation establishes a new reading position.

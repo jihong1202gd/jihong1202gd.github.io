@@ -65,8 +65,14 @@
     toolbar.querySelector('.reader-actions').append(printLink);
     document.documentElement.append(toolbar);
     if (!frame) document.documentElement.dataset.portfolioReaderDirect = '';
-    const syncToolbarHeight = () => document.documentElement.style.setProperty(
-      '--portfolio-reader-offset', toolbar.getBoundingClientRect().height + 'px');
+    let toolbarHeight = 0;
+    const syncToolbarHeight = () => {
+      const height = toolbar.getBoundingClientRect().height;
+      if (height === toolbarHeight) return;
+      toolbarHeight = height;
+      document.documentElement.style.setProperty('--portfolio-reader-offset', height + 'px');
+      requestAnimationFrame(() => window.dispatchEvent(new Event('resize')));
+    };
     new ResizeObserver(syncToolbarHeight).observe(toolbar);
     syncToolbarHeight();
 
@@ -135,7 +141,11 @@
     plus.addEventListener('click', () => applyZoom(steps[Math.min(steps.length - 1, steps.indexOf(zoom) + 1)]));
     fit.addEventListener('click', () => applyZoom(1));
     contents.addEventListener('click', () => {
-      doc?.getElementById(documents[route].contents)?.scrollIntoView({ block: 'start', behavior: 'instant' });
+      const target = doc?.getElementById(documents[route].contents);
+      if (!target) return;
+      const rect = target.getBoundingClientRect();
+      const top = win.portfolioReaderPageTop?.(rect.height) || 0;
+      win.scrollTo({ top: win.scrollY + rect.top - top, behavior: 'instant' });
     });
     if (frame) {
       frame.addEventListener('load', bindDocument);
