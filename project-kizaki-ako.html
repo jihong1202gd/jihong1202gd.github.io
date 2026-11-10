@@ -1192,6 +1192,21 @@ ul{margin:0;padding-left:25px;color:#444;font-size:20px;line-height:1.8}
 }
 :where(html) .timeline-marker:hover{transform:translateX(-50%) scale(1.15)}
 }
+
+@layer canonical {
+  /* 2026-11-10 패키지 공통 틀(패키지 공통 시각 가이드 5절): 키커 109 · 제목 147 · 시작선 214–219 · 본문 237. 원래 여백에 차이만 더한다. */
+  .p1v6-kicker, #slide-01.p1v6-profile .profile-kicker-v1, .v106-kicker, #slide-p2-b .p2b-v2-kicker, #slide-p2-c .p2c-v1-kicker, .p3r3-title > small { margin-bottom: 10px; }
+  .p1v6-heading, .profile-heading-v1, .p3r3-title, .v106-heading, .p2b-v2-canvas > h2, .p2c-v1-canvas > h2 { padding-bottom: 18px; }
+  .p1v6-heading, .profile-heading-v1, .v106-heading, .p2b-v2-canvas > h2, .p2c-v1-canvas > h2 { margin-bottom: 18px; }
+  .ako-intent-heading { margin: 31px 0 18px; padding-bottom: 15px; }
+  .ako-intent-heading small { margin-bottom: 12px; }
+  .slide > header.page-header .eyebrow { margin-top: 29px; margin-bottom: 12px; }
+  .slide > header.page-header h1 { margin-bottom: 18px; }
+  .ako-intent-claim, .p2b-v2-claim, .p2c-v1-claim, .p3r3-claim, .p3r3-p10-claim { background: #f1f3f4; border: 1px solid #d8dce0; border-left: 3px solid #34383e; }
+  .ako-intent-claim, .p2b-v2-claim, .p2c-v1-claim, .p3r3-claim { padding: 10px 18px; }
+  .p1v6-step-marker .p1v6-step-no { display: none; }
+  .profile-closing-rule-v1 { border-top-color: #17191e; background-color: #17191e; }
+}
 </style>
 <script src="assets/image-protect.js" defer></script></head>
 <body>
