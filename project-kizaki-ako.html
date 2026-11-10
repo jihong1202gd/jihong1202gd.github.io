@@ -1194,6 +1194,57 @@ ul{margin:0;padding-left:25px;color:#444;font-size:20px;line-height:1.8}
 }
 
 @layer canonical {
+
+/* Blink success: common intrinsic action leading into an input branch. */
+.p3r3-p15 .blink-success-layout{display:grid;grid-template-columns:minmax(0,1.94fr) minmax(0,1fr);grid-template-rows:minmax(0,1fr);gap:28px}
+.p3r3-p15 .blink-success-common,.p3r3-p15 .blink-success-branches{min-width:0;min-height:0;height:100%;padding:18px 20px;background:#F4F5F6;box-sizing:border-box}
+.p3r3-p15 .blink-success-group-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:14px}
+.p3r3-p15 .blink-success-group-head h2{margin:0;font-size:24px;font-weight:850;line-height:1.4;letter-spacing:-.015em}
+.p3r3-p15 .blink-success-group-head span{font-size:13px;font-weight:750;line-height:1.4;color:#685951}
+.p3r3-p15 .blink-success-shots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.p3r3-p15 .blink-success-shot{min-width:0;margin:0}
+.p3r3-p15 .blink-success-step{display:flex;align-items:center;gap:7px;margin-bottom:10px;font-size:13px;font-weight:800;line-height:1.4;color:#685951}
+.p3r3-p15 .blink-success-step b{display:flex;align-items:center;justify-content:center;width:24px;height:24px;flex:0 0 24px;border-radius:4px;background:#D93025;color:white;font-size:13px}
+.p3r3-p15 .blink-success-image{height:345px}
+.p3r3-p15 .blink-success-expand{position:absolute;right:10px;top:10px;padding:4px 7px;background:#fff;border:1px solid #A85B55;color:#A85B55;font-size:12px;font-weight:800;line-height:1.35}
+.p3r3-p15 .blink-success-shot figcaption{margin-top:10px;font-size:18px;font-weight:600;line-height:1.55;letter-spacing:-.01em;color:#373B43;word-break:keep-all}
+.p3r3-p15 .blink-success-frame{margin-top:17px;padding:14px 16px;background:#fff;border:1px solid #D9DCE1}
+.p3r3-p15 .blink-success-frame-head{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:10px}
+.p3r3-p15 .blink-success-frame-head b{font-size:18px;font-weight:800;line-height:1.4}
+.p3r3-p15 .blink-success-frame-head span{font-size:14px;font-weight:700;color:#5D616B;line-height:1.4}
+.p3r3-p15 .blink-success-events{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0}
+.p3r3-p15 .blink-success-event{min-width:0;border-left:1px solid #D9DCE1;padding:0 13px}
+.p3r3-p15 .blink-success-event:first-child{padding-left:0;border-left:0}
+.p3r3-p15 .blink-success-event strong{display:block;font-size:18px;font-weight:850;line-height:1.4}
+.p3r3-p15 .blink-success-event span{display:block;margin-top:3px;font-size:14px;font-weight:650;line-height:1.4;color:#5D616B}
+.p3r3-p15 .blink-success-origin{margin:9px 0 0;font-size:14px;font-weight:700;line-height:1.4;color:#5D616B}
+.p3r3-p15 .blink-success-branches{display:flex;flex-direction:column}
+.p3r3-p15 .blink-success-branch{min-width:0;padding:12px;border:1px solid #D9DCE1;background:#fff}
+.p3r3-p15 .blink-success-condition{display:block;margin-bottom:6px;font-size:13px;font-weight:800;line-height:1.4;color:#685951}
+.p3r3-p15 .blink-success-branch h3{margin:0 0 8px;font-size:24px;font-weight:850;line-height:1.4;letter-spacing:-.015em}
+.p3r3-p15 .blink-success-branch p{margin:0;font-size:18px;font-weight:600;line-height:1.55;color:#373B43;word-break:keep-all}
+.p3r3-p15 .blink-success-jumps{display:flex;gap:8px;margin-top:12px}
+.p3r3-p15 .blink-success-jumps a{display:inline-flex;align-items:center;gap:7px;padding:7px 11px;border:1px solid #D9DCE1;background:#fff;color:#373B43;font-size:13px;font-weight:750;line-height:1.4;text-decoration:none}
+.p3r3-p15 .blink-success-jumps a:hover{border-color:#A85B55;color:#A85B55}
+.p3r3-p15 .blink-success-return{border-top:1px solid #D9DCE1;padding-top:12px;margin-top:14px}
+.p3r3-p15 .blink-success-recovery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:12px}
+.p3r3-p15 .blink-success-recovery .p3r3-media{height:155px}
+.p3r3-p15 .blink-success-recovery .p3r3-media-caption{padding-right:8px;padding-left:16px}
+.p3r3-p15 .blink-success-details-button{align-self:flex-start;margin-top:auto;padding:8px 12px;border:1px solid #A85B55;background:#fff;color:#A85B55;font-family:inherit;font-size:13px;font-weight:800;line-height:1.4;cursor:pointer}
+.p3r3-p15 .blink-success-details-button:hover{background:#A85B55;color:#fff}
+.blink-success-detail{width:min(1120px,88vw);max-height:82vh;padding:0;border:1px solid #D9DCE1;background:#fff;color:#17191E;font-family:"Noto Sans KR",sans-serif;overflow:auto}
+.blink-success-detail::backdrop{background:rgba(0,0,0,.55)}
+.blink-success-detail-header{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:22px 28px;border-bottom:1px solid #D9DCE1}
+.blink-success-detail-header h2{margin:0;font-size:24px;font-weight:850;line-height:1.4}
+.blink-success-close{padding:7px 12px;border:1px solid #D9DCE1;background:white;font:700 14px "Noto Sans KR",sans-serif;cursor:pointer}
+.blink-success-detail-body{padding:22px 28px}
+.blink-success-detail-body p{margin:0 0 16px;font-size:18px;font-weight:600;line-height:1.6;color:#373B43}
+.blink-success-detail-body h3{margin:22px 0 12px;font-size:24px;font-weight:800;line-height:1.4}
+.blink-success-detail-body table{border-collapse:collapse;width:100%;margin-bottom:18px}
+.blink-success-detail-body th,.blink-success-detail-body td{padding:12px;border:1px solid #D9DCE1;text-align:left;font-size:14px;font-weight:500;line-height:1.55;color:#373B43}
+.blink-success-detail-body th{background:#F4F5F6;font-weight:800;color:#17191E}
+.blink-success-detail-body a{color:#A85B55}
+
   /* 2026-11-10 패키지 공통 틀(패키지 공통 시각 가이드 5절): 키커 109 · 제목 147 · 시작선 214–219 · 본문 237. 원래 여백에 차이만 더한다. */
   .p1v6-kicker, #slide-01.p1v6-profile .profile-kicker-v1, .v106-kicker, #slide-p2-b .p2b-v2-kicker, #slide-p2-c .p2c-v1-kicker, .p3r3-title > small { margin-bottom: 10px; }
   .p1v6-heading, .profile-heading-v1, .p3r3-title, .v106-heading, .p2b-v2-canvas > h2, .p2c-v1-canvas > h2 { padding-bottom: 18px; }
@@ -1935,26 +1986,36 @@ ul{margin:0;padding-left:25px;color:#444;font-size:20px;line-height:1.8}
 <div aria-hidden="true" class="p3r3-divider"></div>
 <footer class="p3r3-footer"><span>김지홍 · 전투 액션 기획</span><span>14 / 33 · RANDOM WAIT</span></footer>
 </article>
-<article aria-label="15 반격 성공 뒤 입력 유무에 따른 후속 분기" class="slide p3r3 p3r3-p15" data-layout-system="part3-r3-v4" id="slide-14">
+<article aria-label="15 블러드 블링크 성공 타격과 후속 분기" class="slide p3r3 p3r3-p15 blink-success-page" data-layout-system="part3-r3-v4" id="slide-14">
 <div class="p3r3-dochead"><span>CHARACTER PROPOSAL · SUCCESS FOLLOW-UP</span><span><a href="#slide-toc">목차</a> · 15 / 33</span></div>
-<div class="p3r3-title"><small>BLOOD BLINK · INPUT BRANCH</small><h1>반격 성공 뒤 15f의 입력으로 전투 연계와 수습 연기를 나눕니다</h1></div>
-<div class="p3r3-claim">반격 타격까지는 공통으로 재생하고, 15f 안에 공격을 입력했는지만 판정해 즉시 콤보 또는 캐릭터 연기로 이어 갑니다.</div>
-<div class="p3r3-body p3r3-parallel-stage">
-<div class="p3r3-common-band"><small>COMMON ENTRY</small><strong>0f 반격 타격 판정 → 15f까지 공격 입력 대기 → 입력 여부에 따라 한 번 분기</strong></div>
-<div class="p3r3-parallel-lanes">
-<section class="p3r3-lane">
-<header class="p3r3-lane-main"><div><small>ATTACK INPUT</small><h2>15f 안에 공격 입력</h2></div><b>COMBAT</b></header>
-<div class="p3r3-axis-grid"><div class="p3r3-axis-heads"><div class="p3r3-axis-label">핵심 판단</div><div class="p3r3-axis-label">설계 설명</div><div class="p3r3-axis-label">콘티 근거</div></div><div class="p3r3-info-row"><div class="p3r3-info-cell p3r3-key-cell">후딜레이를 생략하고<br/>즉시 다음 콤보로 연결</div><div class="p3r3-info-cell p3r3-explain-cell">초기 15f 안에 좌클릭을 입력하면 캔슬 포인트에서 복귀 연출을 건너뜁니다.</div><div class="p3r3-info-cell p3r3-evidence-cell"><div class="p3r3-proof"><div class="p3r3-proof-copy"><small>FRAME EVIDENCE</small><b>반격 타격 · 0–15f</b><span>15f 안의 공격 입력만 후속 분기에 사용</span></div></div></div></div><div class="p3r3-info-row"><div class="p3r3-info-cell p3r3-key-cell">플레이어의 공격 의도를 우선합니다</div><div class="p3r3-info-cell p3r3-explain-cell">복귀 연출을 생략하고, 입력한 공격으로 전투 흐름을 이어 가도록 설계했습니다.</div><div class="p3r3-info-cell p3r3-evidence-cell"><div class="p3r3-proof"><div class="p3r3-proof-copy"><small>INPUT RESULT</small><b>캔슬 후 즉시 콤보</b><span>복귀 연출을 생략하고 공격 흐름을 지속</span></div></div></div></div></div>
-</section>
-<section class="p3r3-lane">
-<header class="p3r3-lane-main"><div><small>NO INPUT</small><h2>15f 안에 후속 입력 없음</h2></div><b>PERFORMANCE</b></header>
-<div class="p3r3-axis-grid"><div class="p3r3-axis-heads"><div class="p3r3-axis-label">핵심 판단</div><div class="p3r3-axis-label">설계 설명</div><div class="p3r3-axis-label">콘티 근거</div></div><div class="p3r3-info-row"><div class="p3r3-info-cell p3r3-key-cell">본성을 감추고<br/>메이드 가면으로 복귀</div><div class="p3r3-info-cell p3r3-explain-cell">헛기침으로 난폭한 태도를 수습하고 자세를 정돈합니다.</div><div class="p3r3-info-cell p3r3-evidence-cell"><button aria-label="15 · 헛기침으로 태도 수습 확대 보기" class="p3r3-media" data-profile-caption="15 · 헛기침으로 태도 수습" data-profile-image="conti/page-15/01-recovery-cough.png" type="button"><img alt="15 · 헛기침으로 태도 수습" src="conti/page-15/01-recovery-cough.png"/><span class="p3r3-media-caption">15 · 헛기침으로 태도 수습</span></button></div></div><div class="p3r3-info-row"><div class="p3r3-info-cell p3r3-key-cell">미입력 시간을<br/>캐릭터 연기로 사용합니다</div><div class="p3r3-info-cell p3r3-explain-cell">영업용 미소를 되찾는 복귀 동작으로 수습 연기를 마무리합니다.</div><div class="p3r3-info-cell p3r3-evidence-cell"><button aria-label="15 · 영업용 미소로 복귀 확대 보기" class="p3r3-media" data-profile-caption="15 · 영업용 미소로 복귀" data-profile-image="conti/page-15/02-recovery-smile.png" type="button"><img alt="15 · 영업용 미소로 복귀" src="conti/page-15/02-recovery-smile.png"/><span class="p3r3-media-caption">15 · 영업용 미소로 복귀</span></button></div></div></div>
-</section>
+<div class="p3r3-title"><small>BLOOD BLINK · COUNTER &amp; FOLLOW-UP</small><h1>블러드 블링크 성공 타격과 후속 분기</h1></div>
+<div class="p3r3-claim">혈액구를 압축·파열시켜 반격하고, 후속 입력에 따라 다음 행동을 나눕니다.</div>
+<main class="p3r3-body blink-success-layout" aria-label="공통 고유 타격 이후 공격 입력에 따른 후속 분기">
+<section class="blink-success-common" aria-label="분기 전에 공통으로 수행하는 고유 타격">
+<div class="blink-success-group-head"><h2>공통 고유 타격</h2><span>근·원거리 공통 · 한 번의 손 쥐기</span></div>
+<div class="blink-success-shots">
+<figure class="blink-success-shot"><div class="blink-success-step"><b>01</b><span>혈액구 포획 · 타격 전</span></div><button class="p3r3-media blink-success-image" type="button" aria-haspopup="dialog" aria-label="전조 · 보스 포획 확대 보기" data-profile-image="conti/page-15/03-blink-envelopment.png" data-profile-caption="전조 · 보스 포획"><span class="blink-success-expand" aria-hidden="true">⌕ 확대</span><img src="conti/page-15/03-blink-envelopment.png" alt="손가락에 힘을 준 아코 앞에서 큰 보스가 핏빛 물방울과 구형 피막에 감싸이는 장면"/><span class="p3r3-media-caption">전조 · 보스 포획</span></button><figcaption>손가락에 힘을 주며,<br/>핏빛 물방울로 적을 구형으로 감쌉니다.</figcaption></figure>
+<figure class="blink-success-shot"><div class="blink-success-step"><b>02</b><span>압축·파열 · 18f 타격</span></div><button class="p3r3-media blink-success-image" type="button" aria-haspopup="dialog" aria-label="타격 · 혈액구 파열 확대 보기" data-profile-image="conti/page-15/04-blink-rupture.png" data-profile-caption="타격 · 혈액구 파열"><span class="blink-success-expand" aria-hidden="true">⌕ 확대</span><img src="conti/page-15/04-blink-rupture.png" alt="아코가 왼손을 꽉 쥐어 보스를 감싼 혈액구가 파열하는 장면"/><span class="p3r3-media-caption">타격 · 혈액구 파열</span></button><figcaption>손을 꽉 쥐는 순간 압축된 혈액구가<br/>터지며 고유 타격을 가합니다.</figcaption></figure>
 </div>
-<div aria-label="0–15f는 양쪽 공통, 15–100f는 후속 공격 미입력 갈래의 프레임 표" class="p3r3-timeline"><div class="p3r3-timeline-head"><b class="p3r3-timeline-title">분기별 프레임</b><span>공통 0–15f · 이후 미입력 갈래만 재생 · 연출 60f + 복귀 25f · 전체 100f</span></div><div class="p3r3-timeline-grid p3r3-cols-4"><div class="p3r3-time-cell"><b>0–15f</b><em>15f</em><span>공통 · 타격·입력 유예 · 15f 분기</span></div><div class="p3r3-time-cell"><b>15–40f</b><em>25f</em><span>미입력 · 헛기침 · 40f 음성</span></div><div class="p3r3-time-cell"><b>40–75f</b><em>35f</em><span>미입력 · 자세 정돈 · 75f 연출 완료</span></div><div class="p3r3-time-cell"><b>75–100f</b><em>25f</em><span>미입력 · 미소 · 100f 전체 복귀</span></div></div></div>
-</div>
+<div class="blink-success-frame" aria-label="블링크 성공 기준 프레임: 시작0, 타격18, 캔슬24, 종료39">
+<div class="blink-success-frame-head"><b>고유 타격 프레임</b><span>60fps · 캔슬 → 종료 15f</span></div>
+<div class="blink-success-events">
+<div class="blink-success-event"><strong>0f · 시작</strong><span>재출현·혈액 포획</span></div>
+<div class="blink-success-event"><strong>18f · 타격</strong><span>손 쥐기·파열</span></div>
+<div class="blink-success-event"><strong>24f · 캔슬</strong><span>후속 반격 연결 가능</span></div>
+<div class="blink-success-event"><strong>39f · 종료</strong><span>미캔슬 시 동작 종료</span></div>
+</div></div>
+<p class="blink-success-origin">0f = 블링크 성공 순간. 적의 공격을 기다리는 시간은 포함하지 않습니다.</p>
+</section>
+<section class="blink-success-branches" aria-label="고유 타격 이후 선택되는 후속 행동">
+<div class="blink-success-group-head"><h2>타격 이후 분기</h2><span>고유 타격 뒤</span></div>
+<section class="blink-success-branch"><span class="blink-success-condition">공격 입력 · 24f부터 연결</span><h3>공통 회피 반격으로 연계</h3><p>현재 모드의 일반공격 3타 모션을<br/>사용해 다음 타격으로 이어 갑니다.</p><div class="blink-success-jumps"><a href="#slide-22">근거리 3타 <span>→</span></a><a href="#slide-26">원거리 3타 <span>→</span></a></div></section>
+<section class="blink-success-branch blink-success-return"><span class="blink-success-condition">후속 입력 없이 고유 타격 종료</span><h3>기존 수습 연기로 복귀</h3><p>헛기침으로 태도를 수습하고,<br/>자세를 정돈한 뒤 미소로 돌아옵니다.</p><div class="blink-success-recovery"><button class="p3r3-media " type="button" aria-haspopup="dialog" aria-label="헛기침·정돈 확대 보기" data-profile-image="conti/page-15/01-recovery-cough.png" data-profile-caption="헛기침·정돈"><span class="blink-success-expand" aria-hidden="true">⌕ 확대</span><img src="conti/page-15/01-recovery-cough.png" alt="기존 블링크 성공 후 미입력 시 헛기침하는 아코"/><span class="p3r3-media-caption">헛기침·정돈</span></button><button class="p3r3-media " type="button" aria-haspopup="dialog" aria-label="영업용 미소 확대 보기" data-profile-image="conti/page-15/02-recovery-smile.png" data-profile-caption="영업용 미소"><span class="blink-success-expand" aria-hidden="true">⌕ 확대</span><img src="conti/page-15/02-recovery-smile.png" alt="기존 블링크 성공 후 윙크와 브이로 미소에 복귀하는 아코"/><span class="p3r3-media-caption">영업용 미소</span></button></div></section>
+<button class="blink-success-details-button" type="button" aria-haspopup="dialog" data-blink-detail-open>동작·연계 프레임 자세히 ＋</button>
+</section>
+</main>
 <div aria-hidden="true" class="p3r3-divider"></div>
-<footer class="p3r3-footer"><span>김지홍 · 전투 액션 기획</span><span>15 / 33 · INPUT BRANCH</span></footer>
+<footer class="p3r3-footer"><span>김지홍 · 전투 액션 기획</span><span>15 / 33 · SUCCESS FOLLOW-UP</span></footer>
 </article>
 <article aria-label="16 대기 만료 시 감정선 계승과 공통 복귀" class="slide p3r3 p3r3-p16" data-layout-system="part3-r3-v4" id="slide-15">
 <div class="p3r3-dochead"><span>CHARACTER PROPOSAL · WAIT EXPIRY</span><span><a href="#slide-toc">목차</a> · 16 / 33</span></div>
@@ -3191,5 +3252,36 @@ if (document.readyState === 'complete' || document.readyState === 'interactive')
 })();
 // AKO_PAGE_WHEEL_NAVIGATION_END
 </script>
+
+<dialog class="blink-success-detail" id="blink-success-detail" aria-labelledby="blink-success-detail-title">
+<header class="blink-success-detail-header"><h2 id="blink-success-detail-title">블러드 블링크 · 고유 타격과 후속 연결</h2><button class="blink-success-close" type="button" data-blink-detail-close>닫기 ×</button></header>
+<div class="blink-success-detail-body">
+<p><b>0f는 블링크 성공 순간입니다.</b> 대기 진입부터 적의 공격을 기다리는 시간은 별도입니다. 아래 값은 사용자 승인 설계 기준이며, 실제 애니메이션을 측정한 값은 아닙니다.</p>
+<table><thead><tr><th>성공 기준</th><th>동작·판정</th></tr></thead><tbody>
+<tr><td>0–12f</td><td>재출현과 함께 핏빛 물방울이 적을 감쌉니다.</td></tr>
+<tr><td>12–18f</td><td>손가락을 꽉 쥐며 혈액구를 압축합니다.</td></tr>
+<tr><td>18f</td><td>혈액구 파열로 고유 타격을 1회 판정합니다.</td></tr>
+<tr><td>18–24f</td><td>타격의 힘과 주먹 쥔 자세를 짧게 유지합니다.</td></tr>
+<tr><td>24f / 39f</td><td>24f부터 후속 반격으로 연결할 수 있습니다. 캔슬하지 않으면39f에 고유 동작이 끝납니다.</td></tr>
+</tbody></table>
+<h3>후속 회피 반격 · 최속 연결</h3>
+<p>후속 동작의 0f는 블링크 성공 기준24f입니다. 고유 타격과 후속 회피 반격은 별도 계수로 계산하며, 일반공격3타의 모션을 재사용합니다.</p>
+<table><thead><tr><th>현재 모드</th><th>후속 자체 기준</th><th>블링크 성공 기준 누적</th></tr></thead><tbody>
+<tr><td>근거리</td><td>27f 적중 · 36f 다음 연계 · 42f 액션 종료</td><td>51f 적중 · 60f 다음 연계 · 66f 액션 종료</td></tr>
+<tr><td>원거리</td><td>39f 발사 · 48f 다음 연계 · 69f 액션 종료</td><td>63f 발사 · 72f 다음 연계 · 93f 액션 종료</td></tr>
+</tbody></table>
+<p>원거리의63f는 투사체 발사 시점입니다. 실제 적중은 비행 후 충돌할 때 발생합니다. 일반공격4타는 이 후속 회피 반격에 자동으로 포함하지 않습니다.</p>
+<h3>후속 입력이 없을 때</h3>
+<p>고유 타격 종료 뒤 기존 헛기침25f → 자세 정돈35f → 미소 복귀25f의 연기를 유지합니다. 이 갈래는14페이지의 준비·대기나16페이지의 대기 만료 실패 연기와 구분합니다.</p>
+</div></dialog>
+<script>
+document.addEventListener('DOMContentLoaded',()=>{
+ const modal=document.getElementById('blink-success-detail');
+ document.querySelector('[data-blink-detail-open]')?.addEventListener('click',()=>modal.showModal());
+ modal.querySelector('[data-blink-detail-close]')?.addEventListener('click',()=>modal.close());
+ modal.addEventListener('click',e=>{if(e.target===modal){const r=modal.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)modal.close();}});
+});
+</script>
+
 </body>
 </html>
