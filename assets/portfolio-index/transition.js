@@ -118,7 +118,7 @@
   const elapsedBeforeArrival = navigationStarted>0 && navigationElapsed>=0 && navigationElapsed<15000 ? navigationElapsed : 0;
   if (window.top === window && (routes.has(file) || routes.has(entry))) {
     const reader = document.createElement('script');
-    reader.src = new URL('assets/portfolio-index/reader.js?v=20261112-balance-reader-1', url).href;
+    reader.src = new URL('assets/portfolio-index/reader.js?v=20261113-pdf', url).href;
     document.head.append(reader);
   }
   const requestedMotionOff = url.searchParams.get('petal-motion') === 'off';

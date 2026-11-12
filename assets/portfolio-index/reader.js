@@ -52,11 +52,8 @@
       location.assign(next.href);
     });
     const pdf = toolbar.querySelector('.reader-pdf');
-    if (info.nativeControls) pdf.remove();
-    else {
-      pdf.href = new URL(route.replace(/\.html$/, '.pdf'), source).href;
-      pdf.setAttribute('aria-label', info.name + ' PDF 내려받기');
-    }
+    pdf.href = new URL(route.replace(/\.html$/, '.pdf'), source).href;
+    pdf.setAttribute('aria-label', info.name + ' PDF 내려받기');
     let printLink = document.querySelector('.portfolio-print-source');
     if (!printLink) {
       printLink = document.createElement('a');
