@@ -1,0 +1,9 @@
+{
+  "pages": "#document .bs-page",
+  "bodyPages": "#document .ap-page",
+  "roles": {
+    "title": ".bs-title",
+    "claim": ".bs-claim",
+    "body": ".bs-content .bs-copy,.bs-content .ap-copy,.bs-content .reading-line"
+  }
+}

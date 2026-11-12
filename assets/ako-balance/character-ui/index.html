@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>아코 · 캐릭터 상세정보</title>
+<style>
+*{box-sizing:border-box}
+html,body{width:100%;height:100%;margin:0;overflow:hidden;background:#090f18;user-select:none;-webkit-user-select:none}
+#character-viewport{position:fixed;left:50%;top:50%;width:1920px;height:1080px;transform-origin:50% 50%;visibility:hidden}
+#character-viewport[data-ready="true"]{visibility:visible}
+#character-scene{display:block;width:1920px;height:1080px;border:0}
+</style>
+<script src="viewport-fit.js?v=3" defer></script>
+</head>
+<body>
+<main id="character-viewport" aria-label="아코 캐릭터 페이지">
+<iframe id="character-scene" src="character-scene.html" title="아코 캐릭터 상세정보" width="1920" height="1080"></iframe>
+</main>
+</body>
+</html>

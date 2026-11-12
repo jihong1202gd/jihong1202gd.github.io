@@ -1,0 +1,117 @@
+{
+  "title": "회피 반격·블러드 블링크 계산 근거",
+  "sameAttackComparison": {
+    "scope": "10레벨 기초 공격 계수. 동일한 대응 타격의 일반공격판과 회피 반격판 사이의 계수 차이 및 생략 공격의 피해를 비교한다. 별도 추가 스킬 피해를 합산하는 비교가 아니다.",
+    "rows": [
+      {
+        "character": "카멜리아 기본 상태",
+        "correspondingAttack": "일반공격3타",
+        "ordinaryPercent": 152.1,
+        "counterPercent": 298.2,
+        "addedToSameAttackPercentPoints": 146.1,
+        "relativeIncreasePercent": 96.06,
+        "skippedAttacks": "일반1·2타",
+        "skippedCoefficientPercent": 155.49,
+        "skippedRouteFrames": 30,
+        "netCoefficientDifferencePercentPoints": -9.39
+      },
+      {
+        "character": "카멜리아 만개 상태",
+        "correspondingAttack": "넝쿨의 춤2타",
+        "ordinaryPercent": 91.26,
+        "counterPercent": 226.66,
+        "addedToSameAttackPercentPoints": 135.4,
+        "relativeIncreasePercent": 148.37,
+        "skippedAttacks": "넝쿨의 춤1타",
+        "skippedCoefficientPercent": 96.33,
+        "skippedRouteFrames": 20,
+        "netCoefficientDifferencePercentPoints": 39.07
+      },
+      {
+        "character": "루크 지상",
+        "correspondingAttack": "일반공격2타",
+        "ordinaryPercent": 150.4,
+        "counterPercent": 251.8,
+        "addedToSameAttackPercentPoints": 101.4,
+        "relativeIncreasePercent": 67.42,
+        "skippedAttacks": "일반1타",
+        "skippedCoefficientPercent": 81.12,
+        "skippedRouteFrames": 21,
+        "netCoefficientDifferencePercentPoints": 20.28
+      }
+    ],
+    "formulas": {
+      "sameAttackAdded": "회피 반격 계수 − 대응 일반공격 계수",
+      "netCoefficientDifference": "같은 타격에 추가되는 계수 − 생략 공격의 계수 합"
+    },
+    "publicSources": {
+      "camellyaCoefficients": "https://wuthering.wiki/character_1603.html",
+      "luukCoefficients": "https://gacha-data.com/wuthering-waves/characters/1510/",
+      "camellyaFrames": "https://github.com/ryanbenson/wuthering-waves-optimizer/blob/master/src/characters/Camellya/frames.ts",
+      "luukFrames": "https://github.com/ryanbenson/wuthering-waves-optimizer/blob/master/src/characters/LuukHerssen/frames.ts"
+    },
+    "note": "생략 구간 프레임은 원래 공격 경로의 시간이며 회피 동작을 포함한 최종 절약 시간이 아닙니다. 순계수 차이는 실제 DPS 상승률이 아닙니다."
+  },
+  "ordinaryCounter": {
+    "level": 10,
+    "referenceStat": "공격력",
+    "melee": {
+      "ordinaryThirdPercent": 255.78,
+      "omittedFirstTwoPercent": 398.0,
+      "reimbursementRate": 1.25,
+      "additionalCoefficientPercentPoints": 497.5,
+      "counterPercent": 753.28,
+      "formula": "255.78 + (188.42+209.58)×1.25 = 753.28",
+      "basis": "루크 지상의 같은 타격 추가계수101.40을 생략1타81.12로 나눈125% 보충 비율을 근거리 보상 책정의 비교 기준으로 선택했다."
+    },
+    "ranged": {
+      "ordinaryThirdPercent": 231.42,
+      "omittedFirstTwoPercent": 360.1,
+      "reimbursementRate": 0.9396102643256801,
+      "additionalCoefficientPercentPoints": 338.35,
+      "counterPercent": 569.77,
+      "hitCoefficientsPercent": [
+        170.94,
+        398.83
+      ],
+      "formula": "231.42 + (170.48+189.62)×(146.10/155.49) ≒ 569.77",
+      "basis": "카멜리아 기본 상태의 같은 타격 추가계수146.10을 생략1·2타155.49로 나눈 약93.96% 보충 비율을 원거리 보상 책정의 비교 기준으로 선택했다.",
+      "hitSplit": "기존 원거리3타의 직격69.43:파열161.99 비율을 유지해 직격170.94로 반올림하고 나머지398.83을 파열에 배정했다."
+    },
+    "timingLimit": "일반3타36/48f를 회피 반격의 확정 소요시간으로 사용하지 않는다. 앞선1·2타 구간60f를 최종 순절약 시간으로 단정하지 않는다. 이 단계에서는 새 반격 시간 또는 DPS 상승률을 확정하지 않았다."
+  },
+  "blinkIntrinsic": {
+    "level": 10,
+    "referenceStat": "공격력",
+    "commonAcrossModes": true,
+    "hitCount": 1,
+    "coefficientPercent": 151.62,
+    "calculation": {
+      "referenceFrames": 60,
+      "meleeFirstTwoPercent": 398.0,
+      "rangedFirstTwoPercent": 360.1,
+      "commonFirstTwoPercent": 379.05,
+      "coefficientPerFrame": 6.3175,
+      "applicationRatio": 1.0,
+      "formula": "((188.42+209.58+170.48+189.62)/2)/60*24 = 151.62",
+      "reason": "고유 타격은 두 모드 공통이므로 같은60f 구간의 일반공격 계수 평균을 비교 기준으로 선택했다. 일반 회피 반격에는 이미 모드별 성공 보상을 배정했으므로 고유 타격은 추가로 사용하는24f에 일반공격 단가100%를 배정하고, 일반 반격의125%·약93.96% 보충 비율을 다시 적용하지 않는다. 이 배분은 설계 선택이며 게임의 공통 공식이 아니다."
+    },
+    "withExistingCounter": {
+      "meleeCounterPercent": 753.28,
+      "rangedCounterPercent": 569.77,
+      "meleeTotalPercent": 904.9,
+      "rangedTotalPercent": 721.39,
+      "meaning": "공격 입력으로 후속 일반 회피 반격까지 연결했을 때의 기초 계수 합. 실제 피해나 DPS 상승률이 아님."
+    },
+    "timing": {
+      "fps": 60,
+      "origin": "적의 공격을 감지하여 블링크가 성공한 순간 S0",
+      "hitFrame": 18,
+      "earliestFollowupFrame": 24,
+      "fullAnimationEndFrame": 39,
+      "cancelToEndFrames": 15,
+      "budgetFrames": 24,
+      "sourceType": "사용자 승인 동작 설계값. 실측 아님"
+    }
+  }
+}

@@ -1,7 +1,7 @@
 (() => {
   'use strict';
   const storageKey = 'jihong-portfolio-opened-v1';
-  const routes = new Set(['about.html', 'project-kizaki-ako.html', 'wuthering-waves-control-analysis.html', 'study-character-making.html']);
+  const routes = new Set(['about.html', 'project-kizaki-ako.html', 'wuthering-waves-control-analysis.html', 'study-character-making.html', 'kizaki-ako-balance.html']);
   const rows = [...document.querySelectorAll('.contents li')].map(element => {
     const link = element.querySelector('a.chapter');
     const route = new URL(link.href).pathname.split('/').pop();

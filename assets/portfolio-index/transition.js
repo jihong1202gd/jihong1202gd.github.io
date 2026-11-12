@@ -27,13 +27,16 @@
   bindMusicEscape(window);
   const routes = new Set(['about.html', 'project-kizaki-ako.html',
     'wuthering-waves-control-analysis.html', 'study-character-making.html']);
+  // The balance document owns its toolbar and opens directly in a new tab.
+  const nativeReaderRoutes = new Set(['kizaki-ako-balance.html']);
+  const documentRoutes = new Set([...routes, ...nativeReaderRoutes]);
   const openedStorageKey = 'jihong-portfolio-opened-v1';
   function recordOpenedDocument() {
     const route = location.pathname.split('/').pop();
-    if (!routes.has(route)) return;
+    if (!documentRoutes.has(route)) return;
     try {
       const saved = JSON.parse(localStorage.getItem(openedStorageKey) || '[]');
-      const opened = new Set((Array.isArray(saved) ? saved : []).filter(item => routes.has(item)));
+      const opened = new Set((Array.isArray(saved) ? saved : []).filter(item => documentRoutes.has(item)));
       if (opened.has(route)) return;
       opened.add(route); localStorage.setItem(openedStorageKey, JSON.stringify([...opened]));
     } catch (_) {}
@@ -548,8 +551,10 @@
     link.addEventListener('click',event=>{
       if(event.defaultPrevented||event.button!==0)return;
       const target=new URL(link.href);
-      if(target.origin!==url.origin||!routes.has(target.pathname.split('/').pop()))return;
+      const route = target.pathname.split('/').pop();
+      if (target.origin !== url.origin || !documentRoutes.has(route)) return;
       window.dispatchEvent(new Event('portfolio-bgm-pause'));
+      if (nativeReaderRoutes.has(route)) return;
       if(event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;
       const opening=new URL('index.html',url);
       opening.searchParams.set('open-portfolio',target.pathname.split('/').pop());
