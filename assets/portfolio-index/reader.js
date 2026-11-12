@@ -3,20 +3,22 @@
   if (window.top !== window || document.getElementById('portfolio-reader-tools')) return;
 
   const documents = {
-    'about.html': { name: '자기 PR', contents: 'v13-contents' },
-    'project-kizaki-ako.html': { name: '캐릭터 제안서', contents: 'slide-toc' },
-    'wuthering-waves-control-analysis.html': { name: '전투 조작 분석', contents: 'contents' },
-    'study-character-making.html': { name: '스터디 부록', contents: 'opening' }
+    'about.html': { number: '0', name: '자기 PR', contents: 'v13-contents' },
+    'project-kizaki-ako.html': { number: '1', name: '캐릭터 제안서', contents: 'slide-toc' },
+    'kizaki-ako-balance.html': { number: '1-2', name: '아코 전투 밸런스 설계', contents: 'contents', nativeControls: true },
+    'wuthering-waves-control-analysis.html': { number: '2', name: '전투 조작 분석', contents: 'contents' },
+    'study-character-making.html': { number: '3', name: '스터디 부록', contents: 'opening' }
   };
   const scriptUrl = document.currentScript.src;
   const address = new URL(location.href);
   const frameSource = document.getElementById('portfolio-document')?.getAttribute('src');
   const route = frameSource ? new URL(frameSource, address).pathname.split('/').pop() :
     address.searchParams.get('open-portfolio') || address.pathname.split('/').pop();
-  if (!documents[route]) return;
+  const info = documents[route];
+  if (!info) return;
   const stylesheet = document.createElement('link');
   stylesheet.rel = 'stylesheet';
-  stylesheet.href = new URL('reader.css?v=20261104-2', scriptUrl).href;
+  stylesheet.href = new URL('reader.css?v=20261112-balance-reader-1', scriptUrl).href;
   document.head.append(stylesheet);
 
   function start() {
@@ -34,10 +36,10 @@
       '<button class="reader-plus" type="button" aria-label="문서 확대">+</button></div>' +
       '<a class="reader-pdf" download>PDF ↓</a></div>';
     const switcher = toolbar.querySelector('.reader-switch select');
-    for (const [index, [path, info]] of Object.entries(documents).entries()) {
+    for (const [path, item] of Object.entries(documents)) {
       const option = document.createElement('option');
       option.value = path;
-      option.textContent = index + '. ' + info.name;
+      option.textContent = item.number + '. ' + item.name;
       option.selected = path === route;
       switcher.append(option);
     }
@@ -50,8 +52,11 @@
       location.assign(next.href);
     });
     const pdf = toolbar.querySelector('.reader-pdf');
-    pdf.href = new URL(route.replace(/\.html$/, '.pdf'), source).href;
-    pdf.setAttribute('aria-label', documents[route].name + ' PDF 내려받기');
+    if (info.nativeControls) pdf.remove();
+    else {
+      pdf.href = new URL(route.replace(/\.html$/, '.pdf'), source).href;
+      pdf.setAttribute('aria-label', info.name + ' PDF 내려받기');
+    }
     let printLink = document.querySelector('.portfolio-print-source');
     if (!printLink) {
       printLink = document.createElement('a');
@@ -64,7 +69,7 @@
     printLink.setAttribute('aria-label', '인쇄용 문서 새 탭에서 열기');
     toolbar.querySelector('.reader-actions').append(printLink);
     document.documentElement.append(toolbar);
-    if (!frame) document.documentElement.dataset.portfolioReaderDirect = '';
+    if (!frame && !info.nativeControls) document.documentElement.dataset.portfolioReaderDirect = '';
     let toolbarHeight = 0;
     const syncToolbarHeight = () => {
       const height = toolbar.getBoundingClientRect().height;
@@ -75,6 +80,11 @@
     };
     new ResizeObserver(syncToolbarHeight).observe(toolbar);
     syncToolbarHeight();
+
+    if (info.nativeControls) {
+      bindNativeControls(toolbar, frame, source, printLink);
+      return;
+    }
 
     let doc, win, original, zoom = 1;
     const steps = [1, 1.5, 2, 2.5, 3, 4];
@@ -152,6 +162,70 @@
       if (frame.contentDocument?.readyState === 'complete') bindDocument();
     } else bindDocument();
   }
+  function bindNativeControls(toolbar, frame, source, printLink) {
+    const actions = toolbar.querySelector('.reader-actions');
+    const overview = document.createElement('button');
+    overview.type = 'button';
+    overview.textContent = '전체 보기';
+    overview.setAttribute('aria-pressed', 'false');
+    actions.insertBefore(overview, toolbar.querySelector('.reader-zoom'));
+
+    const print = document.createElement('button');
+    print.type = 'button';
+    print.className = 'reader-print';
+    print.textContent = '인쇄 ↗';
+    printLink.replaceWith(print);
+
+    const bindings = [
+      [toolbar.querySelector('.reader-contents'), '.viewer-toolbar a[href="#contents"]'],
+      [toolbar.querySelector('.reader-minus'), '#reader-minus'],
+      [toolbar.querySelector('.reader-fit'), '#reader-fit'],
+      [toolbar.querySelector('.reader-plus'), '#reader-plus'],
+      [overview, '#view-strip'],
+      [print, '#reader-print']
+    ];
+    let observer;
+    let controls = [];
+    for (const [index, [button]] of bindings.entries()) {
+      button.disabled = true;
+      button.addEventListener('click', () => controls[index]?.click());
+    }
+
+    function connect() {
+      const doc = frame ? frame.contentDocument : document;
+      if (!doc?.body || (frame && new URL(doc.URL).pathname !== source.pathname)) return;
+      const nativeToolbar = doc.querySelector('.viewer-toolbar');
+      const nextControls = bindings.map(([, selector]) => nativeToolbar?.querySelector(selector));
+      if (nextControls.some(control => !control)) return;
+
+      observer?.disconnect();
+      controls = nextControls;
+      function sync() {
+        for (const [index, [button]] of bindings.entries()) {
+          const control = controls[index];
+          button.disabled = control.disabled === true;
+          const pressed = control.getAttribute('aria-pressed');
+          if (pressed !== null) button.setAttribute('aria-pressed', pressed);
+          if (control === controls[2] || control === controls[4]) button.textContent = control.textContent;
+        }
+        const fit = bindings[2][0];
+        fit.setAttribute('aria-label', fit.textContent === '맞춤' ? '화면에 맞추기' : fit.textContent + ' 확대 중, 화면에 맞추기');
+      }
+      observer = new MutationObserver(sync);
+      observer.observe(nativeToolbar, {
+        subtree: true, childList: true, characterData: true, attributes: true,
+        attributeFilter: ['disabled', 'aria-pressed']
+      });
+      nativeToolbar.hidden = true;
+      sync();
+      (frame ? frame.contentWindow : window).dispatchEvent(new Event('resize'));
+    }
+    if (frame) {
+      frame.addEventListener('load', connect);
+      if (frame.contentDocument?.readyState === 'complete') connect();
+    } else connect();
+  }
+
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true });
   else start();
 })();

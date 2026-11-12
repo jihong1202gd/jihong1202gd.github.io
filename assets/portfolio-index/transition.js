@@ -26,17 +26,14 @@
   }
   bindMusicEscape(window);
   const routes = new Set(['about.html', 'project-kizaki-ako.html',
-    'wuthering-waves-control-analysis.html', 'study-character-making.html']);
-  // The balance document owns its toolbar and opens directly in a new tab.
-  const nativeReaderRoutes = new Set(['kizaki-ako-balance.html']);
-  const documentRoutes = new Set([...routes, ...nativeReaderRoutes]);
+    'wuthering-waves-control-analysis.html', 'study-character-making.html', 'kizaki-ako-balance.html']);
   const openedStorageKey = 'jihong-portfolio-opened-v1';
   function recordOpenedDocument() {
     const route = location.pathname.split('/').pop();
-    if (!documentRoutes.has(route)) return;
+    if (!routes.has(route)) return;
     try {
       const saved = JSON.parse(localStorage.getItem(openedStorageKey) || '[]');
-      const opened = new Set((Array.isArray(saved) ? saved : []).filter(item => documentRoutes.has(item)));
+      const opened = new Set((Array.isArray(saved) ? saved : []).filter(item => routes.has(item)));
       if (opened.has(route)) return;
       opened.add(route); localStorage.setItem(openedStorageKey, JSON.stringify([...opened]));
     } catch (_) {}
@@ -121,7 +118,7 @@
   const elapsedBeforeArrival = navigationStarted>0 && navigationElapsed>=0 && navigationElapsed<15000 ? navigationElapsed : 0;
   if (window.top === window && (routes.has(file) || routes.has(entry))) {
     const reader = document.createElement('script');
-    reader.src = new URL('assets/portfolio-index/reader.js?v=20261104-fit-1', url).href;
+    reader.src = new URL('assets/portfolio-index/reader.js?v=20261112-balance-reader-1', url).href;
     document.head.append(reader);
   }
   const requestedMotionOff = url.searchParams.get('petal-motion') === 'off';
@@ -552,9 +549,8 @@
       if(event.defaultPrevented||event.button!==0)return;
       const target=new URL(link.href);
       const route = target.pathname.split('/').pop();
-      if (target.origin !== url.origin || !documentRoutes.has(route)) return;
+      if (target.origin !== url.origin || !routes.has(route)) return;
       window.dispatchEvent(new Event('portfolio-bgm-pause'));
-      if (nativeReaderRoutes.has(route)) return;
       if(event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;
       const opening=new URL('index.html',url);
       opening.searchParams.set('open-portfolio',target.pathname.split('/').pop());

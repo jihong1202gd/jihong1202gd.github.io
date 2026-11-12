@@ -33,7 +33,8 @@
   const hashIndex = () => roots.findIndex(page => '#' + page.id === location.hash);
   const initialIndex = strip ? -1 : hashIndex();
   let initialAnchorPending = initialIndex >= 0;
-  const toolbarHeight = () => toolbar.offsetHeight;
+  const toolbarHeight = () =>
+    (document.getElementById('portfolio-reader-tools') || toolbar).offsetHeight;
   const pageTop = height => toolbarHeight() + Math.max(0, (innerHeight - toolbarHeight() - height) / 2);
 
   function fitPages() {

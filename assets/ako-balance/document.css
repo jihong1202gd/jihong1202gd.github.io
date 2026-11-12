@@ -315,7 +315,7 @@
     body.capture #document{padding:0;overflow:visible}
     body.capture .page-host{margin:0;width:1920px;height:1080px}
     body.capture .bs-page{transform:none}
-    body.capture .viewer-toolbar{display:none}
+    .viewer-toolbar[hidden],body.capture .viewer-toolbar{display:none}
     @media(max-width:700px){
       .viewer-toolbar{flex-wrap:wrap;gap:4px 8px;padding-inline:8px}
       .viewer-tools{flex-basis:100%}
