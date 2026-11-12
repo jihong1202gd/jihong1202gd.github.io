@@ -467,7 +467,8 @@
       imageTimer=setTimeout(()=>prepared(false),4000);
       image.addEventListener('load',loaded,{once:true});image.addEventListener('error',()=>prepared(false),{once:true});
       image.alt='';
-      image.src=new URL('assets/portfolio-index/sakura-hill-4x.webp',url).href;
+      const hill = matchMedia('(max-width: 700px)').matches ? 'sakura-hill-mobile.webp' : 'sakura-hill-4x.webp';
+      image.src=new URL('assets/portfolio-index/'+hill,url).href;
       if(image.complete&&image.naturalWidth>0)loaded();
     }
     return {host,finish,stop,carryField,ready:()=>departureReady&&progress>=1,
