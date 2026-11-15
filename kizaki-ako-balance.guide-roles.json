@@ -5,5 +5,33 @@
     "title": ".bs-title",
     "claim": ".bs-claim",
     "body": ".bs-content .bs-copy,.bs-content .ap-copy,.bs-content .reading-line"
-  }
+  },
+  "sizeExceptionScopes": {
+    "selectors": [
+      ".main-table",
+      ".data-graph",
+      ".chart-list",
+      ".value-steps",
+      ".timeline-area",
+      ".hit-readout",
+      ".hit-spec",
+      ".rank-decisions",
+      ".entry-team",
+      ".scene-trio a.source-link"
+    ],
+    "approvalReference": "사용자 확인 2026-11-15 \"포함+예외로 진행해\"",
+    "guideQuote": "표·그래프·타임라인·계산식·판정 패널 같은 수치 영역 안쪽의 글자 크기를 4절 단계 밖으로 쓸 수 있다"
+  },
+  "components": {
+    "claimBand": "role:claim",
+    "kicker": ".bs-kicker",
+    "header": ".bs-doc-header > span, .bs-footer > span",
+    "evidenceTab": "figcaption .category, .hit-spec-head > .category, .rank-evidence > .category",
+    "bookmark": ".counter-paths .reading-panel > .category, .part-nodes:not(.ordered) .part-node > span",
+    "caption": ".storyboard > figcaption",
+    "zoomBadge": ".storyboard > .evidence-expand",
+    "processNo": "#part-2 .process-head > .process-no",
+    "processKind": "#part-2 .process-head > .process-kind"
+  },
+  "componentsEnforced": true
 }

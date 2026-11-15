@@ -103,20 +103,21 @@
     right: 92px;
     display: flex;
     justify-content: space-between;
-    font-size: 16px;
+    font-size: 13px;
     font-weight: 720;
-    color: var(--ap-muted);
+    color: #888;
   }
 
   .ap-header a {
     display: inline-flex;
     align-items: center;
-    padding: 6px 13px;
+    height: 33px;
+    padding: 0 13px;
     border: 1px solid #e5e7eb;
     border-radius: 6px;
     background: var(--ap-paper);
     color: #555;
-    font-size: 16px;
+    font-size: 12px;
     font-weight: 850;
     line-height: 1.25;
     text-decoration: none;
@@ -452,7 +453,7 @@
     width: 24px;
     height: 24px;
     flex: 0 0 24px;
-    border-radius: 4px;
+    border-radius: 6px;
     background: var(--ap-accent-interaction);
     color: var(--ap-paper);
     font-size: 14px;
@@ -465,6 +466,9 @@
     font-size: 13px;
     font-weight: 900;
     line-height: 1.35;
+    padding: 3px 7px;
+    border: 1px solid var(--ap-tag-border);
+    background: var(--ap-tag-surface);
   }
 
   .ap-flow-row {
@@ -577,13 +581,23 @@
   }
 
   .ap-media-meta {
-    flex: none;
-    padding: 6px 12px;
+    position: absolute;
+    /* Match the right edge of the contained 526 × 719 invitation. */
+    right: max(var(--ap-media-inline-inset), calc((100cqw - (100cqh - var(--ap-media-label-space) - 2 * var(--ap-media-inset)) * 526 / 719) / 2));
+    bottom: var(--ap-media-inset);
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    height: 28px;
+    margin: 0;
+    padding: 0 8px 0 19px;
     font-size: 14px;
-    font-weight: 700;
-    line-height: 1.45;
-    color: var(--ap-muted);
-    background: var(--ap-paper);
+    font-weight: 800;
+    line-height: 1;
+    color: var(--ap-paper);
+    background: var(--ap-ink);
+    clip-path: polygon(10px 0, 100% 0, 100% 100%, 0 100%);
+    pointer-events: none;
     word-break: keep-all;
   }
 
@@ -592,7 +606,7 @@
     display: flex;
     flex: 1;
     min-height: 0;
-    padding-top: 34px;
+    padding-top: var(--ap-media-label-space);
   }
 
   .ap-media-type {
@@ -623,7 +637,9 @@
   }
 
   .ap-primary-proof {
-    box-shadow: inset 0 3px 0 var(--ap-accent-structure),0 8px 18px rgba(17,17,17,.11);
+    background-image: linear-gradient(var(--ap-accent-structure), var(--ap-accent-structure));
+    background-size: 100% 3px;
+    background-repeat: no-repeat;
   }
 
   .ap-proof-mark {
@@ -652,7 +668,7 @@
     position: relative;
     flex: none;
     border: 1px solid var(--ap-border);
-    background: var(--ap-paper);
+    background-color: var(--ap-paper);
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -830,12 +846,16 @@
   }
 
   .ap-background-proof .ap-image {
+    container-type: size;
+    --ap-media-inset: 10px;
+    --ap-media-inline-inset: 25px;
+    --ap-media-label-space: 34px;
     flex: 1;
     min-height: 0;
   }
 
   .ap-background-proof .ap-image-link {
-    padding: 10px 25px;
+    padding: var(--ap-media-inset) var(--ap-media-inline-inset);
   }
 
   .ap-cover-favorite {
@@ -1043,8 +1063,8 @@
 
   .ap-declaration-title {
     max-width: 1540px;
-    font-size: 70px;
-    font-weight: 700;
+    font-size: 64px;
+    font-weight: 950;
     line-height: 1.14;
     letter-spacing: -.055em;
     word-break: keep-all;
@@ -1094,7 +1114,7 @@
     background: var(--ap-paper);
     color: var(--ap-accent-interaction);
     font-size: 12px;
-    font-weight: 850;
+    font-weight: 900;
     line-height: 1.25;
     cursor: pointer;
   }
