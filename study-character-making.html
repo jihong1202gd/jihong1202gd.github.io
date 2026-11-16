@@ -14,6 +14,16 @@
   font-display: swap;
 }
 
+/* 웹폰트가 도착하기 전에도 대체 글꼴의 줄 수와 높이를 맞춘다. */
+@font-face {
+  font-family: 'Study Korean Fallback';
+  src: local('Malgun Gothic');
+  size-adjust: 91%;
+  ascent-override: 127.47%;
+  descent-override: 31.65%;
+  line-gap-override: 0%;
+}
+
 @layer preview-tokens,preview-base,preview-shell,preview-relations,preview-evidence,preview-pages,preview-interactions,preview-print;
 
 /* 공통 색상 토큰. 이 독립 HTML의 루트에서 페이지·확대창으로 상속하며 기존 값을 유지한다. */
@@ -47,7 +57,7 @@
   body {
     margin: 0;
     background: var(--ap-canvas);
-    font-family: 'Noto Sans KR',sans-serif;
+    font-family: 'Noto Sans KR','Study Korean Fallback','Malgun Gothic',sans-serif;
     color: var(--ap-ink);
   }
 
@@ -204,9 +214,9 @@
     right: 100px;
     display: flex;
     justify-content: space-between;
-    font-size: 14px;
+    font-size: var(--ap-footer-size,14px);
     font-weight: 700;
-    color: #84868d;
+    color: var(--ap-footer-ink,#84868d);
   }
 
   .ap-heading {
@@ -752,7 +762,6 @@
     font-size: 13px;
     font-weight: 850;
     line-height: normal;
-    letter-spacing: .09em;
     color: #555;
   }
 
@@ -775,7 +784,7 @@
     position: static;
     margin: 0 0 18px;
     font-size: 18px;
-    font-weight: 950;
+    font-weight: 850;
     line-height: normal;
     letter-spacing: .2em;
     color: var(--ap-accent-structure);
@@ -1022,20 +1031,21 @@
   }
 
   #first-thought .ap-copy {
-    font-weight: 600;
+    font-weight: 550;
   }
 
   .ap-declaration {
+    --ap-footer-size: 13px;
+    --ap-footer-ink: #888;
     background: var(--ap-paper);
   }
 
   .ap-declaration .ap-header {
-    top: 54px;
+    top: 56px;
     right: 92px;
     font-size: 13px;
     font-weight: 800;
     line-height: 1.58;
-    letter-spacing: .1em;
     color: #888;
   }
 
