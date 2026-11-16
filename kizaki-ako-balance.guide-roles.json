@@ -17,7 +17,8 @@
       ".hit-spec",
       ".rank-decisions",
       ".entry-team",
-      ".scene-trio a.source-link"
+      ".scene-trio a.source-link",
+      "#p06 .allocation-keys"
     ],
     "approvalReference": "사용자 확인 2026-11-15 \"포함+예외로 진행해\"",
     "guideQuote": "표·그래프·타임라인·계산식·판정 패널 같은 수치 영역 안쪽의 글자 크기를 4절 단계 밖으로 쓸 수 있다"
@@ -26,7 +27,7 @@
     "claimBand": "role:claim",
     "kicker": ".bs-kicker",
     "header": ".bs-doc-header > span, .bs-footer > span",
-    "evidenceTab": "figcaption .category, .hit-spec-head > .category, .rank-evidence > .category",
+    "evidenceTab": "figcaption .category, .hit-spec-head > .category, .rank-evidence > .category, #appendix .appendix-evidence > .category",
     "bookmark": ".counter-paths .reading-panel > .category, .part-nodes:not(.ordered) .part-node > span",
     "caption": ".storyboard > figcaption",
     "zoomBadge": ".storyboard > .evidence-expand",
