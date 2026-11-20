@@ -80,6 +80,7 @@ function update(){
   stage.dataset.layoutHeight=String(layoutHeight);
   stage.dataset.min=String(MIN);stage.dataset.max=String(MAX);
  }
+ root.style.setProperty('--visible-viewport-height',height+'px');
  // The backdrop fills the viewport while only the content is transformed.
  stage.style.setProperty('--fit-height',mobile?layoutHeight+'px':'auto');
  stage.style.setProperty('--fit-overflow',mobile?'clip':'visible');
