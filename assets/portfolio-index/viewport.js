@@ -24,11 +24,12 @@ function fitContent(layoutWidth,layoutHeight){
   const right=parseFloat(style.getPropertyValue('--safe-right'))||0;
   const bottom=parseFloat(style.getPropertyValue('--safe-bottom'))||0;
   const left=parseFloat(style.getPropertyValue('--safe-left'))||0;
-  const availableHeight=Math.max(1,layoutHeight-top-bottom);
+  const edgeGap=parseFloat(style.getPropertyValue('--content-edge-gap'))||0;
+  const availableHeight=Math.max(1,layoutHeight-top-bottom-edgeGap*2);
   const availableWidth=Math.max(1,layoutWidth-left-right);
   const naturalHeight=Math.max(page.scrollHeight,page.offsetHeight);
   const scale=Math.min(1,(availableHeight-1)/naturalHeight,availableWidth/layoutWidth);
-  page.style.setProperty('--content-inset-top',top+'px');
+  page.style.setProperty('--content-inset-top',(top+edgeGap)+'px');
   page.style.setProperty('--content-inset-left',(left-right)/2+'px');
   page.style.setProperty('--mobile-scale',String(scale));
   return;
