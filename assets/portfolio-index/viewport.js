@@ -83,8 +83,8 @@ function update(){
  // The backdrop fills the viewport while only the content is transformed.
  stage.style.setProperty('--fit-height',mobile?layoutHeight+'px':'auto');
  stage.style.setProperty('--fit-overflow',mobile?'clip':'visible');
- if(mobile)stage.style.setProperty('--scenery-left','0%');
- else stage.style.removeProperty('--scenery-left');
+ if(mobile)root.style.setProperty('--scenery-left','0%');
+ else root.style.removeProperty('--scenery-left');
  page.style.setProperty('--page-width',mobile?layoutWidth+'px':'auto');
  page.style.setProperty('--page-zoom',mobile?'1':'var(--content-scale)');
  page.style.setProperty('--content-transform',mobile?'scale(var(--mobile-scale,1))':'none');
