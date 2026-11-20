@@ -1,9 +1,11 @@
 <!doctype html>
 <html lang="ko">
 <head>
+<script src="assets/paper-device.js"></script>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-<script src="assets/portfolio-index/transition.js?v=20261104-pinch-1"></script>
+
+  <meta name="viewport" content="width=device-width,initial-scale=1"><script src="assets/paper-opening.js"></script>
+<script src="assets/portfolio-index/transition.js?v=20261120-full-cover"></script>
   <meta name="author" content="KIM JIHONG">
   <title>자기 PR | 여러분이 찾고 있던 “진짜 오타쿠” 기획자</title>
   <style>
@@ -197,7 +199,7 @@ html .toc-core-badge-v17 { animation: auto ease 0s 1 normal none running none; }
 
 #v13-direction .final-link b { font-size: 22px; line-height: 1.35; }
 
-#v13-direction .final-link span { font-size: 36px; }
+#v13-direction .final-link span { font-size: 36px; color: var(--v96-body-red); }
 
 #v13-direction .contact-card { margin-top: 22px; }
 
@@ -389,7 +391,7 @@ html .toc-core-badge-v17 { animation: auto ease 0s 1 normal none running none; }
 
 .toc-back:hover { transform: translateY(-2px); box-shadow: rgba(0, 0, 0, 0.1) 0px 8px 20px; border-color: rgb(217, 48, 37); background: rgb(217, 48, 37); color: rgb(255, 255, 255); }
 
-#v13-direction.final-splash-v68 .final-link { min-height: 116px; padding: 17px 23px 16px; border: 2px solid rgb(217, 48, 37); background: rgb(255, 255, 255); }
+#v13-direction.final-splash-v68 .final-link { min-height: 116px; padding: 17px 23px 16px; border: 2px solid var(--v96-body-red); background: rgb(255, 255, 255); }
 
 #v13-direction.final-splash-v68 .final-link:hover { border-color: rgb(217, 48, 37); background: rgb(217, 48, 37); color: rgb(255, 255, 255); }
 
@@ -1050,7 +1052,7 @@ body.self-pr-document #v98-applicant-strengths .strengths-route-v98 > span { dis
 
 body.self-pr-document #v98-applicant-strengths .strengths-route-v98 a { display: flex; gap: 9px; align-items: center; justify-content: space-between; padding: 0px 16px; border-width: 1px; border-style: solid; border-color: transparent transparent transparent rgb(217, 220, 223); border-image: none; border-radius: 6px; color: rgb(59, 63, 69); font-size: 14px; font-weight: 850; text-decoration: none; }
 
-body.self-pr-document #v98-applicant-strengths .strengths-route-v98 a::after { content: "↗"; color: rgb(168, 91, 85); font-size: 15px; }
+body.self-pr-document #v98-applicant-strengths .strengths-route-v98 a::after { content: "→"; color: rgb(168, 91, 85); font-size: 15px; }
 
 body.self-pr-document #v98-applicant-strengths .strengths-route-v98 a:hover { border-color: rgb(168, 91, 85); background: rgb(255, 255, 255); color: rgb(168, 91, 85); }
 
@@ -1214,7 +1216,8 @@ body.self-pr-document #v13-system-analysis .source-system-diagram > div:nth-chil
 .reading-conclusion { display: block; margin-top: 14px; }
 }
 </style>
-<script src="assets/image-protect.js" defer></script></head>
+<script src="assets/image-protect.js" defer></script><link rel="stylesheet" href="self-pr-v106-mobile-reading.css"><link rel="stylesheet" href="assets/paper-controls.css"><script defer src="assets/paper-controls.js"></script><script src="assets/paper-swipe.js"></script>
+</head>
 <body class="self-pr-document">
 <template id="legacy-v12-archive">
   <article class="page" id="cover" aria-label="1페이지: 자기 PR 표지와 핵심 역량">
@@ -1966,9 +1969,12 @@ body.self-pr-document #v13-system-analysis .source-system-diagram > div:nth-chil
   </article>
 </main>
 <div class="origin-hover-preview-v86" id="origin-hover-preview-v86" hidden aria-hidden="true"><figure><img alt=""><figcaption></figcaption></figure></div>
+
 <dialog class="origin-lightbox-v86" id="origin-lightbox-v86" aria-label="근거 이미지 확대 보기"><button class="origin-lightbox-close-v86" type="button" aria-label="확대 이미지 닫기">×</button><figure><img alt=""><figcaption></figcaption></figure></dialog>
+<script src="self-pr-v106-mobile-reading.js"></script>
 <script>
 function adjustScale(){
+  if(window.prMobileActive?.()&&!window.matchMedia("print").matches)return;
   const pages=document.querySelectorAll('.page');
   if(window.matchMedia('print').matches){
     pages.forEach(page=>{
@@ -2014,7 +2020,7 @@ if(document.readyState==='complete'||document.readyState==='interactive')adjustS
     return false;
   };
   window.addEventListener('wheel',event=>{
-    if(event.defaultPrevented||event.ctrlKey||event.metaKey||window.matchMedia('print').matches)return;
+    if(window.prMobileActive?.()||event.defaultPrevented||event.ctrlKey||event.metaKey||window.matchMedia('print').matches)return;
     if(!event.deltaY||Math.abs(event.deltaX)>Math.abs(event.deltaY)||nativeScrollTarget(event.target))return;
     const pages=[...document.querySelectorAll('main .page')].filter(page=>page.getClientRects().length&&getComputedStyle(page).visibility!=='hidden');
     if(pages.length<2)return;

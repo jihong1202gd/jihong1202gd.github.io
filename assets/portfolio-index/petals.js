@@ -9,7 +9,8 @@ let petals=[],gusts=[];
 const finePointer=matchMedia('(hover: hover) and (pointer: fine)');
 function cardBox(row){
  const stage=document.querySelector('.viewport-stage');
- const origin=stage.getBoundingClientRect(),box=row.getBoundingClientRect();
+ const field=canvas.parentElement;
+ const origin=field.getBoundingClientRect(),box=row.getBoundingClientRect();
  const scale=Number(stage.dataset.scale)||1;
  return {left:(box.left-origin.left)/scale,top:(box.top-origin.top)/scale,
   right:(box.right-origin.left)/scale,bottom:(box.bottom-origin.top)/scale};
@@ -45,9 +46,11 @@ function drawGusts(ms,t){
  }
 }
 const rand=(a,b)=>a+Math.random()*(b-a);
+addEventListener('portfolio-surface',()=>resize(),{passive:true});
 function resize(){
  const stage=document.querySelector(".viewport-stage");
- width=stage.clientWidth;height=stage.scrollHeight;
+ const field=canvas.parentElement;
+ width=field.clientWidth;height=field===stage?stage.scrollHeight:field.clientHeight;
  const scale=Number(stage.dataset.scale)||1;
  const dpr=Math.min((devicePixelRatio||1)*scale,2,Math.sqrt(16000000/(width*height)));
  for(const layer of [canvas,hoverCanvas]){

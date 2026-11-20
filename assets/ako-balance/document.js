@@ -1,5 +1,6 @@
 (() => {
   'use strict';
+  if (document.documentElement.classList.contains('balance-sheets')) return;
   const roots=[...document.querySelectorAll('.bs-page')];
   const hosts=[...document.querySelectorAll('.page-host')];
   const dialog=document.querySelector('#detail-dialog');

@@ -1,0 +1,80 @@
+
+.mobile-paper-nav { display: none; }
+
+@media screen {
+  html[data-mobile-paper][data-mobile-paper] {
+    --paper-turn: 0deg;
+    --paper-stage-width: 100dvw;
+    --paper-stage-height: 100dvh;
+    padding: 0;
+    scroll-padding: 0;
+  }
+
+  html[data-mobile-paper="portrait"][data-mobile-paper] {
+    --paper-turn: 90deg;
+  }
+
+  html[data-mobile-paper] #portfolio-reader-tools { display: none; }
+
+  html[data-mobile-paper] body[data-layout-system="v106"] main.v106-main {
+    padding: 0;
+    margin: 0;
+    min-width: var(--paper-stage-width);
+    min-height: var(--paper-stage-height);
+  }
+
+  html[data-mobile-paper] body[data-layout-system="v106"] .v106-page-wrap {
+    display: none;
+    isolation: isolate;
+    overflow: clip;
+    width: var(--paper-stage-width);
+    height: var(--paper-stage-height);
+    aspect-ratio: auto;
+    margin: 0;
+  }
+
+  html[data-mobile-paper] body[data-layout-system="v106"] #cover.v106-page-wrap { width: var(--paper-stage-width); }
+
+  html[data-mobile-paper] body[data-layout-system="v106"] .v106-page-wrap.mobile-paper-current {
+    display: block;
+  }
+
+  html[data-mobile-paper] body[data-layout-system="v106"] .v106-page-wrap .v106-page {
+    --paper-transform: translate(-50%, -50%) rotate(var(--paper-turn)) scale(var(--mobile-paper-scale));
+    top: 50%;
+    left: 50%;
+    transform-origin: center;
+    scroll-margin: 0;
+  }
+
+  html[data-mobile-paper][data-mobile-paper-nav] .mobile-paper-nav {
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    justify-items: start;
+    align-items: center;
+    padding: 6px;
+    pointer-events: none;
+  }
+
+  html[data-mobile-paper="portrait"][data-mobile-paper-nav] .mobile-paper-nav {
+    inset: auto 0 0;
+  }
+
+  .mobile-paper-nav button {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0;
+    border: 1px solid #d2d4d7;
+    border-radius: 6px;
+    background: #fff;
+    color: #17191e;
+    pointer-events: auto;
+    font: inherit;
+  }
+
+  .mobile-paper-nav button:last-child { justify-self: end; }
+  .mobile-paper-nav button:disabled { opacity: .36; }
+}

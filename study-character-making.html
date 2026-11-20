@@ -1,9 +1,11 @@
 <!doctype html>
 <html lang="ko">
 <head>
-<script src="assets/portfolio-index/transition.js?v=20261104-pinch-1"></script>
+<script src="assets/paper-device.js"></script>
+<script src="assets/portfolio-index/transition.js?v=20261120-full-cover"></script>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="viewport" content="width=device-width, initial-scale=1"><script src="assets/paper-opening.js"></script>
 <title>캐릭터 메이킹 스터디 이거 모에요 · 김지홍</title>
 <style>
 @font-face {
@@ -1334,8 +1336,57 @@
     }
   }
 }
+/* 모바일에서도 원래 지면의 내부 좌표를 그대로 사용한다. */
+@media screen {
+html.ap-paper-reader[data-portfolio-reader-direct] { padding-top: 0; scroll-padding-top: 0; }
+html.ap-paper-reader #portfolio-reader-tools { display: none; }
+@layer preview-interactions {
+  .ap-paper-reader .ap-document {
+    position: relative; display: block; width: 100vw; height: 100dvh; overflow: clip;
+    min-width: 0; margin: 0; padding: 0;
+  }
+  .ap-paper-reader .ap-document > .ap-page {
+    position: absolute; left: 50%; top: 50%; margin: 0; box-shadow: none;
+    transform: translate(-50%, -50%) rotate(var(--ap-paper-angle)) scale(var(--ap-paper-scale));
+    transform-origin: center;
+  }
+  .ap-paper-reader .ap-document > .ap-page:not(.ap-paper-current) { display: none; }
+  .ap-paper-navigation {
+    position: fixed; inset: auto 0 0; height: var(--ap-rail-size);
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .ap-paper-landscape .ap-paper-navigation {
+    inset: 0 0 0 auto; width: var(--ap-rail-size); height: auto; padding-bottom: 0;
+    flex-direction: column;
+  }
+  .ap-paper-reader.ap-paper-no-rail .ap-paper-navigation {
+    inset: auto auto calc(8px + env(safe-area-inset-bottom)) 50%;
+    transform: translateX(-50%); width: max-content; height: auto; flex-direction: row;
+    padding: 4px 8px; border: 1px solid var(--ap-border); border-radius: 8px;
+    background: var(--ap-paper); box-shadow: 0 4px 18px rgba(17,19,24,.25);
+    visibility: hidden;
+  }
+  .ap-paper-reader.ap-paper-no-rail.ap-paper-nav-visible .ap-paper-navigation { visibility: visible; }
+  .ap-paper-navigation :is(button,a) {
+    display: inline-flex; justify-content: center; align-items: center;
+    min-width: 44px; min-height: 44px; padding: 4px; border: 1px solid var(--ap-border);
+    border-radius: 6px; color: var(--ap-text); background: var(--ap-paper);
+    font: 700 13px/1.25 'Noto Sans KR',sans-serif; text-decoration: none;
+  }
+  .ap-paper-navigation button:disabled { opacity: .45; }
+  .ap-paper-navigation output { min-width: 42px; color: var(--ap-text); text-align: center; font-size: 13px; }
+}
+}
+@media print {
+  @layer preview-print {
+    .ap-paper-reader .ap-paper-navigation { display: none; }
+  }
+}
+
 </style>
-<script src="assets/image-protect.js" defer></script></head>
+<script src="assets/image-protect.js" defer></script><link rel="stylesheet" href="assets/paper-controls.css"><script defer src="assets/paper-controls.js"></script><script src="assets/paper-swipe.js"></script>
+</head>
 <body>
 <main class="ap-document" aria-label="캐릭터 메이킹 스터디 부록">
 
@@ -1456,8 +1507,136 @@
 <template id="chat-next"><p class="ap-label">원문 기반 재구성</p><h3 class="ap-chat-dialog-title">대화에서 고른 주제로 다시 모이기까지</h3><p class="ap-chat-scene">2025.12.19 · 같이 볼 주제를 고르며</p><div class="ap-chat-thread" aria-label="2025.12.19 · 같이 볼 주제를 고르며"><div class="ap-chat-message" data-chat-side="right"><span class="ap-speaker">나</span>어디서 본 듯한 캐릭터들을 같이 비교해 보는 것도 재미있을 것 같네요.</div><div class="ap-chat-message" data-chat-side="right"><span class="ap-speaker">나</span>게임은 특정 캐릭터를 뽑지 않으면 비교하기 어려우니, 애니메이션으로 해 볼까요? 라프텔이나 넷플릭스처럼 같이 볼 수 있는지도 중요해 보이고요.</div><div class="ap-chat-message" data-chat-side="left"><span class="ap-speaker">참여자 A</span>그러면 2020~2025년 사이 작품으로 범위를 좁히는 게 좋을 듯합니다.</div><div class="ap-chat-message" data-chat-side="right"><span class="ap-speaker">나</span>공통된 특징을 정해 두고, 그걸 뺀 나머지를 비교해 보는 형식도 좋겠네요.</div><div class="ap-chat-message" data-chat-side="left"><span class="ap-speaker">참여자 A</span>좋은 것 같아요. 주제를 추려서 투표를 열고, 다른 분들 의견도 들어 보고 하죠.</div><div class="ap-chat-message" data-chat-side="left"><span class="ap-speaker">참여자 C</span>각자 읽는 시간이 다르니까, 공지로 전체 의견을 듣는 게 좋겠습니다.</div><div class="ap-chat-message" data-chat-side="right"><span class="ap-speaker">나</span>캐릭터 비교를 다음 스터디 주제로 공지했어요. 댓글로 의견 주세요ㅋㅋ</div></div><p class="ap-chat-scene">같은 날 저녁 · 참여자가 보탠 참고자료</p><div class="ap-chat-thread" aria-label="같은 날 저녁 · 참여자가 보탠 참고자료"><div class="ap-chat-message" data-chat-side="left"><span class="ap-speaker">참여자 B</span>어제 공유하려다가 혼자 헛물켜는 것 같아서 안 올렸는데, 얘기가 이어져서 캐릭터 순위가 나온 글도 공유해 봅니다.</div></div><p class="ap-chat-scene">2026.01.10 · 그 주제로 다시 모인 날</p><div class="ap-chat-thread" aria-label="2026.01.10 · 그 주제로 다시 모인 날"><div class="ap-chat-message" data-chat-side="right"><span class="ap-speaker">나</span>여러분, 8시에요~~~</div><div class="ap-chat-message" data-chat-side="left"><span class="ap-speaker">참여자 B</span>스터디 시작합니다.</div><div class="ap-chat-message" data-chat-side="right"><span class="ap-speaker">나</span>발표자료 공유 · 템플릿 소거법(인싸갸루)</div><div class="ap-chat-message" data-chat-side="left"><span class="ap-speaker">참여자 B</span>오늘 스터디 유익했습니다.</div></div></template>
 <template id="chat-sharing"><p class="ap-label">원문 기반 재구성</p><h3 class="ap-chat-dialog-title">다른 사람의 발표를 준비하다 신나서 꺼낸 이야기</h3><p class="ap-chat-scene">2025.09.15 · ‘귀여움’ 발표를 함께 준비하며</p><div class="ap-chat-thread" aria-label="2025.09.15 · ‘귀여움’ 발표를 함께 준비하며"><div class="ap-chat-message" data-chat-side="left"><span class="ap-speaker">발표자</span>저는 아리스 같은 캐릭터가 그런 느낌을 많이 준다고 생각해요.</div><div class="ap-chat-message" data-chat-side="right"><span class="ap-speaker">나</span>아리스가 가끔 하는 말은 외견과 다르게 어른스럽잖아요. 그것도 귀엽죠.</div><div class="ap-chat-message" data-chat-side="right"><span class="ap-speaker">나</span>반대로 리오처럼 어른스러운 캐릭터가 보여 주는 엉뚱함은 ‘아, 얘도 학생이구나ㅋㅋ 귀엽네’ 싶게 하고요.</div><div class="ap-chat-message" data-chat-side="left"><span class="ap-speaker">발표자</span>저도 핵심은 그 적정선에 있다고 생각해요. 그걸 다루는 방법이 중요하겠죠.</div><div class="ap-chat-message" data-chat-side="right"><span class="ap-speaker">나</span>캐릭터를 살아 있게 만드는 건 그런 허점이나 장점, 변화와 발전인 것 같아요.</div><div class="ap-chat-message" data-chat-side="left"><span class="ap-speaker">발표자</span>좋습니다! 제 발표 의도가 술술 풀리고 있네요.</div><div class="ap-chat-message" data-chat-side="right"><span class="ap-speaker">나</span>제 비장의 보따리였는데, 여기서 다 풀어 버리면 저는 뭘 발표하죠ㅋㅋ 하지만 좋습니다.</div><div class="ap-chat-message" data-chat-side="left"><span class="ap-speaker">발표자</span>거기서 더 고민해서 발전시키면 됩니다!!ㅋㅋ</div></div></template>
 <script>
+const mobilePaper = (() => {
+  const mode = window.paperDevice;
+  const root = document.documentElement;
+  const surface = document.querySelector('.ap-document');
+  const pages = [...surface.querySelectorAll('.ap-page')];
+  const nav = document.createElement('nav');
+  nav.className = 'ap-paper-navigation';
+  nav.setAttribute('aria-label','부록 페이지 이동');
+  const previous = document.createElement('button');
+  const next = document.createElement('button');
+  const counter = document.createElement('output');
+  const list = document.createElement('a');
+  previous.type = next.type = 'button';
+  previous.textContent = '이전';
+  next.textContent = '다음';
+  previous.setAttribute('aria-label','이전 면');
+  next.setAttribute('aria-label','다음 면');
+  counter.setAttribute('aria-live','polite');
+  list.textContent = '목록';
+  list.href = 'index.html';
+  list.target = '_top';
+  nav.append(previous,counter,next,list);
+  let current = 0;
+  let remembered = null;
+  let hostStyle = null;
+  let navigationTimeout;
+
+  function hideNavigation() {
+    clearTimeout(navigationTimeout);
+    root.classList.remove('ap-paper-nav-visible');
+  }
+
+  function revealNavigation(event) {
+    if (!mode.matches || !root.classList.contains('ap-paper-no-rail')) return;
+    if ((window.visualViewport?.scale || 1) > 1.01 || document.querySelector('dialog[open]')) return;
+    const hit = event.target;
+    if (hit !== pages[current] && !hit.matches?.('.ap-start,.ap-end')) return;
+    root.classList.add('ap-paper-nav-visible');
+    clearTimeout(navigationTimeout);
+    navigationTimeout = setTimeout(hideNavigation,4000);
+  }
+
+  surface.addEventListener('click',revealNavigation);
+  window.visualViewport?.addEventListener('resize',()=>{
+    if (window.visualViewport.scale > 1.01) hideNavigation();
+  });
+
+  function expandedFrame() {
+    if (hostStyle || window.parent === window) return;
+    try {
+      if (window.frameElement?.id !== 'portfolio-document') return;
+      const owner = window.parent.document;
+      hostStyle = owner.createElement('style');
+      hostStyle.textContent = '@media screen { #portfolio-document { inset:0; width:100%; height:100%; } html #portfolio-reader-tools { display:none; } }';
+      owner.head.append(hostStyle);
+    } catch {
+      // 외부 사이트가 포함한 문서는 자신의 가용 영역 안에서 맞춘다.
+    }
+  }
+
+  function select(index, fromControl = false) {
+    current = index;
+    pages.forEach((page,i)=>page.classList.toggle('ap-paper-current',i === current));
+    counter.textContent = (current+1) + ' / ' + pages.length;
+    previous.disabled = current === 0;
+    next.disabled = current === pages.length - 1;
+    if (fromControl) {
+      hideNavigation();
+      history.replaceState(history.state,'','#' + pages[current].id);
+      const heading = pages[current].querySelector('h1,h2');
+      heading.tabIndex = -1;
+      heading.focus({preventScroll:true});
+      window.scrollTo({top:0,left:0,behavior:'instant'});
+    }
+  }
+  function hashIndex() { return pages.findIndex(page=>'#'+page.id === location.hash); }
+  function trackDesktop() {
+    if (mode.matches || root.classList.contains('ap-paper-reader')) return;
+    const toolbar = document.querySelector('#portfolio-reader-tools');
+    const edge = (toolbar?.getBoundingClientRect().bottom || 0) + 24;
+    const index = pages.findIndex(page => page.getBoundingClientRect().bottom > edge);
+    if (index >= 0) remembered = index;
+  }
+  function fit() {
+    const active = mode.matches;
+    if (!active) {
+      if (root.classList.contains('ap-paper-reader')) {
+        hideNavigation();
+        root.classList.remove('ap-paper-reader','ap-paper-landscape','ap-paper-no-rail');
+        hostStyle?.remove();
+        hostStyle = null;
+        nav.remove();
+        requestAnimationFrame(()=>pages[current].scrollIntoView({block:'start',behavior:'instant'}));
+      }
+      return false;
+    }
+    const first = !root.classList.contains('ap-paper-reader');
+    root.classList.add('ap-paper-reader');
+    expandedFrame();
+    const width = surface.clientWidth;
+    const height = surface.clientHeight;
+    const isLandscape = width >= height;
+    const scale = isLandscape ? Math.min(width/1920,height/1080) : Math.min(width/1080,height/1920);
+    const gap = ((isLandscape ? width : height)-1920*scale)/2;
+    root.classList.toggle('ap-paper-landscape',isLandscape);
+    if (!root.classList.toggle('ap-paper-no-rail',gap<44)) hideNavigation();
+    root.style.setProperty('--ap-paper-scale',scale);
+    root.style.setProperty('--ap-paper-angle',isLandscape?'0deg':'90deg');
+    root.style.setProperty('--ap-rail-size',gap+'px');
+    if (first) {
+      const index = hashIndex();
+      select(remembered ?? (index >= 0 ? index : current));
+      surface.after(nav);
+      requestAnimationFrame(()=>window.scrollTo({top:0,left:0,behavior:'instant'}));
+    }
+    return true;
+  }
+
+  window.bindPaperSwipe(() => mode.matches, step => select(Math.max(0, Math.min(pages.length - 1, current + step)), true));
+  previous.addEventListener('click',()=>select(current-1,true));
+  next.addEventListener('click',()=>select(current+1,true));
+  window.addEventListener('hashchange',()=>{const index=hashIndex();if(mode.matches&&index>=0)select(index);});
+  window.addEventListener('scroll',trackDesktop,{passive:true});
+  window.addEventListener('pagehide',()=>hostStyle?.remove());
+  window.addEventListener('pageshow',()=>{if(hostStyle&&!hostStyle.isConnected)hostStyle=null;fit();});
+  return {fit,matches:()=>mode.matches};
+})();
+
 const fitBaseDpr=window.devicePixelRatio||1;
-function fitPages(){const pages=document.querySelectorAll('.ap-page'),documentSurface=document.querySelector('.ap-document');if(window.matchMedia('print').matches){document.querySelectorAll('details[open]').forEach(d=>d.open=false);document.querySelectorAll('dialog[open]').forEach(d=>d.close());documentSurface.style.removeProperty('min-width');pages.forEach(p=>{p.style.removeProperty('transform');p.style.removeProperty('transform-origin');p.style.removeProperty('margin-bottom')});return}const zoomRatio=(window.devicePixelRatio||1)/fitBaseDpr;const scale=window.portfolioReaderViewport?.().scale ?? Math.min(window.innerWidth*zoomRatio/1960,window.innerHeight*zoomRatio/1100,1);documentSurface.style.minWidth=(1960*scale)+'px';pages.forEach(p=>{p.style.transform='scale('+scale+')';p.style.transformOrigin='top center';p.style.marginBottom='-'+(1080-1080*scale)+'px'})}
+function fitPages(){const pages=document.querySelectorAll('.ap-page'),documentSurface=document.querySelector('.ap-document');if(window.matchMedia('print').matches){document.querySelectorAll('details[open]').forEach(d=>d.open=false);document.querySelectorAll('dialog[open]').forEach(d=>d.close());documentSurface.style.removeProperty('min-width');pages.forEach(p=>{p.style.removeProperty('transform');p.style.removeProperty('transform-origin');p.style.removeProperty('margin-bottom')});return}if(mobilePaper.fit()){documentSurface.style.removeProperty("min-width");pages.forEach(p=>{p.style.removeProperty("transform");p.style.removeProperty("transform-origin");p.style.removeProperty("margin-bottom")});return}const zoomRatio=(window.devicePixelRatio||1)/fitBaseDpr;const scale=window.portfolioReaderViewport?.().scale ?? Math.min(window.innerWidth*zoomRatio/1960,window.innerHeight*zoomRatio/1100,1);documentSurface.style.minWidth=(1960*scale)+'px';pages.forEach(p=>{p.style.transform='scale('+scale+')';p.style.transformOrigin='top center';p.style.marginBottom='-'+(1080-1080*scale)+'px'})}
 const preview=document.querySelector('.ap-hover-preview'),previewImage=preview.querySelector('img'),previewCaption=preview.querySelector('figcaption'),imageDialog=document.querySelector('.ap-image-dialog'),imageDialogImage=imageDialog.querySelector('img'),imageDialogCaption=imageDialog.querySelector('figcaption');
 const chatDialog=document.querySelector('.ap-chat-dialog'),chatDialogBody=chatDialog.querySelector('.ap-chat-dialog-body');
 let imageTrigger=null,chatTrigger=null,previewTimer=null;
@@ -1496,7 +1675,7 @@ window.addEventListener('load',fitPages);window.addEventListener('resize',()=>{h
     return false;
   };
   window.addEventListener('wheel',event=>{
-    if(event.defaultPrevented||event.ctrlKey||event.metaKey||window.matchMedia('print').matches)return;
+    if(mobilePaper.matches()||event.defaultPrevented||event.ctrlKey||event.metaKey||window.matchMedia('print').matches)return;
     if(!event.deltaY||Math.abs(event.deltaX)>Math.abs(event.deltaY)||nativeScrollTarget(event.target))return;
     const pages=[...document.querySelectorAll('main .ap-page')].filter(page=>page.getClientRects().length&&getComputedStyle(page).visibility!=='hidden');
     if(pages.length<2)return;

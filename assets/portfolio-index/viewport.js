@@ -6,7 +6,7 @@ const root=document.documentElement;
 const shell=document.querySelector('.viewport-shell');
 const stage=document.querySelector('.viewport-stage');
 const page=stage.querySelector('.page');
-const masthead=page.querySelector('.masthead');
+const masthead=document.querySelector('.masthead');
 const main=page.querySelector('main');
 const footer=page.querySelector('footer');
 let pending=0,lastWidth=-1,lastHeight=-1;
@@ -16,7 +16,8 @@ function isMobileLayout(layoutWidth){
 }
 function fitContent(layoutWidth,layoutHeight){
  if(isMobileLayout(layoutWidth)){
-  // Keep the layout width stable and fit the whole composition uniformly.
+  // Fit against the stable small viewport. Browser chrome and rubber-band
+  // changes resize the backdrop/stage, but must not rescale the composition.
   contentScale=1;
   page.style.setProperty('--content-scale','1');
   const style=getComputedStyle(root);
@@ -25,13 +26,18 @@ function fitContent(layoutWidth,layoutHeight){
   const bottom=parseFloat(style.getPropertyValue('--safe-bottom'))||0;
   const left=parseFloat(style.getPropertyValue('--safe-left'))||0;
   const edgeGap=parseFloat(style.getPropertyValue('--content-edge-gap'))||0;
-  const availableHeight=Math.max(1,layoutHeight-top-bottom-edgeGap*2);
-  const availableWidth=Math.max(1,layoutWidth-left-right);
+  const stableHeight=parseFloat(getComputedStyle(page).minHeight)||layoutHeight;
+  const split=window.portfolioMobileSurface?.element.dataset.contentLayout==='split';
+  const contentTop=top+edgeGap+(split?masthead.offsetHeight:0);
+  const availableHeight=Math.max(1,stableHeight-contentTop-bottom-edgeGap);
+  const availableWidth=Math.max(1,layoutWidth-left-right-(split?edgeGap*2:0));
   const naturalHeight=Math.max(page.scrollHeight,page.offsetHeight);
   const scale=Math.min(1,(availableHeight-1)/naturalHeight,availableWidth/layoutWidth);
-  page.style.setProperty('--content-inset-top',(top+edgeGap)+'px');
-  page.style.setProperty('--content-inset-left',(left-right)/2+'px');
+  page.style.setProperty('--content-inset-top',contentTop+'px');
+  const paddingLeft=parseFloat(getComputedStyle(page).paddingLeft)||0;
+  page.style.setProperty('--content-inset-left',(split?left+edgeGap-paddingLeft*scale:(left-right)/2)+'px');
   page.style.setProperty('--mobile-scale',String(scale));
+
   return;
  }
  page.style.removeProperty('--content-inset-top');
@@ -65,6 +71,7 @@ function update(){
  let height=root.clientHeight||innerHeight;
  const mobile=isMobileLayout(width);
  const viewport=window.visualViewport;
+ if(mobile&&viewport&&viewport.scale>1.01)return;
  if(mobile&&viewport&&viewport.scale===1){
   height=Math.floor(Math.min(height,viewport.height));
  }
@@ -84,7 +91,7 @@ function update(){
  root.style.setProperty('--visible-viewport-height',height+'px');
  // The backdrop fills the viewport while only the content is transformed.
  stage.style.setProperty('--fit-height',mobile?layoutHeight+'px':'auto');
- stage.style.setProperty('--fit-overflow',mobile?'clip':'visible');
+ stage.style.setProperty('--fit-overflow','visible');
  if(mobile)root.style.setProperty('--scenery-left','0%');
  else root.style.removeProperty('--scenery-left');
  page.style.setProperty('--page-width',mobile?layoutWidth+'px':'auto');
@@ -101,6 +108,25 @@ addEventListener('resize',schedule,{passive:true});
 if(window.visualViewport)window.visualViewport.addEventListener('resize',()=>{
  if(window.visualViewport.scale===1)schedule();
 },{passive:true});
+// The index is a single fitted screen. Suppress one-finger vertical dragging
+// only at native scale, so Safari cannot pull the home composition away.
+// Range controls, text selection and native pinch/pan keep their own gestures.
+let singleTouch=null;
+document.addEventListener('touchstart',event=>{
+ const touch=event.touches.length===1?event.touches[0]:null;
+ singleTouch=touch?{x:touch.clientX,y:touch.clientY}:null;
+},{passive:true,capture:true});
+document.addEventListener('touchmove',event=>{
+ if(!singleTouch||event.touches.length!==1||!isMobileLayout(root.clientWidth)||
+    (window.visualViewport?.scale||1)>1.01)return;
+ if(event.target.closest?.('input,select,textarea,[contenteditable="true"]')||
+    document.getSelection()?.type==='Range')return;
+ const touch=event.touches[0],dx=touch.clientX-singleTouch.x,dy=touch.clientY-singleTouch.y;
+ if(Math.abs(dy)>6&&Math.abs(dy)>Math.abs(dx)&&event.cancelable)event.preventDefault();
+},{passive:false,capture:true});
+const clearTouch=()=>{singleTouch=null;};
+document.addEventListener('touchend',clearTouch,{passive:true,capture:true});
+document.addEventListener('touchcancel',clearTouch,{passive:true,capture:true});
 if(document.fonts)document.fonts.ready.then(schedule);
 update();
 })();

@@ -27,9 +27,24 @@
   bindMusicEscape(window);
   const routes = new Set(['about.html', 'project-kizaki-ako.html',
     'wuthering-waves-control-analysis.html', 'study-character-making.html', 'kizaki-ako-balance.html']);
+  // Static hosts may remove .html. Keep document names and iframe comparisons canonical.
+  const normalizeDocumentName = name => routes.has(name) ? name :
+    routes.has((name || '') + '.html') ? name + '.html' : null;
+  function canonicalDocumentPath(pathname) {
+    const path = pathname.replace(/\/+$/, '');
+    const slash = path.lastIndexOf('/');
+    const name = normalizeDocumentName(path.slice(slash + 1));
+    return name ? path.slice(0, slash + 1) + name : pathname;
+  }
+  function documentFromPath(pathname) {
+    return normalizeDocumentName(canonicalDocumentPath(pathname).split('/').pop());
+  }
+  window.portfolioDocumentRoute = Object.freeze({
+    normalize: normalizeDocumentName, fromPath: documentFromPath, canonicalPath: canonicalDocumentPath
+  });
   const openedStorageKey = 'jihong-portfolio-opened-v1';
   function recordOpenedDocument() {
-    const route = location.pathname.split('/').pop();
+    const route = documentFromPath(location.pathname);
     if (!routes.has(route)) return;
     try {
       const saved = JSON.parse(localStorage.getItem(openedStorageKey) || '[]');
@@ -41,9 +56,17 @@
   if (document.readyState === 'complete') recordOpenedDocument();
   else addEventListener('load', recordOpenedDocument, { once: true });
   const url = new URL(location.href);
-  const scriptUrl = document.currentScript.src;
-  const file = url.pathname.split('/').pop();
-  const entry = url.searchParams.get('open-portfolio');
+  const transitionSource = document.currentScript.src;
+  const rawFile = url.pathname.split('/').pop();
+  const file = documentFromPath(url.pathname) || (rawFile === 'index' ? 'index.html' : rawFile);
+  const entry = normalizeDocumentName(url.searchParams.get('open-portfolio'));
+  if ((file === '' || file === 'index.html') && routes.has(entry) && window.paperDevice?.matches) {
+    const target = new URL(entry, url);
+    target.hash = url.hash;
+    location.replace(target.href);
+    return;
+  }
+
   // Fit the existing 1920 x 1080 paper inside the usable CSS viewport.
   // An iframe already excludes its parent's toolbar; subtract it only at top level.
   if (routes.has(file)) {
@@ -119,7 +142,7 @@
   const elapsedBeforeArrival = navigationStarted>0 && navigationElapsed>=0 && navigationElapsed<15000 ? navigationElapsed : 0;
   if (window.top === window && (routes.has(file) || routes.has(entry))) {
     const reader = document.createElement('script');
-    reader.src = new URL('reader.js?v=20261113-pdf', scriptUrl).href;
+    reader.src = new URL('./reader.js?v=20261120-route-fix', transitionSource).href;
     document.head.append(reader);
   }
   const requestedMotionOff = url.searchParams.get('petal-motion') === 'off';
@@ -140,14 +163,18 @@
     host.dataset.minimumMs = String(minimumMs);
     host.dataset.presentation = intro ? 'intro' : shortOpening ? 'repeat' : 'first';
     host.dataset.backdrop = !covered && !intro ? 'hill' : 'white';
-    host.style.cssText = 'position:fixed;inset:0;z-index:2147483647;display:block;'+(!covered&&!intro?'background:#fff;':'');
+    const band=!routes.has(entry)&&window.portfolioMobileSurface?.geometry?window.portfolioMobileSurface.element:null;
+    host.dataset.surface=band?'document-band':'viewport';
+    host.style.cssText = 'position:fixed;inset:0;height:100vh;height:100dvh;z-index:2147483647;display:block;'+(!covered&&!intro?'background:#fff;':'');
+    if(band)host.style.cssText='position:absolute;inset:0;z-index:2147483647;display:block;'+(!covered&&!intro?'background:#fff;':'');
     const shadow = host.attachShadow({mode: 'open'});
     shadow.innerHTML = `<style>
       :host{color-scheme:light;font:13px/1.6 system-ui,sans-serif}
       .departure-scenery{position:absolute;inset:0;overflow:hidden;background:#fff}
       .departure-scenery img{position:absolute;bottom:0;left:50%;width:max(110vw,160vh);height:auto;max-width:none;transform:translateX(-50%)}
+      @media(max-width:700px),(hover:none) and (pointer:coarse){.departure-scenery img{inset:0;width:100%;height:100%;object-fit:cover;object-position:57% bottom;transform:none}}
       canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
-      .message{position:absolute;bottom:max(28px,calc(env(safe-area-inset-bottom) + 16px));left:16px;right:16px;display:flex;flex-direction:column;align-items:center;text-align:center;color:#bd3c69;font-family:"Malgun Gothic",sans-serif;max-height:calc(100vh - 40px);overflow:auto;padding:72px 32px 0;left:0;right:0;box-sizing:border-box;transition:opacity .18s}
+      .message{position:absolute;bottom:max(28px,calc(env(safe-area-inset-bottom) + 16px));left:16px;right:16px;display:flex;flex-direction:column;align-items:center;text-align:center;color:#bd3c69;font-family:"Malgun Gothic",sans-serif;max-height:calc(100% - 40px);overflow:auto;padding:72px 32px 0;left:0;right:0;box-sizing:border-box;transition:opacity .18s}
       :host([data-phase="revealing"]) .message{opacity:0;pointer-events:none}
       .loading-card{position:relative;box-sizing:border-box;width:min(440px,100%);padding:18px 24px;border:1px solid #e3cbd6;border-radius:24px;background:rgba(255,255,255,.78);box-shadow:0 3px 12px #7343550a}
 
@@ -174,7 +201,7 @@
     if (!intro) {
       shadow.querySelector('.message span').textContent = '기획서를 펼치는 중';
       shadow.querySelector('.direct').href = target.href;
-      shadow.querySelector('.return').href = new URL('../../index.html', scriptUrl).href;
+      shadow.querySelector('.return').href = new URL('../../index.html', transitionSource).href;
     }
     const white = shadow.querySelector('.white'), canvas = shadow.querySelector('.petals');
     const paint = white.getContext('2d'), ctx = canvas.getContext('2d');
@@ -196,8 +223,9 @@
     if (!paint || !ctx) throw new Error('Canvas unavailable');
     const rootStyle=document.documentElement.style;
     const savedScrollStyles=['overflow','scrollbar-gutter'].map(name=>[name,rootStyle.getPropertyValue(name),rootStyle.getPropertyPriority(name)]);
-    rootStyle.setProperty('overflow','hidden');rootStyle.setProperty('scrollbar-gutter','auto');
-    document.documentElement.append(host);
+    if(!band){rootStyle.setProperty('overflow','hidden');rootStyle.setProperty('scrollbar-gutter','auto');}
+    (band||document.documentElement).append(host);
+    let viewTop=0,viewHeight=0;
     let width, height, base, petals = [], frame = 0, last = 0, progress = covered ? 1 : 0;
     let disposed = false, finishTimer = 0, openingStarted = null, openingFraction = 0;
     let revealStarted = null, revealFraction = 0;
@@ -262,7 +290,16 @@
     }
     function resize() {
       const oldWidth=width,oldHeight=height;
-      width = Math.max(1, innerWidth); height = Math.max(1, innerHeight);
+      const bounds=host.getBoundingClientRect();
+      width = Math.max(1, bounds.width); height = Math.max(1, bounds.height);
+      const geometry=band?window.portfolioMobileSurface.geometry:null;
+      viewHeight=geometry?.visible||height;viewTop=geometry?.scrollTop||0;
+      if(band){
+        const message=shadow.querySelector('.message');
+        if(message){message.style.bottom=(height-viewTop-viewHeight+28)+'px';message.style.maxHeight=Math.max(1,viewHeight-40)+'px';}
+        const image=shadow.querySelector('.departure-scenery');
+        if(image){image.style.backgroundImage=`url("${new URL('./sakura-hill-mobile.webp',transitionSource).href}")`;image.style.backgroundSize='auto '+getComputedStyle(document.documentElement).getPropertyValue('--surface-image-height');image.style.backgroundPosition='57% '+getComputedStyle(document.documentElement).getPropertyValue('--surface-image-top');image.style.backgroundRepeat='repeat-y';}
+      }
       base = width < 700 ? 26 : 44;
       const dpr = Math.min(devicePixelRatio || 1, 2, Math.sqrt(16000000/(width*height)));
       for (const surface of [white, canvas]) {
@@ -319,23 +356,23 @@
       let x,y,turn;
       if(u<.25) {
         const v=u/.25;
-        x=cubic(-.14,.04,.26,.50,v)*width;y=cubic(.66,.67,.60,.50,v)*height;
+        x=cubic(-.14,.04,.26,.50,v)*width;y=cubic(.66,.67,.60,.50,v)*viewHeight+viewTop;
         turn=-.25+v*.1;
       } else if(u<.50) {
         const v=(u-.25)/.25;
-        x=cubic(.50,.76,.74,.52,v)*width;y=cubic(.50,.30,.08,.10,v)*height;
+        x=cubic(.50,.76,.74,.52,v)*width;y=cubic(.50,.30,.08,.10,v)*viewHeight+viewTop;
         turn=-.15-v*2.8;
       } else if(u<.73) {
         const v=(u-.50)/.23;
-        x=cubic(.52,.20,.18,.50,v)*width;y=cubic(.10,.02,.33,.50,v)*height;
+        x=cubic(.52,.20,.18,.50,v)*width;y=cubic(.10,.02,.33,.50,v)*viewHeight+viewTop;
         turn=-2.95-v*3;
       } else {
         const v=(u-.73)/.27;
-        x=cubic(.50,.72,.87,1.15,v)*width;y=cubic(.50,.59,.41,.37,v)*height;
+        x=cubic(.50,.72,.87,1.15,v)*width;y=cubic(.50,.59,.41,.37,v)*viewHeight+viewTop;
         turn=-5.95+v*.5;
       }
       // Perspective follows screen position, so both centre crossings grow equally.
-      const distance=((x/width-.5)/.30)**2+((y/height-.5)/.32)**2;
+      const distance=((x/width-.5)/.30)**2+(((y-viewTop)/viewHeight-.5)/.32)**2;
       const sizeFactor=1.25+3.8*Math.exp(-distance*1.25);
       host.dataset.beretX=x.toFixed(1);host.dataset.beretY=y.toFixed(1);host.dataset.beretScale=sizeFactor.toFixed(3);
       const size=Math.max(76,Math.min(160,width*.20))*sizeFactor;
@@ -417,13 +454,16 @@
     function stop() {
       if (disposed) return;disposed=true;cancelAnimationFrame(frame);clearTimeout(slowTimer);clearTimeout(finishTimer);clearTimeout(imageTimer);
       removeEventListener('resize',resize);reduced.removeEventListener('change',motionPreference);
+      window.visualViewport?.removeEventListener('resize',resize);
+      removeEventListener('portfolio-surface',resize);
+      coverResizeObserver.disconnect();
       document.removeEventListener('visibilitychange',visibility);
       document.removeEventListener('DOMContentLoaded',hideOriginalPetals);
       if (originalPetals) originalPetals.hidden=false;
       if (!intro && revealStarted !== null && !document.hidden &&
           performance.now()-revealStarted >= DOCUMENT_REVEAL_MS-40) touchReadingSession(true);
       profileReport();host.remove();
-      for(const [name,value,priority] of savedScrollStyles){if(value)rootStyle.setProperty(name,value,priority);else rootStyle.removeProperty(name);}
+      for(const [name,value,priority] of (band?[]:savedScrollStyles)){if(value)rootStyle.setProperty(name,value,priority);else rootStyle.removeProperty(name);}
     }
     function finish() {
       if (disposed || host.dataset.phase==='revealing') return;
@@ -448,6 +488,10 @@
       if(reduced.matches&&!departureReady){clearTimeout(imageTimer);departureReady=true;started=performance.now();last=0;}
       resize();
     }
+    const coverResizeObserver=new ResizeObserver(resize);
+    coverResizeObserver.observe(host);
+    addEventListener('portfolio-surface',resize,{passive:true});
+    window.visualViewport?.addEventListener('resize',resize,{passive:true});
     addEventListener('resize',resize,{passive:true});document.addEventListener('visibilitychange',visibility);
     reduced.addEventListener('change',motionPreference);
     if (intro) {hideOriginalPetals();if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',hideOriginalPetals,{once:true});}
@@ -458,7 +502,7 @@
       const prepared=ok=>{
         if(disposed||departureReady)return;
         clearTimeout(imageTimer);departureReady=true;started=performance.now();last=0;previousProfileFrame=0;
-        if(ok)shadow.querySelector('.departure-scenery').append(image);
+        if(ok&&!band)shadow.querySelector('.departure-scenery').append(image);
         host.dataset.backgroundReady=ok?'decoded':'fallback';host.dataset.phase='closing';
       };
       const loaded=()=>{
@@ -468,8 +512,10 @@
       imageTimer=setTimeout(()=>prepared(false),4000);
       image.addEventListener('load',loaded,{once:true});image.addEventListener('error',()=>prepared(false),{once:true});
       image.alt='';
-      const hill = matchMedia('(max-width: 700px)').matches ? 'sakura-hill-mobile.webp' : 'sakura-hill-4x.webp';
-      image.src=new URL(hill,scriptUrl).href;
+      const hill = matchMedia('(max-width: 700px)').matches
+        ? new URL('./sakura-hill-mobile.webp', transitionSource)
+        : new URL('./sakura-hill-4x.webp', transitionSource);
+      image.src=hill.href;
       if(image.complete&&image.naturalWidth>0)loaded();
     }
     return {host,finish,stop,carryField,ready:()=>departureReady&&progress>=1,
@@ -550,12 +596,12 @@
     link.addEventListener('click',event=>{
       if(event.defaultPrevented||event.button!==0)return;
       const target=new URL(link.href);
-      const route = target.pathname.split('/').pop();
+      const route = documentFromPath(target.pathname);
       if (target.origin !== url.origin || !routes.has(route)) return;
       window.dispatchEvent(new Event('portfolio-bgm-pause'));
       if(event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;
-      const opening=new URL('../../index.html',scriptUrl);
-      opening.searchParams.set('open-portfolio',target.pathname.split('/').pop());
+      const opening=new URL('../../index.html', transitionSource);
+      opening.searchParams.set('open-portfolio',route);
       opening.searchParams.set('portfolio-version','20261018-16');
       if(reduced.matches||document.querySelector('#petals')?.dataset.motion==='paused')opening.searchParams.set('petal-motion','off');
       if(profile)opening.searchParams.set('transition-profile','1');

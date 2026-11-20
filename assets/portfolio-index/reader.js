@@ -11,9 +11,12 @@
   };
   const scriptUrl = document.currentScript.src;
   const address = new URL(location.href);
+  const routeHelpers = window.portfolioDocumentRoute;
+  const routeFromPath = pathname => routeHelpers?.fromPath(pathname) || pathname.split('/').pop();
+  const canonicalPath = pathname => routeHelpers?.canonicalPath(pathname) || pathname;
   const frameSource = document.getElementById('portfolio-document')?.getAttribute('src');
-  const route = frameSource ? new URL(frameSource, address).pathname.split('/').pop() :
-    address.searchParams.get('open-portfolio') || address.pathname.split('/').pop();
+  const route = frameSource ? routeFromPath(new URL(frameSource, address).pathname) :
+    routeHelpers?.normalize(address.searchParams.get('open-portfolio')) || routeFromPath(address.pathname);
   const info = documents[route];
   if (!info) return;
   const stylesheet = document.createElement('link');
@@ -52,7 +55,8 @@
       location.assign(next.href);
     });
     const pdf = toolbar.querySelector('.reader-pdf');
-    pdf.href = new URL(route.replace(/\.html$/, '.pdf'), source).href;
+    const officialPdfs = {"project-kizaki-ako.html": "https://jihong1202gd.github.io/project-kizaki-ako.pdf", "about.html": "https://jihong1202gd.github.io/about.pdf", "kizaki-ako-balance.html": "https://jihong1202gd.github.io/kizaki-ako-balance.pdf", "study-character-making.html": "https://jihong1202gd.github.io/study-character-making.pdf"};
+    pdf.href = officialPdfs[route] || new URL(route.replace(/\.html$/, '.pdf'), source).href;
     pdf.setAttribute('aria-label', info.name + ' PDF 내려받기');
     let printLink = document.querySelector('.portfolio-print-source');
     if (!printLink) {
@@ -128,7 +132,7 @@
 
     function bindDocument() {
       const candidate = frame ? frame.contentDocument : document;
-      if (!candidate?.body || (frame && new URL(candidate.URL).pathname !== source.pathname)) return;
+      if (!candidate?.body || (frame && canonicalPath(new URL(candidate.URL).pathname) !== canonicalPath(source.pathname))) return;
       doc = candidate;
       win = frame ? frame.contentWindow : window;
       original = {
@@ -190,7 +194,7 @@
 
     function connect() {
       const doc = frame ? frame.contentDocument : document;
-      if (!doc?.body || (frame && new URL(doc.URL).pathname !== source.pathname)) return;
+      if (!doc?.body || (frame && canonicalPath(new URL(doc.URL).pathname) !== canonicalPath(source.pathname))) return;
       const nativeToolbar = doc.querySelector('.viewer-toolbar');
       const nextControls = bindings.map(([, selector]) => nativeToolbar?.querySelector(selector));
       if (nextControls.some(control => !control)) return;

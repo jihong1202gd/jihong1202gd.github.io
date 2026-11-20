@@ -25,7 +25,8 @@
       const viewWidth = document.documentElement.clientWidth;
       const viewHeight = window.innerHeight;
       feedback.style.left = `${Math.max(8, Math.min(viewWidth - popup.width - 8, anchor.x - popup.width / 2))}px`;
-      feedback.style.top = `${Math.max(8, Math.min(viewHeight - popup.height - 8, anchor.y - popup.height - 12))}px`;
+      const documentOffset=getComputedStyle(feedback).position==='absolute'?scrollY:0;
+      feedback.style.top = `${documentOffset+Math.max(8, Math.min(viewHeight - popup.height - 8, anchor.y - popup.height - 12))}px`;
       feedbackTimer = setTimeout(() => { feedback.hidden = true; }, 1500);
     });
   }
