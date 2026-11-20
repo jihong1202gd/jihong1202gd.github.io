@@ -41,6 +41,7 @@
   if (document.readyState === 'complete') recordOpenedDocument();
   else addEventListener('load', recordOpenedDocument, { once: true });
   const url = new URL(location.href);
+  const scriptUrl = document.currentScript.src;
   const file = url.pathname.split('/').pop();
   const entry = url.searchParams.get('open-portfolio');
   // Fit the existing 1920 x 1080 paper inside the usable CSS viewport.
@@ -118,7 +119,7 @@
   const elapsedBeforeArrival = navigationStarted>0 && navigationElapsed>=0 && navigationElapsed<15000 ? navigationElapsed : 0;
   if (window.top === window && (routes.has(file) || routes.has(entry))) {
     const reader = document.createElement('script');
-    reader.src = new URL('assets/portfolio-index/reader.js?v=20261113-pdf', url).href;
+    reader.src = new URL('reader.js?v=20261113-pdf', scriptUrl).href;
     document.head.append(reader);
   }
   const requestedMotionOff = url.searchParams.get('petal-motion') === 'off';
@@ -173,7 +174,7 @@
     if (!intro) {
       shadow.querySelector('.message span').textContent = '기획서를 펼치는 중';
       shadow.querySelector('.direct').href = target.href;
-      shadow.querySelector('.return').href = new URL('index.html', url).href;
+      shadow.querySelector('.return').href = new URL('../../index.html', scriptUrl).href;
     }
     const white = shadow.querySelector('.white'), canvas = shadow.querySelector('.petals');
     const paint = white.getContext('2d'), ctx = canvas.getContext('2d');
@@ -468,7 +469,7 @@
       image.addEventListener('load',loaded,{once:true});image.addEventListener('error',()=>prepared(false),{once:true});
       image.alt='';
       const hill = matchMedia('(max-width: 700px)').matches ? 'sakura-hill-mobile.webp' : 'sakura-hill-4x.webp';
-      image.src=new URL('assets/portfolio-index/'+hill,url).href;
+      image.src=new URL(hill,scriptUrl).href;
       if(image.complete&&image.naturalWidth>0)loaded();
     }
     return {host,finish,stop,carryField,ready:()=>departureReady&&progress>=1,
@@ -553,7 +554,7 @@
       if (target.origin !== url.origin || !routes.has(route)) return;
       window.dispatchEvent(new Event('portfolio-bgm-pause'));
       if(event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;
-      const opening=new URL('index.html',url);
+      const opening=new URL('../../index.html',scriptUrl);
       opening.searchParams.set('open-portfolio',target.pathname.split('/').pop());
       opening.searchParams.set('portfolio-version','20261018-16');
       if(reduced.matches||document.querySelector('#petals')?.dataset.motion==='paused')opening.searchParams.set('petal-motion','off');

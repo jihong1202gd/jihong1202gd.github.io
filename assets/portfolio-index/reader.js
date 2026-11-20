@@ -45,7 +45,7 @@
     }
     switcher.addEventListener('change', () => {
       if (switcher.value === route) return;
-      const next = new URL('index.html', source);
+      const next = new URL('../../index.html', scriptUrl);
       next.searchParams.set('open-portfolio', switcher.value);
       next.searchParams.set('portfolio-version', '20261104-reader-2');
       if (matchMedia('(prefers-reduced-motion: reduce)').matches) next.searchParams.set('petal-motion', 'off');
