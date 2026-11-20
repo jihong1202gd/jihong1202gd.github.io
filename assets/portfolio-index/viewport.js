@@ -19,11 +19,22 @@ function fitContent(layoutWidth,layoutHeight){
   // Keep the layout width stable and fit the whole composition uniformly.
   contentScale=1;
   page.style.setProperty('--content-scale','1');
+  const style=getComputedStyle(root);
+  const top=parseFloat(style.getPropertyValue('--safe-top'))||0;
+  const right=parseFloat(style.getPropertyValue('--safe-right'))||0;
+  const bottom=parseFloat(style.getPropertyValue('--safe-bottom'))||0;
+  const left=parseFloat(style.getPropertyValue('--safe-left'))||0;
+  const availableHeight=Math.max(1,layoutHeight-top-bottom);
+  const availableWidth=Math.max(1,layoutWidth-left-right);
   const naturalHeight=Math.max(page.scrollHeight,page.offsetHeight);
-  const scale=Math.min(1,(layoutHeight-1)/naturalHeight);
+  const scale=Math.min(1,(availableHeight-1)/naturalHeight,availableWidth/layoutWidth);
+  page.style.setProperty('--content-inset-top',top+'px');
+  page.style.setProperty('--content-inset-left',(left-right)/2+'px');
   page.style.setProperty('--mobile-scale',String(scale));
   return;
  }
+ page.style.removeProperty('--content-inset-top');
+ page.style.removeProperty('--content-inset-left');
  let nextScale=1;
  if(layoutWidth>MOBILE_MAX){
   const style=getComputedStyle(page);
