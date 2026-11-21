@@ -1,7 +1,7 @@
 (() => {
 'use strict';
 const surface=document.querySelector('.mobile-surface');
-if(!surface||new URL(location.href).searchParams.has('open-portfolio'))return;
+if(!surface)return;
 const root=document.documentElement;
 const media=matchMedia('(max-width:700px),(hover:none) and (pointer:coarse)');
 let pending=0,geometry=null;
