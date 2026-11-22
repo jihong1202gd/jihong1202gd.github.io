@@ -49,7 +49,9 @@ window.bindPaperSwipe = function (isReading, turnPage) {
     if (Math.abs(up) < 42 || Math.abs(up) < Math.abs(across) * 1.3) return;
     if (event.cancelable) event.preventDefault();
     document.dispatchEvent(new Event('paper-turn'));
-    turnPage(up > 0 ? 1 : -1);
+    const step = up > 0 ? 1 : -1;
+    if (step > 0 && window.portfolioAdvanceDocument?.()) return;
+    turnPage(step);
   }, {capture: true, passive: false});
 
   document.addEventListener('touchcancel', () => { start = null; }, {capture: true, passive: true});

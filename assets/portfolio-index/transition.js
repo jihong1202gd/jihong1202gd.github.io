@@ -25,8 +25,8 @@
     } catch (_) { /* External frames keep their own keyboard controls. */ }
   }
   bindMusicEscape(window);
-  const routes = new Set(['about.html', 'project-kizaki-ako.html',
-    'wuthering-waves-control-analysis.html', 'study-character-making.html', 'kizaki-ako-balance.html']);
+  const routes = new Set(['about.html', 'project-kizaki-ako.html', 'kizaki-ako-balance.html',
+    'wuthering-waves-control-analysis.html', 'study-character-making.html']);
   // Static hosts may remove .html. Keep document names and iframe comparisons canonical.
   const normalizeDocumentName = name => routes.has(name) ? name :
     routes.has((name || '') + '.html') ? name + '.html' : null;
@@ -65,6 +65,87 @@
     target.hash = url.hash;
     location.replace(target.href);
     return;
+  }
+
+  // A fresh forward gesture on the final sheet continues in index order.
+  // Wheel inertia that brought the reader to that sheet must stay there.
+  if (routes.has(file)) {
+    const sequence = [...routes];
+    const nextDocument = sequence[sequence.indexOf(file) + 1];
+    const pageSelector = 'body > .slide[id], .v106-page-wrap .v106-page, main.v13-main > .page, #document .bs-page, .ap-document > .ap-page';
+    let advancing = false;
+    let lastWheelAt = -Infinity;
+    let forwardBurst = false;
+    let wheelDistance = 0;
+
+    function finalSheet() {
+      return [...document.querySelectorAll(pageSelector)].at(-1);
+    }
+    function atDocumentEnd() {
+      const page = finalSheet();
+      if (!page?.getClientRects().length) return false;
+      const rect = page.getBoundingClientRect();
+      return rect.height > 0 && rect.top < innerHeight * .3 && rect.bottom <= innerHeight + 3;
+    }
+    function ownsScroll(target) {
+      if (!(target instanceof Element)) return false;
+      if (target.closest('nav, button, input, textarea, select, video, audio, iframe, [contenteditable], [role="slider"]')) return true;
+      const page = finalSheet();
+      for (let node = target; node && node !== document.body; node = node.parentElement) {
+        // The full document scroll container belongs to page navigation.
+        if (node.contains(page)) continue;
+        if (node.scrollHeight > node.clientHeight + 1 && /^(auto|scroll)$/.test(getComputedStyle(node).overflowY)) return true;
+      }
+      return false;
+    }
+    function canContinue(target) {
+      if (!document.body || !nextDocument || advancing || matchMedia('print').matches || document.body.classList.contains('strip-view')) return false;
+      if ((window.visualViewport?.scale ?? 1) > 1.01 || document.querySelector('[data-paper-enlarged]')) return false;
+      if (Number(getComputedStyle(document.body).zoom) > 1.01 || ownsScroll(target)) return false;
+      const visibleModal = [...document.querySelectorAll('dialog[open], [aria-modal="true"]:not(dialog):not([hidden])')]
+        .some(node => node.getClientRects().length && getComputedStyle(node).visibility !== 'hidden');
+      if (visibleModal) return false;
+      try {
+        if ([document, window.top.document].some(doc => [...doc.querySelectorAll('.reader-fit, #reader-fit')]
+          .some(button => /^\d+(?:\.\d+)?%$/.test(button.textContent.trim())))) return false;
+      } catch (_) { /* Cross-origin parents do not own this document's controls. */ }
+      return atDocumentEnd();
+    }
+    window.portfolioAdvanceDocument = target => {
+      if (!canContinue(target)) return false;
+      advancing = true;
+      const destination = new URL('../../' + nextDocument, transitionSource);
+      destination.searchParams.set('portfolio-opening', 'sakura');
+      destination.searchParams.set('portfolio-started', String(Date.now()));
+      window.top.location.assign(destination.href);
+      return true;
+    };
+    window.addEventListener('wheel', event => {
+      const now = performance.now();
+      if (now - lastWheelAt >= 600) {
+        wheelDistance = 0;
+        forwardBurst = canContinue(event.target);
+      }
+      lastWheelAt = now;
+      if (event.defaultPrevented || event.ctrlKey || event.metaKey || event.shiftKey || event.deltaY <= 0 || Math.abs(event.deltaX) > Math.abs(event.deltaY) || !canContinue(event.target)) {
+        forwardBurst = false;
+        wheelDistance = 0;
+        return;
+      }
+      if (!forwardBurst) return;
+      const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? innerHeight : 1;
+      wheelDistance += event.deltaY * unit;
+      if (wheelDistance < 60 || !window.portfolioAdvanceDocument(event.target)) return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+    }, {capture: true, passive: false});
+    addEventListener('pageshow', event => {
+      if (!event.persisted) return;
+      advancing = false;
+      forwardBurst = false;
+      wheelDistance = 0;
+      lastWheelAt = -Infinity;
+    });
   }
 
   // Fit the existing 1920 x 1080 paper inside the usable CSS viewport.
