@@ -114,7 +114,7 @@
     window.portfolioAdvanceDocument = target => {
       if (!canContinue(target)) return false;
       advancing = true;
-      const destination = new URL('../../' + nextDocument, transitionSource);
+      const destination = new URL(nextDocument, new URL('../../index.html', transitionSource));
       destination.searchParams.set('portfolio-opening', 'sakura');
       destination.searchParams.set('portfolio-started', String(Date.now()));
       window.top.location.assign(destination.href);
