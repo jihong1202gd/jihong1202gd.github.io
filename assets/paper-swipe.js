@@ -4,7 +4,7 @@ window.bindPaperSwipe = function (isReading, turnPage) {
   document.dispatchEvent(new Event('paper-reader-ready'));
   let start;
   const rotated = () => matchMedia('(orientation: portrait)').matches;
-  const available = () => isReading() && !document.querySelector('[data-paper-enlarged]') && (window.visualViewport?.scale ?? 1) <= 1.01 &&
+  const available = () => isReading() && !document.getElementById('portfolio-transition') && !document.querySelector('[data-paper-enlarged]') && (window.visualViewport?.scale ?? 1) <= 1.01 &&
     !document.querySelector('dialog[open], [aria-modal="true"]:not([hidden]):not(dialog)');
 
   function ownsDrag(target) {
@@ -50,7 +50,10 @@ window.bindPaperSwipe = function (isReading, turnPage) {
     if (event.cancelable) event.preventDefault();
     document.dispatchEvent(new Event('paper-turn'));
     const step = up > 0 ? 1 : -1;
-    if (step > 0 && window.portfolioAdvanceDocument?.()) return;
+    const changedDocument = window.portfolioTurnDocument
+      ? window.portfolioTurnDocument(step)
+      : step > 0 && window.portfolioAdvanceDocument?.();
+    if (changedDocument) return;
     turnPage(step);
   }, {capture: true, passive: false});
 

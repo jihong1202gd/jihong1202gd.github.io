@@ -67,82 +67,103 @@
     return;
   }
 
-  // A fresh forward gesture on the final sheet continues in index order.
-  // Wheel inertia that brought the reader to that sheet must stay there.
+  // Use the same one-gesture/one-page rule at document boundaries.
   if (routes.has(file)) {
     const sequence = [...routes];
-    const nextDocument = sequence[sequence.indexOf(file) + 1];
+    const documentIndex = sequence.indexOf(file);
+    const lastPages = {
+      'about.html': 'v13-direction',
+      'project-kizaki-ako.html': 'slide-end',
+      'kizaki-ako-balance.html': 'appendix',
+      'wuthering-waves-control-analysis.html': 'end',
+      'study-character-making.html': 'person-summary'
+    };
     const pageSelector = 'body > .slide[id], .v106-page-wrap .v106-page, main.v13-main > .page, #document .bs-page, .ap-document > .ap-page';
-    let advancing = false;
+    let navigating = false;
     let lastWheelAt = -Infinity;
-    let forwardBurst = false;
+    let boundaryDirection = 0;
+    let wheelDirection = 0;
     let wheelDistance = 0;
 
-    function finalSheet() {
-      return [...document.querySelectorAll(pageSelector)].at(-1);
+    function boundaryPage(direction) {
+      const pages = [...document.querySelectorAll(pageSelector)];
+      return direction > 0 ? pages.at(-1) : pages[0];
     }
-    function atDocumentEnd() {
-      const page = finalSheet();
+    function atBoundary(direction) {
+      const page = boundaryPage(direction);
       if (!page?.getClientRects().length) return false;
       const rect = page.getBoundingClientRect();
-      return rect.height > 0 && rect.top < innerHeight * .3 && rect.bottom <= innerHeight + 3;
+      if (rect.height <= 0 || rect.bottom <= 0 || rect.top >= innerHeight) return false;
+      // A fitted page may be centered far down a tall, narrow viewport.
+      return direction > 0 ? rect.bottom <= innerHeight + 3 : rect.top >= -3;
     }
-    function ownsScroll(target) {
+    function ownsScroll(target, direction) {
       if (!(target instanceof Element)) return false;
       if (target.closest('nav, button, input, textarea, select, video, audio, iframe, [contenteditable], [role="slider"]')) return true;
-      const page = finalSheet();
+      const page = boundaryPage(direction);
       for (let node = target; node && node !== document.body; node = node.parentElement) {
-        // The full document scroll container belongs to page navigation.
         if (node.contains(page)) continue;
         if (node.scrollHeight > node.clientHeight + 1 && /^(auto|scroll)$/.test(getComputedStyle(node).overflowY)) return true;
       }
       return false;
     }
-    function canContinue(target) {
-      if (!document.body || !nextDocument || advancing || matchMedia('print').matches || document.body.classList.contains('strip-view')) return false;
-      if ((window.visualViewport?.scale ?? 1) > 1.01 || document.querySelector('[data-paper-enlarged]')) return false;
-      if (Number(getComputedStyle(document.body).zoom) > 1.01 || ownsScroll(target)) return false;
-      const visibleModal = [...document.querySelectorAll('dialog[open], [aria-modal="true"]:not(dialog):not([hidden])')]
-        .some(node => node.getClientRects().length && getComputedStyle(node).visibility !== 'hidden');
-      if (visibleModal) return false;
+    function canTurn(direction, target) {
+      if (!document.body || navigating || !sequence[documentIndex + direction] || matchMedia('print').matches || document.body.classList.contains('strip-view')) return false;
+      if (document.getElementById('portfolio-transition') || (window.visualViewport?.scale ?? 1) > 1.01 || document.querySelector('[data-paper-enlarged]')) return false;
+      if (Number(getComputedStyle(document.body).zoom) > 1.01 || ownsScroll(target, direction)) return false;
+      if ([...document.querySelectorAll('dialog[open], [aria-modal="true"]:not(dialog):not([hidden])')]
+        .some(node => node.getClientRects().length && getComputedStyle(node).visibility !== 'hidden')) return false;
       try {
         if ([document, window.top.document].some(doc => [...doc.querySelectorAll('.reader-fit, #reader-fit')]
           .some(button => /^\d+(?:\.\d+)?%$/.test(button.textContent.trim())))) return false;
       } catch (_) { /* Cross-origin parents do not own this document's controls. */ }
-      return atDocumentEnd();
+      return atBoundary(direction);
     }
-    window.portfolioAdvanceDocument = target => {
-      if (!canContinue(target)) return false;
-      advancing = true;
-      const destination = new URL(nextDocument, new URL('../../index.html', transitionSource));
+    window.portfolioTurnDocument = (step, target) => {
+      const direction = Math.sign(step);
+      if (!direction || !canTurn(direction, target)) return false;
+      navigating = true;
+      const destinationDocument = sequence[documentIndex + direction];
+      const destination = new URL(destinationDocument, new URL('../../index.html', transitionSource));
+      if (direction < 0) destination.hash = lastPages[destinationDocument];
       destination.searchParams.set('portfolio-opening', 'sakura');
       destination.searchParams.set('portfolio-started', String(Date.now()));
       window.top.location.assign(destination.href);
       return true;
     };
+    // Preserve forward navigation if an older cached swipe module is still loaded.
+    window.portfolioAdvanceDocument = target => window.portfolioTurnDocument(1, target);
     window.addEventListener('wheel', event => {
       const now = performance.now();
-      if (now - lastWheelAt >= 600) {
+      const direction = Math.sign(event.deltaY);
+      if (now - lastWheelAt > 180) {
         wheelDistance = 0;
-        forwardBurst = canContinue(event.target);
+        wheelDirection = direction;
+        boundaryDirection = direction && canTurn(direction, event.target) ? direction : 0;
       }
       lastWheelAt = now;
-      if (event.defaultPrevented || event.ctrlKey || event.metaKey || event.shiftKey || event.deltaY <= 0 || Math.abs(event.deltaX) > Math.abs(event.deltaY) || !canContinue(event.target)) {
-        forwardBurst = false;
+      if (document.getElementById('portfolio-transition') && !event.ctrlKey && !event.metaKey) {
+        boundaryDirection = 0;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        return;
+      }
+      if (event.defaultPrevented || event.ctrlKey || event.metaKey || event.shiftKey || !direction || Math.abs(event.deltaX) > Math.abs(event.deltaY) || direction !== wheelDirection || !canTurn(direction, event.target)) {
+        boundaryDirection = 0;
         wheelDistance = 0;
         return;
       }
-      if (!forwardBurst) return;
+      if (boundaryDirection !== direction) return;
       const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? innerHeight : 1;
-      wheelDistance += event.deltaY * unit;
-      if (wheelDistance < 60 || !window.portfolioAdvanceDocument(event.target)) return;
+      wheelDistance += Math.abs(event.deltaY) * unit;
+      if (wheelDistance < 30 || !window.portfolioTurnDocument(direction, event.target)) return;
       event.preventDefault();
       event.stopImmediatePropagation();
     }, {capture: true, passive: false});
     addEventListener('pageshow', event => {
       if (!event.persisted) return;
-      advancing = false;
-      forwardBurst = false;
+      navigating = false;
+      boundaryDirection = 0;
       wheelDistance = 0;
       lastWheelAt = -Infinity;
     });
