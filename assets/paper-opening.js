@@ -9,17 +9,18 @@
   panel.setAttribute('aria-label','문서 읽는 방법');
   panel.innerHTML = '<strong>휴대폰을 90° 돌려 가로로 읽어 주세요</strong><p>아래에서 위로 쓸어 올리면 다음 장,<br>위에서 아래로 쓸어 내리면 이전 장이에요.</p><p>지면을 한 번 탭하면 확대·축소 버튼이 나타나요.</p><button type="button" hidden>바로 읽기</button>';
   document.documentElement.append(panel);
-  const shown = performance.now();
+  const deadline = setTimeout(finish, Math.max(0, 2000 - performance.now()));
+  function finish() { clearTimeout(deadline);panel.remove(); }
   function ready() {
+    if (!panel.isConnected) return;
     const button = panel.querySelector('button');
     button.hidden = false;
-    button.addEventListener('click', () => panel.remove(), {once:true});
-    const finish = () => setTimeout(() => panel.remove(), Math.max(0, 3500 - (performance.now() - shown)));
+    button.addEventListener('click', finish, {once:true});
     const sheet = document.querySelector('.pr-current, .paper-current, .mobile-paper-current, [data-current-sheet], .ap-paper-current');
     const images = Array.from(sheet?.querySelectorAll('img') ?? []).filter(image => !image.complete && image.loading !== 'lazy');
     // Media on later pages may keep window.load pending after the first sheet is readable.
     const pending = images.map(image => image.decode().catch(() => {}));
-    Promise.race([Promise.all(pending), new Promise(resolve => setTimeout(resolve, 4000))]).then(finish);
+    Promise.all(pending).then(finish);
   }
   // The reader can be used as soon as the initial sheet and its controller have mounted.
   document.addEventListener('DOMContentLoaded', () => requestAnimationFrame(() => requestAnimationFrame(ready)), {once:true});

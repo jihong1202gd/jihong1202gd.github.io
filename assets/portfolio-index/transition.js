@@ -236,7 +236,7 @@
   addEventListener('keydown', () => touchReadingSession(), {passive: true});
   addEventListener('focus', () => { if (!document.hidden) touchReadingSession(); });
   const INTRO_REVEAL_MS = 1150;
-  const DOCUMENT_MIN_MS = repeatPresentation ? 750 : MIN_PRESENTATION_MS;
+  const DOCUMENT_MAX_MS = 2000;
   const DOCUMENT_REVEAL_MS = repeatPresentation ? 450 : 1000;
   const profile = url.searchParams.get('transition-profile') === '1';
   const navigationStarted = Number(url.searchParams.get('portfolio-started'));
@@ -260,9 +260,9 @@
     host.id = intro ? 'index-entry-transition' : 'portfolio-transition';
     host.dataset.phase = intro ? 'waiting' : covered ? 'loading' : 'closing';
     const shortOpening = !intro && repeatPresentation;
-    const minimumMs = intro ? MIN_PRESENTATION_MS : DOCUMENT_MIN_MS;
+    const presentationMs = intro ? MIN_PRESENTATION_MS : DOCUMENT_MAX_MS;
     const createdAt = performance.now();
-    host.dataset.minimumMs = String(minimumMs);
+    host.dataset[intro ? 'minimumMs' : 'maximumMs'] = String(presentationMs);
     host.dataset.presentation = intro ? 'intro' : shortOpening ? 'repeat' : 'first';
     host.dataset.backdrop = !covered && !intro ? 'hill' : 'white';
     const band=!routes.has(entry)&&window.portfolioMobileSurface?.geometry?window.portfolioMobileSurface.element:null;
@@ -341,7 +341,9 @@
         samples:frameTimes.length,fps:sum?1000*frameTimes.length/sum:0,
         p95FrameMs:sorted[Math.floor((sorted.length-1)*.95)]||0,
         framesOver33Ms:frameTimes.filter(x=>x>33.4).length,
-        presentation: host.dataset.presentation, minimumMs, revealMs: DOCUMENT_REVEAL_MS,
+        presentation: host.dataset.presentation, minimumMs: intro ? presentationMs : 0,
+        maximumMs: intro ? null : DOCUMENT_MAX_MS, endReason: host.dataset.endReason || 'animation',
+        revealMs: intro ? INTRO_REVEAL_MS : 0,
         totalMs: Math.round(performance.now()-createdAt),
         documentReadyMs: Number(host.dataset.documentReadyMs || 0),
         revealStartMs: Number(host.dataset.revealStartMs || 0),
@@ -521,7 +523,7 @@
         }
       }
       field(ms);
-      if(!intro)updateBar(host.dataset.phase==='revealing'?1:Math.min(.9,.1+.8*((covered?elapsedBeforeArrival:0)+ms-started)/minimumMs));
+      if(!intro)updateBar(host.dataset.phase==='revealing'?1:Math.min(.9,.1+.8*((covered?elapsedBeforeArrival:0)+ms-started)/presentationMs));
       if(intro&&originalPetals&&openingFraction>.85)originalPetals.hidden=false;
       ctx.clearRect(0,0,width,height);
       let drawn=0;
@@ -559,6 +561,7 @@
       window.visualViewport?.removeEventListener('resize',resize);
       removeEventListener('portfolio-surface',resize);
       coverResizeObserver.disconnect();
+      removeEventListener('click',skipIntro,true);removeEventListener('keydown',skipIntro,true);
       document.removeEventListener('visibilitychange',visibility);
       document.removeEventListener('DOMContentLoaded',hideOriginalPetals);
       if (originalPetals) originalPetals.hidden=false;
@@ -566,6 +569,12 @@
           performance.now()-revealStarted >= DOCUMENT_REVEAL_MS-40) touchReadingSession(true);
       profileReport();host.remove();
       for(const [name,value,priority] of (band?[]:savedScrollStyles)){if(value)rootStyle.setProperty(name,value,priority);else rootStyle.removeProperty(name);}
+    }
+    function skipIntro(event) {
+      if (!intro || disposed) return;
+      if (event.type === 'keydown' && (event.repeat || event.ctrlKey || event.metaKey || event.altKey || ['Shift','Control','Alt','Meta'].includes(event.key))) return;
+      event.preventDefault();event.stopImmediatePropagation();
+      host.dataset.endReason = 'input';stop();
     }
     function finish() {
       if (disposed || host.dataset.phase==='revealing') return;
@@ -575,12 +584,11 @@
         if (!finishTimer) finishTimer=setTimeout(stop,Math.max(0,openingStarted-performance.now())+INTRO_REVEAL_MS+400);
         return;
       }
-      host.dataset.phase='revealing';updateBar(1);
-      if(reduced.matches){stop();return;}
-      revealStarted=performance.now();host.dataset.revealDirection='edges-to-center';
-      host.dataset.revealStartMs=String(Math.round(revealStarted-createdAt));
-      host.style.background='transparent';shadow.querySelector('.departure-scenery')?.remove();
-      whiten();finishTimer=setTimeout(stop,DOCUMENT_REVEAL_MS+400);
+      // Document covers end at readiness or the deadline, including the reveal itself.
+      host.dataset.phase='complete';updateBar(1);
+      host.dataset.revealStartMs=String(Math.round(performance.now()-createdAt));
+      if (!document.hidden) touchReadingSession(true);
+      stop();
     }
     const slowTimer=intro?0:setTimeout(()=>{host.dataset.slow='';shadow.querySelector('.message span').textContent='연결이 늦어지고 있어요';},8000);
     function hideOriginalPetals() {if(intro&&!disposed){originalPetals=document.getElementById('petals');if(originalPetals)originalPetals.hidden=true;}}
@@ -596,7 +604,10 @@
     window.visualViewport?.addEventListener('resize',resize,{passive:true});
     addEventListener('resize',resize,{passive:true});document.addEventListener('visibilitychange',visibility);
     reduced.addEventListener('change',motionPreference);
-    if (intro) {hideOriginalPetals();if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',hideOriginalPetals,{once:true});}
+    if (intro) {
+      addEventListener('click',skipIntro,true);addEventListener('keydown',skipIntro,true);
+      hideOriginalPetals();if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',hideOriginalPetals,{once:true});
+    }
     resize();frame=requestAnimationFrame(render);
     if(!departureReady) {
       host.dataset.phase='preparing';
@@ -629,16 +640,22 @@
     let cover;
     try {
       cover=createCover(true,url);
-      const earliestReveal = performance.now() + (reduced.matches ? 0 : Math.max(0,DOCUMENT_MIN_MS-elapsedBeforeArrival-260));
-      const watchdog=setTimeout(()=>cover.finish(),15000);
+      const arrivalStarted=performance.now();
+      let ended=false;
+      function end(reason) {
+        if(ended)return;ended=true;clearTimeout(deadline);
+        cover.host.dataset.endReason=reason;cover.finish();
+      }
+      const deadline=setTimeout(()=>end('timeout'),Math.max(0,DOCUMENT_MAX_MS-elapsedBeforeArrival));
       const ready=()=>{
         const fonts=document.fonts?document.fonts.ready:Promise.resolve();
         Promise.race([fonts,new Promise(resolve=>setTimeout(resolve,1200))]).then(()=>{
-          clearTimeout(watchdog);setTimeout(()=>cover.finish(),Math.max(0,earliestReveal-performance.now()));
+          cover.host.dataset.documentReadyMs=String(Math.round(performance.now()-arrivalStarted+elapsedBeforeArrival));
+          end('ready');
         });
       };
       if(document.readyState==='complete')ready();else addEventListener('load',ready,{once:true});
-      addEventListener('pageshow',event=>{if(event.persisted)cover.stop();});
+      addEventListener('pageshow',event=>{if(event.persisted){clearTimeout(deadline);cover.stop();}});
     } catch (_) {if(cover)cover.stop();document.getElementById('portfolio-transition')?.remove();}
     return;
   }
@@ -719,7 +736,7 @@
     const target=new URL(entry,url);cleanAddress();
     let cover,frame,watchdog;const shellStarted=performance.now();
     try {
-      // Keep this document and its animated cover alive until the child is ready.
+      // Keep the shell alive; end the cover when ready or at the two-second deadline.
       cover=createCover(false,target);
       document.documentElement.dataset.portfolioShell='loading';
       const style=document.createElement('style');
@@ -736,7 +753,7 @@
       const printSource=document.createElement('a');printSource.className='portfolio-print-source';
       printSource.textContent='인쇄용 문서 열기 ↗';printSource.href=target.href;
       printSource.target='_blank';printSource.rel='noopener';printSource.hidden=true;
-      let ready=false,revealed=false;
+      let ready=false,revealed=false,revealTimer=0;
       function printDocument(event) {
         if(!ready||event.defaultPrevented||event.altKey||(!event.ctrlKey&&!event.metaKey)||event.key.toLowerCase()!=='p')return;
         event.preventDefault();frame.contentWindow.focus();frame.contentWindow.print();
@@ -754,32 +771,30 @@
           ready=true;clearTimeout(watchdog);
           cover.host.dataset.documentReadyMs=String(Math.round(performance.now()-shellStarted));
           frame.title=doc.title||'포트폴리오 문서';
+          if(revealed){document.title=frame.title;document.documentElement.dataset.portfolioShell='ready';printSource.hidden=false;}
           frame.contentWindow.addEventListener('keydown',printDocument,true);
           // Keep ordinary cross-document links as top-level navigation; anchors stay inside.
           for(const link of doc.querySelectorAll('a[href]')) {
             const address=new URL(link.getAttribute('href'),target);
             if(!link.hasAttribute('download')&&(!link.target||link.target==='_self')&&address.origin===target.origin&&address.pathname!==target.pathname&&/\.html$/.test(address.pathname))link.target='_top';
           }
+          revealDocument('ready');
         });
       });
       frame.src=target.href;document.documentElement.append(frame);document.documentElement.append(printSource);
       addEventListener('keydown',printDocument,true);
       watchdog=setTimeout(delayedNotice,15000);
-      function revealWhenReady() {
-        if(!cover.host.isConnected)return;
-        const age=Date.now()-cover.startedAt();
-        if(!ready||!cover.ready()||(!reduced.matches&&age<DOCUMENT_MIN_MS-260)){
-          requestAnimationFrame(revealWhenReady);return;
-        }
-        if(revealed)return;revealed=true;
+      function revealDocument(reason) {
+        if(revealed)return;revealed=true;clearTimeout(revealTimer);
+        cover.host.dataset.endReason=reason;
         document.title=frame.title;
         history.replaceState(history.state,'',target);
-        document.documentElement.dataset.portfolioShell='ready';
-        frame.removeAttribute('aria-hidden');frame.inert=false;printSource.hidden=false;
+        document.documentElement.dataset.portfolioShell=ready?'ready':'loading';
+        frame.removeAttribute('aria-hidden');frame.inert=false;printSource.hidden=!ready;
         cover.finish();
-        setTimeout(()=>frame.focus({preventScroll:true}),DOCUMENT_REVEAL_MS+60);
+        frame.focus({preventScroll:true});
       }
-      requestAnimationFrame(revealWhenReady);
+      revealTimer=setTimeout(()=>revealDocument('timeout'),Math.max(0,DOCUMENT_MAX_MS-(performance.now()-shellStarted)));
     }catch(_){clearTimeout(watchdog);if(cover)cover.stop();location.replace(target.href);}
   }
   startOutgoing();
