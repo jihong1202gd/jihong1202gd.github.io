@@ -9,6 +9,14 @@ const page=stage.querySelector('.page');
 const masthead=document.querySelector('.masthead');
 const main=page.querySelector('main');
 const footer=page.querySelector('footer');
+// A clipped, out-of-flow probe measures the viewport without scrollbar feedback.
+const viewportProbe=document.createElement('div');
+viewportProbe.setAttribute('aria-hidden','true');
+viewportProbe.style.cssText='position:fixed;top:0;left:0;width:0;height:0;overflow:hidden;contain:strict;visibility:hidden;pointer-events:none';
+const viewportBox=document.createElement('div');
+viewportBox.style.cssText='width:100vw;height:100vh';
+viewportProbe.append(viewportBox);
+document.body.append(viewportProbe);
 let pending=0,lastWidth=-1,lastHeight=-1;
 let contentScale=1;
 let lastRenderSignature='',lastContentSignature='';
@@ -17,6 +25,18 @@ function contentSignature(){
 }
 function isMobileLayout(layoutWidth){
  return layoutWidth<=MOBILE_MAX||matchMedia('(hover: none) and (pointer: coarse)').matches;
+}
+function readViewport(){
+ // Fitted output cannot change this input; preserve fractional CSS pixels.
+ const bounds=viewportBox.getBoundingClientRect();
+ const width=bounds.width||innerWidth;
+ const mobile=isMobileLayout(width);
+ const viewport=window.visualViewport;
+ let height=mobile?(root.clientHeight||innerHeight):(bounds.height||innerHeight);
+ if(mobile&&viewport&&viewport.scale===1){
+  height=Math.floor(Math.min(height,viewport.height));
+ }
+ return {width,height,mobile};
 }
 function fitContent(layoutWidth,layoutHeight){
  if(isMobileLayout(layoutWidth)){
@@ -62,8 +82,9 @@ function measure(){
  const scale=Number(stage.dataset.scale)||1;
  const layoutWidth=Number(stage.dataset.layoutWidth);
  const height=isMobileLayout(layoutWidth)?Number(stage.dataset.layoutHeight):
-  Math.max(stage.scrollHeight,stage.offsetHeight,stage.getBoundingClientRect().height/scale);
- const renderWidth=Math.ceil(layoutWidth*scale),renderHeight=Math.ceil(height*scale);
+  Math.max(Number(stage.dataset.layoutHeight),stage.getBoundingClientRect().height/scale);
+ // Rounding either fitted dimension upward can create a scrollbar and refit loop.
+ const renderWidth=layoutWidth*scale,renderHeight=height*scale;
  const signature=[layoutWidth,height,scale,renderWidth,renderHeight].join(':');
  if(signature===lastRenderSignature)return;
  lastRenderSignature=signature;
@@ -75,14 +96,9 @@ function measure(){
 }
 function update(){
  pending=0;
- const width=root.clientWidth||innerWidth;
- let height=root.clientHeight||innerHeight;
- const mobile=isMobileLayout(width);
+ const {width,height,mobile}=readViewport();
  const viewport=window.visualViewport;
  if(mobile&&viewport&&viewport.scale>1.01)return;
- if(mobile&&viewport&&viewport.scale===1){
-  height=Math.floor(Math.min(height,viewport.height));
- }
  const scale=Math.max(1,width/MAX,height/MAX);
  const layoutWidth=Math.max(MIN,Math.min(MAX,width/scale));
  const layoutHeight=Math.max(MIN,Math.min(MAX,height/scale));
@@ -117,7 +133,10 @@ const contentObserver=new ResizeObserver(()=>{
  if(contentSignature()!==lastContentSignature)schedule();
 });
 for(const element of [masthead,main,footer])contentObserver.observe(element);
-new ResizeObserver(()=>{if(root.clientWidth!==lastWidth||root.clientHeight!==lastHeight)schedule();}).observe(root);
+new ResizeObserver(()=>{
+ const {width,height}=readViewport();
+ if(width!==lastWidth||height!==lastHeight)schedule();
+}).observe(root);
 addEventListener('resize',schedule,{passive:true});
 if(window.visualViewport)window.visualViewport.addEventListener('resize',()=>{
  if(window.visualViewport.scale===1)schedule();
