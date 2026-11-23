@@ -1,6 +1,7 @@
 (() => {
   'use strict';
-  if (window.top !== window || document.getElementById('portfolio-reader-tools')) return;
+  if (window.top !== window || document.getElementById('portfolio-reader-tools') ||
+    document.getElementById('portfolio-reader-styles')) return;
 
   const documents = {
     'about.html': { number: '0', name: '자기 PR', contents: 'v13-contents' },
@@ -20,11 +21,31 @@
   const info = documents[route];
   if (!info) return;
   const stylesheet = document.createElement('link');
+  stylesheet.id = 'portfolio-reader-styles';
   stylesheet.rel = 'stylesheet';
   stylesheet.href = new URL('reader.css?v=20261112-balance-reader-1', scriptUrl).href;
+  let stylesReady = false, stylesFailed = false, started = false;
+  function startWhenStylesReady() {
+    if (stylesReady || stylesFailed) return;
+    stylesReady = true;
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, {once: true});
+    else start();
+  }
+  function withoutToolbar() {
+    if (stylesReady || started || stylesFailed) return;
+    stylesFailed = true;
+    stylesheet.remove();
+    // Keep the native document usable; no unstyled toolbar or empty shell offset.
+    document.documentElement.style.setProperty('--portfolio-reader-offset', '0px');
+  }
+  stylesheet.addEventListener('load', startWhenStylesReady, {once: true});
+  stylesheet.addEventListener('error', withoutToolbar, {once: true});
   document.head.append(stylesheet);
+  if (stylesheet.sheet) startWhenStylesReady();
 
   function start() {
+    if (started || !stylesReady || stylesFailed || document.getElementById('portfolio-reader-tools')) return;
+    started = true;
     const frame = document.getElementById('portfolio-document');
     const source = frame ? new URL(frame.src) : address;
     const toolbar = document.createElement('nav');
@@ -227,6 +248,5 @@
     } else connect();
   }
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true });
-  else start();
+
 })();

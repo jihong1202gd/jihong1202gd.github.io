@@ -244,7 +244,7 @@
   const elapsedBeforeArrival = navigationStarted>0 && navigationElapsed>=0 && navigationElapsed<15000 ? navigationElapsed : 0;
   if (window.top === window && (routes.has(file) || routes.has(entry))) {
     const reader = document.createElement('script');
-    reader.src = new URL('./reader.js?v=20261120-route-fix', transitionSource).href;
+    reader.src = new URL('./reader.js?v=20261123-reader-hash-ready', transitionSource).href;
     document.head.append(reader);
   }
   const requestedMotionOff = url.searchParams.get('petal-motion') === 'off';

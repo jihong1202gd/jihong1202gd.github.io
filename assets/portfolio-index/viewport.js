@@ -17,7 +17,7 @@ const viewportBox=document.createElement('div');
 viewportBox.style.cssText='width:100vw;height:100vh';
 viewportProbe.append(viewportBox);
 document.body.append(viewportProbe);
-let pending=0,lastWidth=-1,lastHeight=-1;
+let pending=0,pendingMeasure=0,lastWidth=-1,lastHeight=-1;
 let contentScale=1;
 let lastRenderSignature='',lastContentSignature='';
 function contentSignature(){
@@ -127,7 +127,14 @@ function update(){
  lastContentSignature=contentSignature();
 }
 function schedule(){if(!pending)pending=requestAnimationFrame(update);}
-new ResizeObserver(measure).observe(stage);
+function scheduleMeasure(){
+ if(pendingMeasure)return;
+ pendingMeasure=requestAnimationFrame(()=>{
+  pendingMeasure=0;
+  measure();
+ });
+}
+new ResizeObserver(scheduleMeasure).observe(stage);
 // Observe natural content, not the page height changed by our own zoom/min-height.
 const contentObserver=new ResizeObserver(()=>{
  if(contentSignature()!==lastContentSignature)schedule();
