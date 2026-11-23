@@ -11,6 +11,10 @@ const main=page.querySelector('main');
 const footer=page.querySelector('footer');
 let pending=0,lastWidth=-1,lastHeight=-1;
 let contentScale=1;
+let lastRenderSignature='',lastContentSignature='';
+function contentSignature(){
+ return [masthead.offsetHeight,main.offsetHeight,footer.offsetHeight].join(':');
+}
 function isMobileLayout(layoutWidth){
  return layoutWidth<=MOBILE_MAX||matchMedia('(hover: none) and (pointer: coarse)').matches;
 }
@@ -59,10 +63,14 @@ function measure(){
  const layoutWidth=Number(stage.dataset.layoutWidth);
  const height=isMobileLayout(layoutWidth)?Number(stage.dataset.layoutHeight):
   Math.max(stage.scrollHeight,stage.offsetHeight,stage.getBoundingClientRect().height/scale);
- shell.style.width=Math.ceil(layoutWidth*scale)+'px';
- shell.style.height=Math.ceil(height*scale)+'px';
- shell.dataset.renderWidth=String(Math.ceil(layoutWidth*scale));
- shell.dataset.renderHeight=String(Math.ceil(height*scale));
+ const renderWidth=Math.ceil(layoutWidth*scale),renderHeight=Math.ceil(height*scale);
+ const signature=[layoutWidth,height,scale,renderWidth,renderHeight].join(':');
+ if(signature===lastRenderSignature)return;
+ lastRenderSignature=signature;
+ if(shell.style.width!==renderWidth+'px')shell.style.width=renderWidth+'px';
+ if(shell.style.height!==renderHeight+'px')shell.style.height=renderHeight+'px';
+ shell.dataset.renderWidth=String(renderWidth);
+ shell.dataset.renderHeight=String(renderHeight);
  dispatchEvent(new CustomEvent('portfolio-layout'));
 }
 function update(){
@@ -99,10 +107,16 @@ function update(){
  page.style.setProperty('--content-transform',mobile?'scale(var(--mobile-scale,1))':'none');
  fitContent(layoutWidth,layoutHeight);
  measure();
+ // Read after applying our own fit so its ResizeObserver delivery is a no-op.
+ lastContentSignature=contentSignature();
 }
 function schedule(){if(!pending)pending=requestAnimationFrame(update);}
 new ResizeObserver(measure).observe(stage);
-new ResizeObserver(schedule).observe(page);
+// Observe natural content, not the page height changed by our own zoom/min-height.
+const contentObserver=new ResizeObserver(()=>{
+ if(contentSignature()!==lastContentSignature)schedule();
+});
+for(const element of [masthead,main,footer])contentObserver.observe(element);
 new ResizeObserver(()=>{if(root.clientWidth!==lastWidth||root.clientHeight!==lastHeight)schedule();}).observe(root);
 addEventListener('resize',schedule,{passive:true});
 if(window.visualViewport)window.visualViewport.addEventListener('resize',()=>{

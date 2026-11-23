@@ -50,15 +50,24 @@ addEventListener('portfolio-surface',()=>resize(),{passive:true});
 function resize(){
  const stage=document.querySelector(".viewport-stage");
  const field=canvas.parentElement;
- width=field.clientWidth;height=field===stage?stage.scrollHeight:field.clientHeight;
+ const nextWidth=field.clientWidth,nextHeight=field===stage?stage.scrollHeight:field.clientHeight;
  const scale=Number(stage.dataset.scale)||1;
- const dpr=Math.min((devicePixelRatio||1)*scale,2,Math.sqrt(16000000/(width*height)));
- for(const layer of [canvas,hoverCanvas]){
-  layer.width=Math.round(width*dpr);layer.height=Math.round(height*dpr);
+ const dpr=Math.min((devicePixelRatio||1)*scale,2,Math.sqrt(16000000/(nextWidth*nextHeight)));
+ const pixelWidth=Math.round(nextWidth*dpr),pixelHeight=Math.round(nextHeight*dpr);
+ const sizeChanged=nextWidth!==width||nextHeight!==height;
+ const layers=[canvas,hoverCanvas];
+ // Reassigning a canvas size clears its backing store even when unchanged.
+ if(!sizeChanged&&layers.every(layer=>layer.width===pixelWidth&&layer.height===pixelHeight))return;
+ width=nextWidth;height=nextHeight;
+ for(const layer of layers){
+  if(layer.width!==pixelWidth)layer.width=pixelWidth;
+  if(layer.height!==pixelHeight)layer.height=pixelHeight;
   layer.getContext('2d').setTransform(dpr,0,0,dpr,0,0);
  }
- petals=Array.from({length:width<700?26:44},()=>makePetal(true));
- gusts=[];
+ if(sizeChanged){
+  petals=Array.from({length:width<700?26:44},()=>makePetal(true));
+  gusts=[];
+ }
 }
 function makePetal(initial){
  return {x:rand(-width*.1,width*1.1),y:initial?rand(-30,height):-30,size:rand(7,15),speed:rand(24,44),drift:rand(-16,-5),phase:rand(0,Math.PI*2),angle:rand(0,6.3),spin:rand(-.8,.8),alpha:rand(.5,.82)};
