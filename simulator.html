@@ -530,40 +530,76 @@ function renderDOM() {
 }
 
 // 이벤트 핸들러
+let attackPointer = null;
+function cancelAttack() {
+    if (mouseHoldTimer) clearTimeout(mouseHoldTimer);
+    mouseHoldTimer = null;
+    isHeavyTriggered = false;
+    const held = attackPointer;
+    attackPointer = null;
+    if (held?.capture.hasPointerCapture(held.id)) held.capture.releasePointerCapture(held.id);
+}
 function handleMouseDown() {
     isHeavyTriggered = false;
     mouseHoldTimer = setTimeout(() => {
+        mouseHoldTimer = null;
         isHeavyTriggered = true;
-        triggerAction('HEAVY_ATTACK'); 
+        triggerAction('HEAVY_ATTACK');
     }, 300);
 }
-
 function handleMouseUp() {
-    if (mouseHoldTimer) {
-        clearTimeout(mouseHoldTimer);
-        mouseHoldTimer = null;
-    }
+    if (mouseHoldTimer) clearTimeout(mouseHoldTimer);
+    mouseHoldTimer = null;
     if (!isHeavyTriggered) triggerAction('ATTACK');
 }
 
 const vpadAtk = document.getElementById('vpad-atk');
-vpadAtk.addEventListener('mousedown', (e) => { e.stopPropagation(); handleMouseDown(); });
-vpadAtk.addEventListener('mouseup', (e) => { e.stopPropagation(); handleMouseUp(); });
-vpadAtk.addEventListener('mouseleave', () => { if(mouseHoldTimer) { clearTimeout(mouseHoldTimer); mouseHoldTimer = null; } });
+function insideAttackButton(event) {
+    const rect = vpadAtk.getBoundingClientRect();
+    return event.clientX >= rect.left && event.clientX <= rect.right &&
+        event.clientY >= rect.top && event.clientY <= rect.bottom;
+}
+window.addEventListener('pointerdown', event => {
+    if (attackPointer && event.pointerId !== attackPointer.id) cancelAttack();
+    if (!event.isPrimary || event.button !== 0 || document.querySelector('dialog[open]') ||
+        document.querySelector('.tool-canvas').inert) return;
+    const button = event.target.closest('#vpad-atk');
+    if (!button && event.target.closest('.v-pad-btn, select, button')) return;
+    cancelAttack();
+    const capture = button || document.querySelector('.tool-canvas');
+    attackPointer = {id:event.pointerId, capture, button:!!button};
+    capture.setPointerCapture(event.pointerId);
+    // One pointer path owns the press; suppress compatibility mouse replays.
+    event.preventDefault();
+    handleMouseDown();
+}, true);
+window.addEventListener('pointermove', event => {
+    if (attackPointer?.id === event.pointerId && attackPointer.button && !insideAttackButton(event)) cancelAttack();
+}, true);
+window.addEventListener('pointerup', event => {
+    const held = attackPointer;
+    if (!held || held.id !== event.pointerId) return;
+    if ((held.button && !insideAttackButton(event)) || document.querySelector('dialog[open]')) {
+        cancelAttack();
+        return;
+    }
+    attackPointer = null;
+    if (held.capture.hasPointerCapture(held.id)) held.capture.releasePointerCapture(held.id);
+    handleMouseUp();
+}, true);
+for (const type of ['pointercancel', 'lostpointercapture']) window.addEventListener(type, event => {
+    if (attackPointer?.id === event.pointerId) cancelAttack();
+}, true);
+window.addEventListener('blur', cancelAttack);
+document.addEventListener('visibilitychange', () => { if (document.hidden) cancelAttack(); });
 
 document.getElementById('vpad-dodge').addEventListener('mousedown', () => triggerAction('DODGE'));
-document.getElementById('vpad-skill').addEventListener('mousedown', () => triggerAction('RESONANCE_SKILL'));
-document.getElementById('vpad-echo').addEventListener('mousedown', () => triggerAction('ECHO'));
-document.getElementById('vpad-ult').addEventListener('mousedown', () => triggerAction('ULTIMATE'));
 
-window.addEventListener('mousedown', (e) => {
-    if (e.button !== 0 || e.target.closest('.v-pad-btn') || e.target.closest('select') || e.target.closest('button')) return;
-    handleMouseDown();
-});
-window.addEventListener('mouseup', (e) => {
-    if (e.button !== 0 || e.target.closest('.v-pad-btn') || e.target.closest('select') || e.target.closest('button')) return;
-    handleMouseUp();
-});
+document.getElementById('vpad-skill').addEventListener('mousedown', () => triggerAction('RESONANCE_SKILL'));
+
+document.getElementById('vpad-echo').addEventListener('mousedown', () => triggerAction('ECHO'));
+
+document.getElementById('vpad-ult').addEventListener('mousedown', () => triggerAction('ULTIMATE'));
 
 window.addEventListener('keydown', (e) => {
     if (e.repeat) return; 
@@ -602,7 +638,7 @@ const send=state=>{if(embedded)parent.postMessage({type:'switch-tool-help',state
 function openHelp(){
  helpOpener.classList.remove('is-guide-closed');activated=true;
  if(guide.open){guide.querySelector('.tool-help-close').focus({preventScroll:true});return;}
- if(mouseHoldTimer){clearTimeout(mouseHoldTimer);mouseHoldTimer=null;}
+ cancelAttack();
  needsFreshPress=true;canvas.inert=true;guide.showModal();send('open');
  guide.querySelector('.tool-help-close').focus({preventScroll:true});
 }

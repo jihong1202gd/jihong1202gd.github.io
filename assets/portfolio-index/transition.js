@@ -734,14 +734,14 @@
   if (!routes.has(entry)) return;
   function startOutgoing() {
     const target=new URL(entry,url);cleanAddress();
-    let cover,frame,watchdog;const shellStarted=performance.now();
+    // Old cached index HTML has no early entry contract; use the complete document directly.
+    const entryState=window.portfolioEntryState;
+    if (!entryState) {location.replace(target.href);return;}
+    let cover,frame,watchdog;const shellStarted=entryState.startedAt;
     try {
-      // Keep the shell alive; end the cover when ready or at the two-second deadline.
+      // The cover ends by two seconds; its separate status survives until ready or failure.
       cover=createCover(false,target);
       document.documentElement.dataset.portfolioShell='loading';
-      const style=document.createElement('style');
-      style.textContent='html[data-portfolio-shell]{overflow:hidden;scrollbar-gutter:auto}html[data-portfolio-shell] .viewport-shell{display:none}#portfolio-document{position:fixed;inset:var(--portfolio-reader-offset,56px) 0 0;width:100%;height:calc(100% - var(--portfolio-reader-offset,56px));border:0;display:block;background:#fff;z-index:2147483646}.portfolio-print-source{color:inherit;text-decoration:none}.portfolio-print-source:focus-visible{outline:3px solid #ed326e;outline-offset:3px}@media print{.portfolio-print-source{display:none}}';
-      document.head.append(style);
       const pauseIndex=()=>{
         const toggle=document.querySelector('.motion-toggle');
         if(toggle&&toggle.getAttribute('aria-pressed')==='false')toggle.click();
@@ -753,25 +753,44 @@
       const printSource=document.createElement('a');printSource.className='portfolio-print-source';
       printSource.textContent='인쇄용 문서 열기 ↗';printSource.href=target.href;
       printSource.target='_blank';printSource.rel='noopener';printSource.hidden=true;
-      let ready=false,revealed=false,revealTimer=0;
+      let ready=false,failed=false,revealed=false,revealTimer=0;
+      const documentMarkers = {
+        'about.html': ['main.v13-main > #v13-cover', 'main.v13-main > #v13-direction'],
+        'project-kizaki-ako.html': ['body > #slide-cover.slide', 'body > #slide-end.slide'],
+        'kizaki-ako-balance.html': ['#document #opening.bs-page', '#document #appendix.bs-page'],
+        'wuthering-waves-control-analysis.html': ['#cover.v106-page-wrap > .v106-page', '#end.v106-page-wrap > .v106-page'],
+        'study-character-making.html': ['.ap-document > #opening.ap-page', '.ap-document > #person-summary.ap-page']
+      };
       function printDocument(event) {
         if(!ready||event.defaultPrevented||event.altKey||(!event.ctrlKey&&!event.metaKey)||event.key.toLowerCase()!=='p')return;
         event.preventDefault();frame.contentWindow.focus();frame.contentWindow.print();
       }
-      function delayedNotice() {
-        cover.host.dataset.slow='';
+      function delayedNotice() {entryState.show('slow');}
+      function failure() {
+        failed=true;clearTimeout(watchdog);
+        document.documentElement.dataset.portfolioShell='error';
+        entryState.show('error');
+        revealDocument('error');
       }
-      frame.addEventListener('error',delayedNotice);
+      frame.addEventListener('error',failure);
       frame.addEventListener('load',()=>{
         let doc;
-        try{doc=frame.contentDocument;if(!doc?.body)throw new Error('Document unavailable');}
-        catch(_){delayedNotice();return;}
+        try {
+          doc=frame.contentDocument;
+          if(doc?.URL==='about:blank')return;
+          if(!doc?.body || canonicalDocumentPath(new URL(doc.URL).pathname)!==canonicalDocumentPath(target.pathname) ||
+            !documentMarkers[entry].every(selector=>doc.querySelector(selector)))throw new Error('Document unavailable');
+        } catch(_) {failure();return;}
         const fonts=doc.fonts?doc.fonts.ready:Promise.resolve();
         Promise.race([fonts,new Promise(resolve=>setTimeout(resolve,1200))]).then(()=>{
-          ready=true;clearTimeout(watchdog);
+          ready=true;failed=false;clearTimeout(watchdog);
           cover.host.dataset.documentReadyMs=String(Math.round(performance.now()-shellStarted));
           frame.title=doc.title||'포트폴리오 문서';
-          if(revealed){document.title=frame.title;document.documentElement.dataset.portfolioShell='ready';printSource.hidden=false;}
+          document.documentElement.dataset.portfolioShell='ready';
+          const statusFocused=document.getElementById('portfolio-load-status')?.contains(document.activeElement);
+          entryState.finish();
+          frame.removeAttribute('aria-hidden');frame.inert=false;
+          if(revealed){document.title=frame.title;printSource.hidden=false;if(statusFocused)frame.focus({preventScroll:true});}
           frame.contentWindow.addEventListener('keydown',printDocument,true);
           // Keep ordinary cross-document links as top-level navigation; anchors stay inside.
           for(const link of doc.querySelectorAll('a[href]')) {
@@ -783,16 +802,17 @@
       });
       frame.src=target.href;document.documentElement.append(frame);document.documentElement.append(printSource);
       addEventListener('keydown',printDocument,true);
-      watchdog=setTimeout(delayedNotice,15000);
+      watchdog=setTimeout(delayedNotice,Math.max(0,15000-(performance.now()-shellStarted)));
       function revealDocument(reason) {
         if(revealed)return;revealed=true;clearTimeout(revealTimer);
         cover.host.dataset.endReason=reason;
         document.title=frame.title;
         history.replaceState(history.state,'',target);
-        document.documentElement.dataset.portfolioShell=ready?'ready':'loading';
-        frame.removeAttribute('aria-hidden');frame.inert=false;printSource.hidden=!ready;
+        document.documentElement.dataset.portfolioShell=ready?'ready':failed?'error':'loading';
+        printSource.hidden=!ready;
         cover.finish();
-        frame.focus({preventScroll:true});
+        if(ready)frame.focus({preventScroll:true});
+        else entryState.show(failed?'error':'loading');
       }
       revealTimer=setTimeout(()=>revealDocument('timeout'),Math.max(0,DOCUMENT_MAX_MS-(performance.now()-shellStarted)));
     }catch(_){clearTimeout(watchdog);if(cover)cover.stop();location.replace(target.href);}

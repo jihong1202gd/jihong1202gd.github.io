@@ -21,6 +21,17 @@
  .mobile-surface>.masthead .music-volume{min-height:30px;background:linear-gradient(145deg,#ffffff66,#ffffff29);border-color:#ffffffad;-webkit-backdrop-filter:blur(16px) saturate(145%);backdrop-filter:blur(16px) saturate(145%);box-shadow:inset 0 1px 0 #ffffffb3,0 3px 14px #4c386012}
  .copy-feedback{position:absolute}
 }
+html[data-portfolio-shell]{overflow:hidden;scrollbar-gutter:auto}
+html[data-portfolio-shell] .mobile-surface,html[data-portfolio-shell] .viewport-shell{display:none}
+#portfolio-document{position:fixed;inset:var(--portfolio-reader-offset,56px) 0 0;width:100%;height:calc(100% - var(--portfolio-reader-offset,56px));border:0;display:block;background:#fff;z-index:2147483646}
+.portfolio-print-source{color:inherit;text-decoration:none}
+.portfolio-print-source:focus-visible{outline:3px solid #ed326e;outline-offset:3px}
+#portfolio-load-status{position:fixed;top:calc(var(--portfolio-reader-offset,56px) + 12px);left:50%;transform:translateX(-50%);z-index:2147483647;max-width:calc(100% - 32px);padding:12px;border:1px solid #ead2dc;border-radius:18px;background:#fff;color:#97556d;font:13px/1.6 system-ui,sans-serif;text-align:center}
+#portfolio-load-status p{margin:0}
+#portfolio-load-status .recovery{display:flex;margin-top:12px;gap:10px;justify-content:center;flex-wrap:wrap}
+#portfolio-load-status a{padding:7px 14px;border:1px solid #ead2dc;border-radius:18px;background:#fff;color:inherit;text-decoration:none}
+#portfolio-load-status a:focus-visible{outline:3px solid #ed326e;outline-offset:3px}
+@media print{#portfolio-load-status,.portfolio-print-source{display:none}}
 .viewport-shell{position:relative;z-index:1;min-width:300px;min-height:300px;width:100%}.viewport-stage{position:absolute;top:0;left:0;width:var(--layout-width,100%);min-width:300px;min-height:var(--layout-height,300px);height:var(--fit-height,auto);overflow:var(--fit-overflow,visible);transform:scale(var(--page-scale,1));transform-origin:top left;container-type:inline-size}
 *{box-sizing:border-box}html{min-height:100%;background:var(--browser-background,#fff)}body{position:var(--body-position,relative);inset:var(--body-inset,auto);overflow:var(--body-overflow,visible);margin:0;background:var(--browser-background,transparent);color:var(--ink);font-family:Noto,"Malgun Gothic",sans-serif;-webkit-font-smoothing:antialiased}a{color:inherit;text-decoration:none}button{font:inherit}a:focus-visible,button:focus-visible{outline:3px solid var(--pink);outline-offset:6px}
 .scenery{position:absolute;inset:0 0 0 var(--scenery-left,33%);z-index:0;overflow:hidden;background:#63b0f8}.sky{position:absolute;inset:0;background:url('sky-repeat-4x.webp') repeat-y center top;background-size:100% auto}.hill{position:absolute;inset:0 0 var(--hill-bottom-inset,0px);background:url('sakura-hill-4x.webp') no-repeat center bottom;background-size:cover}
