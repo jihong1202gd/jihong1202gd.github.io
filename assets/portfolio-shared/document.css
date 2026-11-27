@@ -1,0 +1,14 @@
+:root {
+  --portfolio-document-ink: #17191e;
+}
+
+@layer legacy {
+  .portfolio-toc-title:is(h1,h2) {
+    border-bottom: 5px solid #d93025;
+    color: var(--portfolio-document-ink);
+    font-size: 44px;
+    font-weight: 900;
+    line-height: 1.12;
+    letter-spacing: -0.045em;
+  }
+}

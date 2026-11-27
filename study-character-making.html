@@ -31,7 +31,7 @@
 /* 공통 색상 토큰. 이 독립 HTML의 루트에서 페이지·확대창으로 상속하며 기존 값을 유지한다. */
 @layer preview-tokens {
   :root {
-    --ap-ink: #17191e;
+    --ap-ink: var(--portfolio-document-ink, #17191e);
     --ap-text: #373b43;
     --ap-muted: #5d616b;
     --ap-accent-structure: #d93025;
@@ -811,7 +811,8 @@
     word-break: keep-all;
   }
 
-  .ap-cover-questions em {
+  .ap-cover-questions em,
+  .ap-declaration-title em {
     color: var(--ap-accent-structure);
     font-style: normal;
     font-weight: inherit;
@@ -1080,12 +1081,6 @@
     line-height: 1.14;
     letter-spacing: -.055em;
     word-break: keep-all;
-  }
-
-  .ap-declaration-title em {
-    color: var(--ap-accent-structure);
-    font-style: normal;
-    font-weight: inherit;
   }
 
   .ap-declaration-copy {
@@ -1385,6 +1380,7 @@ html.ap-paper-reader #portfolio-reader-tools { display: none; }
 }
 
 </style>
+<link rel="stylesheet" href="assets/portfolio-shared/document.css?v=20261127-1">
 <script src="assets/image-protect.js" defer></script><link rel="stylesheet" href="assets/paper-controls.css"><script defer src="assets/paper-controls.js"></script><script src="assets/paper-swipe.js"></script>
 </head>
 <body>

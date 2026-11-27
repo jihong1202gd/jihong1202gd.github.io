@@ -229,7 +229,7 @@ html .toc-core-badge-v17 { animation: auto ease 0s 1 normal none running none; }
 
 .body-page-v48 > .footer { right: 100px; bottom: 30px; left: 100px; }
 
-.toc-page-v49 > h2 { width: 100%; max-width: none; border-bottom: 5px solid rgb(217, 48, 37); color: rgb(23, 25, 30); font-size: 44px; font-weight: 900; line-height: 1.12; letter-spacing: -0.045em; }
+.toc-page-v49 > h2 { width: 100%; max-width: none; }
 
 .toc-page-v49 .toc-map-lead { height: 27px; margin: 0px 0px 16px; color: rgb(85, 89, 96); font-size: 17px; font-weight: 680; line-height: 1.55; }
 
@@ -526,7 +526,7 @@ body.self-pr-document .wf-step-body .wf-compact-list { margin-top: 4px; }
 
 body.self-pr-document .wf-step-body .wf-compact-list li { padding: 3px 0px; line-height: 1.32; }
 
-body.self-pr-document .wf-process-proof .wf-link { width: 100%; min-width: 0px; flex: 0 0 auto; margin: 7px 0px 0px; padding: 7px 10px; }
+body.self-pr-document .wf-process-proof .wf-link, body.self-pr-document .wf-proof-unit-v86 .wf-link { width: 100%; min-width: 0px; flex: 0 0 auto; margin: 7px 0px 0px; padding: 7px 10px; }
 
 body.self-pr-document .wf-stack { --wf-line: #d9dce1; --wf-ink: #17191e; --wf-body: #373b43; --wf-sub: #5d616b; --wf-accent: #d93025; display: grid; height: 100%; min-height: 0px; grid-template-rows: auto minmax(0px, 1fr); gap: 18px; }
 
@@ -586,19 +586,17 @@ body.self-pr-document .wf-proof-stack-v86 { display: grid; min-height: 0px; flex
 
 body.self-pr-document .wf-proof-unit-v86 { display: flex; min-height: 0px; flex-direction: column; }
 
-body.self-pr-document .wf-proof-unit-v86 .wf-link { width: 100%; min-width: 0px; flex: 0 0 auto; margin: 7px 0px 0px; padding: 7px 10px; }
+body.self-pr-document .part3-media-v86 .wf-media-grid-v86, body.self-pr-document .part2-media-v86 .wf-media-grid-v86 { display: grid; width: 100%; min-width: 0px; min-height: 0px; flex: 1 1 0%; gap: 7px; }
 
-body.self-pr-document .part3-media-v86 .wf-media-grid-v86 { display: grid; width: 100%; min-width: 0px; min-height: 0px; flex: 1 1 0%; gap: 7px; }
+body.self-pr-document .part3-media-v86 .wf-media-single-v86, body.self-pr-document .part2-media-v86 .wf-media-single-v86 { grid-template-columns: minmax(0px, 1fr); }
 
-body.self-pr-document .part3-media-v86 .wf-media-single-v86 { grid-template-columns: minmax(0px, 1fr); }
+body.self-pr-document .part3-media-v86 .origin-evidence-card-v86, body.self-pr-document .part2-media-v86 .origin-evidence-card-v86 { position: relative; display: block; width: 100%; height: 100%; min-width: 0px; min-height: 0px; padding: 0px; overflow: hidden; border: 1px solid rgba(23, 25, 30, 0.18); border-radius: 3px; background: rgb(255, 255, 255); color: rgb(23, 25, 30); cursor: zoom-in; font: inherit; text-align: left; transition: transform 0.16s, border-color 0.16s; }
 
-body.self-pr-document .part3-media-v86 .origin-evidence-card-v86 { position: relative; display: block; width: 100%; height: 100%; min-width: 0px; min-height: 0px; padding: 0px; overflow: hidden; border: 1px solid rgba(23, 25, 30, 0.18); border-radius: 3px; background: rgb(255, 255, 255); color: rgb(23, 25, 30); cursor: zoom-in; font: inherit; text-align: left; transition: transform 0.16s, border-color 0.16s; }
+body.self-pr-document .part3-media-v86 .origin-evidence-card-v86:hover, body.self-pr-document .part3-media-v86 .origin-evidence-card-v86:focus-visible, body.self-pr-document .part1-media-v86 .origin-evidence-card-v86:hover, body.self-pr-document .part1-media-v86 .origin-evidence-card-v86:focus-visible, body.self-pr-document .part2-media-v86 .origin-evidence-card-v86:hover, body.self-pr-document .part2-media-v86 .origin-evidence-card-v86:focus-visible { z-index: 3; border-color: rgb(217, 48, 37); outline: none; transform: translateY(-2px); }
 
-body.self-pr-document .part3-media-v86 .origin-evidence-card-v86:hover, body.self-pr-document .part3-media-v86 .origin-evidence-card-v86:focus-visible { z-index: 3; border-color: rgb(217, 48, 37); outline: none; transform: translateY(-2px); }
+body.self-pr-document .part3-media-v86 .wf-media-card-v86 > img, body.self-pr-document .part2-media-v86 .wf-media-card-v86 > img { display: block; width: 100%; height: 100%; object-fit: contain; background: rgb(238, 240, 242); }
 
-body.self-pr-document .part3-media-v86 .wf-media-card-v86 > img { display: block; width: 100%; height: 100%; object-fit: contain; background: rgb(238, 240, 242); }
-
-body.self-pr-document .part3-media-v86 .origin-expand-v86 { position: absolute; top: 6px; right: 6px; z-index: 2; padding: 3px 6px; border: 1px solid rgb(217, 48, 37); border-radius: 999px; background: rgba(255, 255, 255, 0.94); color: rgb(217, 48, 37); font-size: 9px; font-weight: 900; line-height: 1; }
+body.self-pr-document .part3-media-v86 .origin-expand-v86, body.self-pr-document .part2-media-v86 .origin-expand-v86 { position: absolute; top: 6px; right: 6px; z-index: 2; padding: 3px 6px; border: 1px solid rgb(217, 48, 37); border-radius: 999px; background: rgba(255, 255, 255, 0.94); color: rgb(217, 48, 37); font-size: 9px; font-weight: 900; line-height: 1; }
 
 body.self-pr-document .part3-media-v86 .origin-thumb-caption-v86 { position: absolute; right: 0px; bottom: 0px; left: 0px; min-height: 28px; padding: 6px 8px; overflow: hidden; background: rgba(17, 17, 17, 0.86); color: rgb(255, 255, 255); font-size: 10px; font-weight: 850; line-height: 1.25; text-overflow: ellipsis; white-space: nowrap; }
 
@@ -629,8 +627,6 @@ body.self-pr-document #v13-fandom-depth .wf-head, body.self-pr-document #v13-fan
 body.self-pr-document #v13-origin .wf-proof.origin-mini-proof-v86 { align-items: stretch; justify-content: center; padding: 10px 13px; background: rgba(255, 255, 255, 0.55); }
 
 body.self-pr-document .part1-media-v86 .origin-evidence-card-v86 { position: relative; min-width: 0px; min-height: 0px; padding: 0px; overflow: hidden; border: 1px solid rgba(23, 25, 30, 0.18); border-radius: 3px; background: rgba(255, 255, 255, 0.96); color: rgb(23, 25, 30); cursor: zoom-in; font: inherit; text-align: left; transition: transform 0.16s, border-color 0.16s; }
-
-body.self-pr-document .part1-media-v86 .origin-evidence-card-v86:hover, body.self-pr-document .part1-media-v86 .origin-evidence-card-v86:focus-visible { z-index: 3; border-color: rgb(217, 48, 37); outline: none; transform: translateY(-2px); }
 
 body.self-pr-document .part1-media-v86 .origin-expand-v86 { position: absolute; top: 7px; right: 7px; z-index: 2; padding: 4px 7px; border: 1px solid rgb(217, 48, 37); border-radius: 999px; background: rgba(255, 255, 255, 0.94); color: rgb(217, 48, 37); font-size: 11px; font-weight: 900; line-height: 1; }
 
@@ -702,21 +698,9 @@ body.self-pr-document #v13-fandom-depth .evidence-wide-copy-v86 em { margin-top:
 
 body.self-pr-document #v13-fandom-community .exhibition-card-v86 > img { object-fit: contain; background: rgb(242, 243, 245); }
 
-body.self-pr-document .part2-media-v86 .origin-evidence-card-v86 { position: relative; display: block; width: 100%; height: 100%; min-width: 0px; min-height: 0px; padding: 0px; overflow: hidden; border: 1px solid rgba(23, 25, 30, 0.18); border-radius: 3px; background: rgb(255, 255, 255); color: rgb(23, 25, 30); cursor: zoom-in; font: inherit; text-align: left; transition: transform 0.16s, border-color 0.16s; }
-
-body.self-pr-document .part2-media-v86 .origin-evidence-card-v86:hover, body.self-pr-document .part2-media-v86 .origin-evidence-card-v86:focus-visible { z-index: 3; border-color: rgb(217, 48, 37); outline: none; transform: translateY(-2px); }
-
-body.self-pr-document .part2-media-v86 .origin-expand-v86 { position: absolute; top: 6px; right: 6px; z-index: 2; padding: 3px 6px; border: 1px solid rgb(217, 48, 37); border-radius: 999px; background: rgba(255, 255, 255, 0.94); color: rgb(217, 48, 37); font-size: 9px; font-weight: 900; line-height: 1; }
-
 body.self-pr-document .part2-media-v86 .origin-thumb-caption-v86 { position: absolute; right: 0px; bottom: 0px; left: 0px; min-height: 28px; padding: 6px 8px; overflow: hidden; background: rgba(17, 17, 17, 0.86); color: rgb(255, 255, 255); font-size: 10px; font-weight: 850; line-height: 1.25; text-overflow: ellipsis; white-space: nowrap; }
 
-body.self-pr-document .part2-media-v86 .wf-media-grid-v86 { display: grid; width: 100%; min-width: 0px; min-height: 0px; flex: 1 1 0%; gap: 7px; }
-
-body.self-pr-document .part2-media-v86 .wf-media-single-v86 { grid-template-columns: minmax(0px, 1fr); }
-
 body.self-pr-document .part2-media-v86 .wf-media-double-v86 { grid-template-columns: repeat(2, minmax(0px, 1fr)); }
-
-body.self-pr-document .part2-media-v86 .wf-media-card-v86 > img { display: block; width: 100%; height: 100%; object-fit: contain; background: rgb(238, 240, 242); }
 
 body.self-pr-document #v13-career-turn .part2-media-v86 .wf-media-grid-v86 { height: 100%; }
 
@@ -1216,6 +1200,7 @@ body.self-pr-document #v13-system-analysis .source-system-diagram > div:nth-chil
 .reading-conclusion { display: block; margin-top: 14px; }
 }
 </style>
+<link rel="stylesheet" href="assets/portfolio-shared/document.css?v=20261127-1">
 <script src="assets/image-protect.js" defer></script><link rel="stylesheet" href="self-pr-v106-mobile-reading.css"><link rel="stylesheet" href="assets/paper-controls.css"><script defer src="assets/paper-controls.js"></script><script src="assets/paper-swipe.js"></script>
 </head>
 <body class="self-pr-document">
@@ -1521,7 +1506,7 @@ body.self-pr-document #v13-system-analysis .source-system-diagram > div:nth-chil
   <article class="page toc-page body-page-v48 toc-page-v49" id="v13-contents" aria-label="클릭형 자기 PR 목차">
     <header class="header"><span>SELF PR · READING MAP</span><span></span></header>
     <div class="kicker">목차</div>
-    <h2>좋아함에서 전투 설계까지</h2>
+    <h2 class="portfolio-toc-title">좋아함에서 전투 설계까지</h2>
     <div class="page-body-v48">
     <p class="toc-map-lead">제가 무엇을 좋아해 왔고, 그 감각을 어떤 질문과 선택을 거쳐 전투 기획으로 바꾸었는지 순서대로 보여드립니다.</p>
     <nav class="toc-grid" aria-label="자기 PR 상세 페이지 바로가기">

@@ -4,7 +4,7 @@
 @layer reset {
   *{box-sizing:border-box}
   html{font-family:"Noto Sans KR","Malgun Gothic",sans-serif}
-  body{margin:0;background:#E7E9EB;color:#17191E;font-weight:550}
+  body{margin:0;background:#E7E9EB;color:var(--portfolio-document-ink,#17191E);font-weight:550}
   button,input,select{font:inherit}
   button,a{-webkit-tap-highlight-color:transparent}
   a{color:#A85B55;text-decoration:none}
@@ -173,7 +173,6 @@
   .value-steps li:not(:last-child)::after{content:"→";position:absolute;right:-27px;top:50%;transform:translateY(-50%);color:#A85B55;font-size:21px;font-weight:850}
   .value-steps span{font-size:17px;font-weight:650}
   .value-steps strong{font-size:29px;color:#17191E;line-height:1.25}
-  .value-steps li:last-child strong,#p03 .value-steps li:nth-child(2) strong{color:#843C36}
   .settings-table .main-table :is(th,td):first-child{width:10%}
   .settings-table .main-table :is(th,td):nth-child(2){width:32%}
   .settings-table .main-table :is(th,td):nth-child(3){width:28%}
@@ -196,7 +195,6 @@
   .attack-coefficients .main-table :is(th,td):first-child{width:17%}
   .attack-coefficients .main-table :is(th,td):nth-child(2){width:28%}
   .attack-coefficients .main-table :is(th,td):nth-child(n+3){text-align:right;font-variant-numeric:tabular-nums}
-  .attack-coefficients .main-table strong{color:#843C36}
   .hit-spec-head{position:relative;display:flex;align-items:center;min-height:28px;margin-bottom:6px}
   .hit-spec .timeline-zones{display:flex;gap:5px;font-size:14px;font-weight:700}
   .hit-spec .zone-tag{padding:2px 7px;border:1px solid #C7CBD0;background:#EFF1F3;color:#373B43}
@@ -252,6 +250,8 @@
   .blink-proof{display:grid;grid-template-columns:45% minmax(0,1fr);gap:16px;align-items:center}
   .blink-proof .storyboard img{height:236px}
   .blink-proof p{padding:6px 0}
+  .value-steps li:last-child strong,#p03 .value-steps li:nth-child(2) strong,
+  .attack-coefficients .main-table strong,
   .blink-proof strong{color:#843C36}
   .ui-overview{top:237px;height:auto;display:grid;grid-template-columns:1096px minmax(0,1fr);gap:40px;align-items:center}
   .appendix-evidence{position:relative;padding-top:26.25px}
